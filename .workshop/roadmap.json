@@ -215,7 +215,7 @@
           "description": "Datenmodell für owners, services, availabilityRules, availabilityExceptions, sessions, bookings, resourceOccupancy, actionTokens, outboxJobs und auditEvents mit Indizes und Provisionierungsskript.",
           "order": 2,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-1",
             "task-1-4"
@@ -225,13 +225,24 @@
             "Eindeutige Indizes für Idempotenzschlüssel und Belegungseinheiten existieren",
             "Integrationstest prüft die angelegten Indizes"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T11:29:24Z",
+          "completedAt": "2026-10-07T11:33:51Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "34 neue Integrationstests (48 in der API) gegen mongodb-memory-server: Runner (Vermerk, Idempotenz, Wiederholung nach Abbruch, unbekannte Migrationen, Sperre), alle Collections, alle eindeutigen Indizes inkl. Schlüssel und Abfrage-Indizes, Standardeinstellungen ohne Überschreiben, Validatoren (Kapazität auch bei $inc, Status, Zeitreihenfolge, sessionId-Regel, Teilnehmerdaten, 5-Minuten-Raster, Token-Hash) und Duplikatschutz. Tests laufen ohne gebautes Shared-dist (Quellcode-Auflösung geprüft). Manuell gegen Docker-MongoDB: db:migrate legt alles an, zweiter Lauf und Lauf aus dist ändern nichts; pnpm build baut Shared und API; API aus dist meldet /health 200. Quality Gate grün.",
+            "commands": [
+              "rm -rf packages/shared/dist && pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/api db:migrate (2×)",
+              "pnpm build",
+              "pnpm --filter @fw-booking/api db:migrate:dist",
+              "mongosh fw_booking: getCollectionNames, bookings.getIndexes, settings.findOne",
+              "pnpm --filter @fw-booking/api start + curl /health",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T11:33:51Z"
           }
         },
         {
@@ -240,7 +251,7 @@
           "description": "Serverseitige Sessions mit Secure/HttpOnly-Cookies, SameSite und CSRF-Schutz für verändernde Aktionen.",
           "order": 3,
           "weight": 3,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-2"
           ],

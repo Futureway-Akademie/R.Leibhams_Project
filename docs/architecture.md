@@ -40,7 +40,18 @@ Kurse blockieren die Ressource ebenfalls, sodass Einzeltermine sich nicht mit Ku
 
 ## Collections
 
-`owners`, `services`, `availabilityRules`, `availabilityExceptions`, `sessions`, `bookings`, `resourceOccupancy`, `actionTokens`, `outboxJobs`, `auditEvents`.
+`settings`, `owners`, `services`, `openingHours`, `availabilityExceptions`, `courseRules`, `sessions`, `bookings`, `resourceOccupancy`, `actionTokens`, `outboxJobs`, `auditEvents` sowie `_migrations` für angewendete Migrationen.
+
+Dokumenttypen: `apps/api/src/database/documents.ts`. Zeitpunkte sind BSON-Dates in UTC. Struktur, Validatoren und Indizes entstehen über versionierte Migrationen in `apps/api/src/database/migrations/` und werden mit `pnpm --filter @fw-booking/api db:migrate` angewendet (nicht beim API-Start).
+
+| Schutz | Umsetzung |
+|---|---|
+| Keine Doppelbelegung der Ressource | Eindeutiger Index `resourceOccupancy(resourceId, unitStart)`; Validator erzwingt 5-Minuten-Raster |
+| Keine Überbuchung eines Kurses | Validator `bookedCount ≤ capacity` auf `sessions` |
+| Keine doppelte Buchung bei Wiederholung | Eindeutiger Index `bookings(idempotencyKey)` |
+| Eine aktive Buchung je E-Mail und Kurstermin | Eindeutiger Teilindex `bookings(sessionId, participantEmailKey)` für `status: confirmed` |
+| Idempotente Kurstermin-Erzeugung | Eindeutiger Teilindex `sessions(ruleId, localStart)` |
+| Tokens nur als Hash | Validator verlangt SHA-256-Hex in `actionTokens.tokenHash` |
 
 ## Zentrale Abnahmetests
 

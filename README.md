@@ -16,11 +16,13 @@ corepack enable pnpm   # falls keine Schreibrechte: --install-directory <Verzeic
 pnpm install
 cp .env.example .env
 pnpm infra:up
+pnpm --filter @fw-booking/api db:migrate   # Collections, Validatoren, Indizes
 pnpm --filter @fw-booking/api dev   # API auf http://127.0.0.1:3000, Healthcheck unter /health
 ```
 
 | Befehl | Zweck |
 |---|---|
+| `pnpm build` | Shared-Paket und API bauen (`dist/`) |
 | `pnpm lint` | ESLint (typbasiert) über das gesamte Repository |
 | `pnpm typecheck` | `tsc --noEmit` in allen Workspace-Paketen |
 | `pnpm test` | Vitest in allen Workspace-Paketen |

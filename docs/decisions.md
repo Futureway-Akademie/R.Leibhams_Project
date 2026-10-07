@@ -125,3 +125,17 @@ NestJS 12 mit Express. Zugriff auf MongoDB über den offiziellen Treiber (kein M
 ### Begründung
 
 Express hat die breiteste Unterstützung für die später benötigten Sessions, CSRF-Schutz und Rate Limiting. Der native Treiber gibt volle Kontrolle über Transaktionen und atomare Updates und vermeidet doppelte Schemadefinitionen. Ein Healthcheck, der Datenbankausfälle meldet statt die API zu beenden, erleichtert Betrieb und Monitoring.
+
+## 2026-10-07 – Datenbankstruktur und Migrationen
+
+### Kontext
+
+Der Buchungskern braucht Collections und Indizes, die Doppelbuchungen und Duplikate datenbankseitig ausschließen. Kundeninstallationen müssen später kontrolliert aktualisiert werden.
+
+### Entscheidung
+
+Zeitpunkte als BSON-Date. Versionierte Migrationen (`001-initial`, …) mit eigenem Runner: angewendete Schritte in `_migrations`, Sperre gegen parallele Läufe, Abbruch bei unbekannten Migrationen in der Datenbank. Ausführung nur über den eigenen Befehl `db:migrate`, nicht beim API-Start. MongoDB-Validatoren prüfen nur kritische Invarianten (Pflichtfelder, Statuswerte, `bookedCount ≤ capacity`, 5-Minuten-Raster, Token-Hash-Format); die vollständigen Regeln bleiben bei Zod. Eindeutige Indizes sichern Ressourcenbelegung, Idempotenz, eine aktive Buchung je E-Mail und Kurstermin sowie idempotente Kurstermin-Erzeugung. Das Shared-Paket wird für die Produktion nach `dist/` gebaut; Entwicklung und Tests nutzen über die Export-Bedingung `development` direkt den Quellcode.
+
+### Begründung
+
+Datenbankseitige Eindeutigkeit ist auch bei gleichzeitigen Anfragen verlässlich. Ein getrennter Migrationsbefehl erlaubt einen eigenen Provisionierungszugang mit erweiterten Rechten, während die API mit eingeschränkten Rechten laufen kann.

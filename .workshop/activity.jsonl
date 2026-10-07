@@ -34,3 +34,8 @@
 {"timestamp": "2026-10-07T11:13:09Z", "type": "decision_recorded", "summary": "Express, nativer MongoDB-Treiber, nestjs-pino mit Redaction, SWC, mongodb-memory-server mit MongoDB 8.0.32."}
 {"timestamp": "2026-10-07T11:13:09Z", "type": "task_ready", "taskId": "task-2-2", "summary": "Task bereit: Collections, Indizes und Provisionierung."}
 {"timestamp": "2026-10-07T11:13:09Z", "type": "task_ready", "taskId": "task-7-1", "summary": "Task bereit: Geschützter Entwicklerzugang."}
+{"timestamp": "2026-10-07T11:29:24Z", "type": "task_started", "taskId": "task-2-2", "summary": "Collections, Indizes und Provisionierung begonnen: BSON Date, Schema-Validierung für kritische Invarianten, versionierte Migrationen per eigenem Befehl."}
+{"timestamp": "2026-10-07T11:33:51Z", "type": "verification_passed", "taskId": "task-2-2", "summary": "Migrations-, Index- und Validator-Tests grün; Migration gegen Docker-MongoDB idempotent."}
+{"timestamp": "2026-10-07T11:33:51Z", "type": "task_completed", "taskId": "task-2-2", "summary": "Collections, Validatoren, Indizes und versionierte Migrationen mit db:migrate umgesetzt; Shared-Paket baubar."}
+{"timestamp": "2026-10-07T11:33:51Z", "type": "decision_recorded", "summary": "BSON Date, versionierte Migrationen per eigenem Befehl, DB-Validatoren für kritische Invarianten."}
+{"timestamp": "2026-10-07T11:33:51Z", "type": "task_ready", "taskId": "task-2-3", "summary": "Task bereit: Owner-Login und Logout."}

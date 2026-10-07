@@ -5,13 +5,16 @@
   "type": "module",
   "description": "Buchungs-API (NestJS, Express, MongoDB).",
   "scripts": {
-    "dev": "node --env-file-if-exists=../../.env --import @swc-node/register/esm-register --watch src/main.ts",
+    "dev": "node --conditions=development --env-file-if-exists=../../.env --import @swc-node/register/esm-register --watch src/main.ts",
     "build": "swc src -d dist --strip-leading-paths --ignore '**/*.test.ts' --ignore 'src/testing/**'",
     "start": "node --env-file-if-exists=../../.env dist/main.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:migrate": "node --env-file-if-exists=../../.env --conditions=development --import @swc-node/register/esm-register src/database/migrate.ts",
+    "db:migrate:dist": "node --env-file-if-exists=../../.env dist/database/migrate.js"
   },
   "dependencies": {
+    "@fw-booking/shared": "workspace:*",
     "@nestjs/common": "^12.1.2",
     "@nestjs/core": "^12.1.2",
     "@nestjs/platform-express": "^12.1.2",

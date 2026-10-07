@@ -17,6 +17,7 @@ export const durationMinutesSchema = unitMinutesSchema
 export const bufferMinutesSchema = unitMinutesSchema.max(MAX_BUFFER_MINUTES);
 
 export const slotGridMinutesSchema = z.union(SLOT_GRID_MINUTES.map((m) => z.literal(m)));
+export type SlotGridMinutes = z.infer<typeof slotGridMinutesSchema>;
 
 export const groupCapacitySchema = z.int().min(MIN_GROUP_CAPACITY);
 
