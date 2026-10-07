@@ -42,7 +42,7 @@ const ownersValidator = {
   },
 };
 
-const servicesValidator = {
+export const servicesValidator = {
   $jsonSchema: {
     bsonType: 'object',
     required: ['type', 'title', 'durationMinutes', 'active', 'createdAt'],

@@ -10,7 +10,7 @@ Verbindliche fachliche Regeln für WP Buchung Kalender plus PWA. Sie gelten für
 | **Owner** | Betreiber der Installation (z. B. Friseur, Yogastudio), verwaltet Angebote und Termine. |
 | **Interessent / Teilnehmer** | Person, die über das Widget bucht. Hat kein Benutzerkonto. |
 | **Angebot** | Buchbare Leistung mit genau einer Terminart, z. B. „Herrenhaarschnitt“ oder „Yoga für Einsteiger“. |
-| **Terminart** | `einzeltermin` oder `gruppenkurs`. Unveränderlich, sobald für das Angebot Buchungen existieren. |
+| **Terminart** | `einzeltermin` oder `gruppenkurs`. Nach dem Anlegen unveränderlich. |
 | **Ressource** | Das, was belegt wird (in der ersten Version: genau eine je Installation, typischerweise der Owner selbst). |
 | **Slot** | Berechneter, buchbarer Startzeitpunkt eines Einzeltermins. Wird nicht vorab gespeichert. |
 | **Kurstermin** | Konkret gespeicherter Termin eines Gruppenkurses mit Beginn, Ende und Kapazität. |
@@ -150,7 +150,10 @@ Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einma
 | Termin absagen | Jederzeit möglich, mit Bestätigungsdialog. Alle aktiven Buchungen erhalten Status „vom Owner abgesagt“, jeder Teilnehmer bekommt eine Absagemail. Nicht umkehrbar. |
 | Einzelne Buchung absagen | Wie Termin absagen, aber nur für diese Buchung. |
 | Löschen | Nur für Kurstermine ohne Buchungshistorie. Termine mit Buchungen werden abgesagt, nicht gelöscht. |
-| Terminart ändern | Nur solange für das Angebot keine Buchungen existieren. |
+| Terminart ändern | Nicht möglich. Für eine andere Terminart wird ein neues Angebot angelegt und das alte deaktiviert. |
+| Angebot deaktivieren | Keine neuen Buchungen, nicht im Widget sichtbar; bestehende Buchungen bleiben gültig. Jederzeit reaktivierbar. Angebote werden nicht gelöscht. |
+| Angebot ändern | Dauer, Puffer, Raster, Kapazität und Fristen wirken nur auf künftige Slots und Kurstermine; bestehende Buchungen und Kurstermine bleiben unverändert. |
+| Reihenfolge der Angebote | Manuell festgelegt; neue Angebote stehen am Ende. |
 
 Alle Owner-Änderungen an Terminen und Buchungen werden in `auditEvents` protokolliert.
 

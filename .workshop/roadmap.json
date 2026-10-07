@@ -285,7 +285,7 @@
           "description": "CRUD für Angebote mit Terminart Einzeltermin (Dauer, Puffer) oder Gruppenkurs (Standardkapazität) sowie Buchungs- und Stornoregeln.",
           "order": 4,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-3"
           ],
@@ -294,13 +294,22 @@
             "Einzeltermine haben immer Kapazität 1, Gruppenkurse Kapazität größer 1",
             "Ungültige Kombinationen werden serverseitig abgelehnt"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T12:19:17Z",
+          "completedAt": "2026-10-07T12:23:04Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "20 neue API-Tests (99 in der API) und 2 Shared-Tests: Zugriffsschutz (401/403), Anlegen beider Terminarten mit Standardwerten und Antwortvalidierung gegen serviceSchema, Ablehnung ungültiger Kombinationen (Kapazität 1, Raster 15, Dauer 32, unbekannte Terminart), Liste mit Reihenfolge und active-Filter, 404/400, Teiländerungen ohne Zurücksetzen (auch einzelne Fristen), 409 beim Terminart-Wechsel, Deaktivieren/Reaktivieren mit Audit ohne Werte, Reihenfolge inkl. Ablehnung unvollständiger/doppelter/unbekannter Listen, DB-Validator verlangt sortOrder. Manuell gegen Docker-MongoDB: Migration 003, Anlegen, 409 beim Terminart-Wechsel, Umsortieren, Liste; Testdaten danach entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/api db:migrate",
+              "curl POST/PATCH/PUT/GET /api/owner/services",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T12:23:04Z"
           }
         },
         {
@@ -309,7 +318,7 @@
           "description": "Wiederkehrende Öffnungszeiten je Wochentag in Owner-Zeitzone sowie Ausnahmen wie Urlaub und Sperrzeiten für Einzeltermine.",
           "order": 5,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-4",
             "task-1-5"
@@ -359,7 +368,7 @@
           "description": "Konkrete Kurstermine mit Kapazität anlegen, sperren und über wiederkehrende Regeln im Buchungshorizont ohne Duplikate erzeugen.",
           "order": 7,
           "weight": 3,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-4",
             "task-1-5"

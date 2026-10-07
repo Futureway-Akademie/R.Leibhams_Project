@@ -45,3 +45,9 @@
 {"timestamp": "2026-10-07T11:43:48Z", "type": "decision_recorded", "summary": "Argon2id, eigene Sitzungen (12 h / 7 Tage), globaler Guard mit @Public(), Login-Sperre 5/15 Min, Konten per CLI."}
 {"timestamp": "2026-10-07T11:43:48Z", "type": "task_ready", "taskId": "task-2-4", "summary": "Task bereit: Angebote mit Terminart."}
 {"timestamp": "2026-10-07T11:43:48Z", "type": "task_ready", "taskId": "task-5-1", "summary": "Task bereit: Portal-Gerüst und Login."}
+{"timestamp": "2026-10-07T12:19:17Z", "type": "task_started", "taskId": "task-2-4", "summary": "Angebotsverwaltung begonnen: Terminart unveränderlich, nur Deaktivieren statt Löschen, manuelle Reihenfolge."}
+{"timestamp": "2026-10-07T12:23:04Z", "type": "verification_passed", "taskId": "task-2-4", "summary": "Angebots-API-Tests und manueller Ablauf gegen Docker-MongoDB erfolgreich."}
+{"timestamp": "2026-10-07T12:23:04Z", "type": "task_completed", "taskId": "task-2-4", "summary": "Angebotsverwaltung für beide Terminarten mit Deaktivieren, Reihenfolge und Audit umgesetzt."}
+{"timestamp": "2026-10-07T12:23:04Z", "type": "decision_recorded", "summary": "Terminart unveränderlich, nur Deaktivieren statt Löschen, manuelle Reihenfolge per sortOrder."}
+{"timestamp": "2026-10-07T12:23:04Z", "type": "task_ready", "taskId": "task-2-5", "summary": "Task bereit: Öffnungszeiten und Ausnahmen."}
+{"timestamp": "2026-10-07T12:23:04Z", "type": "task_ready", "taskId": "task-2-7", "summary": "Task bereit: Kurstermine anlegen und wiederkehrend erzeugen."}

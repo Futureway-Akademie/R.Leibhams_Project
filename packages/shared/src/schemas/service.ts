@@ -88,6 +88,8 @@ export const groupServicePatch = z
 
 const serviceMeta = {
   id: objectIdSchema,
+  /** Position in Portal und Widget (aufsteigend); gesetzt über die Reihenfolge-Aktion. */
+  sortOrder: z.int().nonnegative(),
   createdAt: utcDateTimeSchema,
   updatedAt: utcDateTimeSchema,
 };

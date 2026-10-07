@@ -62,6 +62,8 @@ interface ServiceBaseDocument {
   active: boolean;
   durationMinutes: number;
   bookingRules: BookingRules;
+  /** Position in Portal und Widget (aufsteigend). */
+  sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
 }

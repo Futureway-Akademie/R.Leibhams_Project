@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import type { DynamicModule } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module.js';
+import { CatalogModule } from './catalog/catalog.module.js';
 import type { DestinationStream } from 'pino';
 import { APP_CONFIG } from './config/config.js';
 import type { AppConfig } from './config/config.js';
@@ -24,6 +25,7 @@ export class AppModule {
         LoggerModule.forRoot(loggerParams(config, options.logStream)),
         DatabaseModule,
         AuthModule,
+        CatalogModule,
       ],
       controllers: [HealthController],
       providers: [{ provide: APP_CONFIG, useValue: config }],

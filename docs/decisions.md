@@ -153,3 +153,17 @@ Eigene serverseitige Sitzungen in `authSessions` (nur SHA-256-Hash des Tokens) m
 ### Begründung
 
 Serverseitige Sitzungen sind sofort widerrufbar, etwa bei deaktivierten Owners. Der Guard mit Standard-Sperre verhindert, dass eine vergessene Absicherung Owner-Daten offenlegt. Die Sperre je E-Mail kann von Dritten ausgelöst werden; das wird für 15 Minuten in Kauf genommen.
+
+## 2026-10-07 – Angebotsverwaltung
+
+### Kontext
+
+Owner pflegen Angebote beider Terminarten; Widget und Portal brauchen eine vom Owner gewünschte Reihenfolge.
+
+### Entscheidung
+
+Die Terminart ist nach dem Anlegen unveränderlich (Abweichung von der ursprünglichen Regel „änderbar ohne Buchungen“). Angebote werden nur deaktiviert, nie gelöscht. Die Reihenfolge ist manuell über `sortOrder` und den Endpunkt `PUT /api/owner/services/order` (Transaktion, alle IDs genau einmal); neue Angebote kommen ans Ende. Migration `003-service-order` ergänzt Feld, Validator und Index. Änderungen werden mit den geänderten Feldnamen, ohne Werte, im Audit-Log festgehalten.
+
+### Begründung
+
+Eine feste Terminart vermeidet verwaiste Kursregeln, Kurstermine oder Belegungen. Deaktivieren erhält die Historie für Buchungen und Auswertungen.

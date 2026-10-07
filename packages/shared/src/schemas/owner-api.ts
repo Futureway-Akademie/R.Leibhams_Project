@@ -34,6 +34,15 @@ export const serviceUpdateSchema = z.discriminatedUnion('type', [
 ]);
 export type ServiceUpdate = z.infer<typeof serviceUpdateSchema>;
 
+/** Neue Reihenfolge der Angebote: alle IDs genau einmal, in gewünschter Reihenfolge. */
+export const serviceOrderUpdateSchema = z.strictObject({
+  serviceIds: z
+    .array(objectIdSchema)
+    .min(1)
+    .refine((ids) => new Set(ids).size === ids.length, 'IDs dürfen nicht doppelt vorkommen'),
+});
+export type ServiceOrderUpdate = z.infer<typeof serviceOrderUpdateSchema>;
+
 export const openingHoursUpdateSchema = z.strictObject({ days: weeklyOpeningHoursSchema });
 export type OpeningHoursUpdate = z.infer<typeof openingHoursUpdateSchema>;
 

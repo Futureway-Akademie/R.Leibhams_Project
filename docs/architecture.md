@@ -67,6 +67,16 @@ Dokumenttypen: `apps/api/src/database/documents.ts`. Zeitpunkte sind BSON-Dates 
 - **Passwort-Raten:** Nach 5 Fehlversuchen in 15 Minuten je E-Mail oder IP antwortet der Login mit 429. Unbekannte E-Mails und falsche Passwörter sind von außen nicht unterscheidbar.
 - **Konten:** Keine Selbstregistrierung; Anlage per `owner:create` (Passwort ≥ 12 Zeichen, verdeckte Eingabe).
 
+## Owner-API: Angebote
+
+| Endpunkt | Wirkung |
+|---|---|
+| `GET /api/owner/services[?active=true\|false]` | Angebote in manueller Reihenfolge |
+| `GET /api/owner/services/:id` | Ein Angebot |
+| `POST /api/owner/services` | Anlegen (`serviceCreateSchema`), neues Angebot ans Ende |
+| `PATCH /api/owner/services/:id` | Teiländerung (`serviceUpdateSchema`), auch Deaktivieren über `active`; Wechsel der Terminart → 409 |
+| `PUT /api/owner/services/order` | Reihenfolge aller Angebote (`serviceOrderUpdateSchema`) |
+
 ## Zentrale Abnahmetests
 
 - Parallele Anfragen auf denselben Einzeltermin-Slot → genau eine Buchung.

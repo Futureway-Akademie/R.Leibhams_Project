@@ -1,7 +1,9 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { MongoClient } from 'mongodb';
 import type { Db } from 'mongodb';
+import request from 'supertest';
 import { createApp } from '../app.factory.js';
+import { createOwner } from '../auth/owners.js';
 import type { AppConfig } from '../config/config.js';
 import { runMigrations } from '../database/migrations/runner.js';
 import { testConfig } from './mongo.js';
@@ -42,4 +44,30 @@ export async function createTestApp(
       await client.close();
     },
   };
+}
+
+export interface OwnerSession {
+  cookie: string;
+  csrfToken: string;
+}
+
+/** Legt (falls nötig) einen Test-Owner an und meldet ihn an. */
+export async function loginAsOwner(
+  t: TestApp,
+  email = 'owner@example.test',
+  password = 'test-passwort-lang',
+): Promise<OwnerSession> {
+  try {
+    await createOwner(t.db, email, password);
+  } catch {
+    // existiert bereits
+  }
+  const response = await request(t.app.getHttpServer())
+    .post('/api/auth/login')
+    .send({ email, password })
+    .expect(200);
+  const setCookie = ([] as string[]).concat(response.headers['set-cookie'] ?? []);
+  const cookie = setCookie[0]?.split(';')[0];
+  if (!cookie) throw new Error('Kein Sitzungs-Cookie');
+  return { cookie, csrfToken: (response.body as { csrfToken: string }).csrfToken };
 }

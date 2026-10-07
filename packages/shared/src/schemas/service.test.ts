@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { serviceCreateSchema, serviceUpdateSchema } from './owner-api.js';
+import { serviceCreateSchema, serviceOrderUpdateSchema, serviceUpdateSchema } from './owner-api.js';
 import { serviceSchema } from './service.js';
 
 describe('serviceCreateSchema – Einzeltermin', () => {
@@ -149,9 +149,26 @@ describe('serviceSchema', () => {
         bookingRules: { minLeadMinutes: null, horizonDays: null, changeDeadlineMinutes: null },
         durationMinutes: 60,
         defaultCapacity: 10,
+        sortOrder: 0,
         createdAt: '2026-10-07T08:00:00Z',
         updatedAt: '2026-10-07T08:00:00Z',
       }).success,
     ).toBe(true);
+  });
+});
+
+describe('serviceOrderUpdateSchema', () => {
+  it('akzeptiert eine Liste eindeutiger IDs', () => {
+    expect(
+      serviceOrderUpdateSchema.safeParse({
+        serviceIds: ['65f1a2b3c4d5e6f7a8b9c0d1', '65f1a2b3c4d5e6f7a8b9c0d2'],
+      }).success,
+    ).toBe(true);
+  });
+  it('lehnt doppelte, leere und ungültige Listen ab', () => {
+    const id = '65f1a2b3c4d5e6f7a8b9c0d1';
+    expect(serviceOrderUpdateSchema.safeParse({ serviceIds: [id, id] }).success).toBe(false);
+    expect(serviceOrderUpdateSchema.safeParse({ serviceIds: [] }).success).toBe(false);
+    expect(serviceOrderUpdateSchema.safeParse({ serviceIds: ['x'] }).success).toBe(false);
   });
 });
