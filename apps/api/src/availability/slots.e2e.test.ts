@@ -1,0 +1,351 @@
+import { publicSlotsResponseSchema, availableDatesResponseSchema } from '@fw-booking/shared';
+import { ObjectId } from 'mongodb';
+import type { MongoMemoryReplSet } from 'mongodb-memory-server';
+import request from 'supertest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { DEFAULT_RESOURCE_ID, SETTINGS_ID, collections } from '../database/documents.js';
+import type {
+  GroupServiceDocument,
+  OccupancyRefType,
+  SingleServiceDocument,
+} from '../database/documents.js';
+import { createTestApp, loginAsOwner } from '../testing/app.js';
+import type { OwnerSession, TestApp } from '../testing/app.js';
+import { startReplSet } from '../testing/mongo.js';
+import { SlotService } from './slot.service.js';
+
+let replSet: MongoMemoryReplSet;
+let t: TestApp;
+let owner: OwnerSession;
+let slotService: SlotService;
+
+// Dienstag, 01.12.2026, Winterzeit (UTC+1). "Jetzt" liegt weit genug davor.
+const DAY = '2026-12-01';
+const NOW = new Date('2026-11-20T09:00:00Z');
+
+beforeAll(async () => {
+  replSet = await startReplSet();
+  t = await createTestApp(replSet.getUri());
+  owner = await loginAsOwner(t);
+  slotService = t.app.get(SlotService);
+});
+
+afterAll(async () => {
+  await t.close();
+  await replSet.stop();
+});
+
+beforeEach(async () => {
+  const c = collections(t.db);
+  await Promise.all([
+    c.services.deleteMany({}),
+    c.openingHours.deleteMany({}),
+    c.availabilityExceptions.deleteMany({}),
+    c.resourceOccupancy.deleteMany({}),
+  ]);
+  await c.settings.updateOne({ _id: SETTINGS_ID }, { $set: { timeZone: 'Europe/Berlin' } });
+  // Dienstag 09:00–12:00, Sonntag 01:00–04:00 (für die Zeitumstellung)
+  await c.openingHours.insertMany([
+    { _id: new ObjectId(), weekday: 2, windows: [{ start: '09:00', end: '12:00' }] },
+    { _id: new ObjectId(), weekday: 7, windows: [{ start: '01:00', end: '04:00' }] },
+  ]);
+});
+
+function single(overrides: Partial<SingleServiceDocument> = {}): SingleServiceDocument {
+  return {
+    _id: new ObjectId(),
+    type: 'single',
+    title: 'Haarschnitt',
+    description: null,
+    active: true,
+    durationMinutes: 30,
+    bufferMinutes: 0,
+    slotGridMinutes: 30,
+    bookingRules: { minLeadMinutes: null, horizonDays: null, changeDeadlineMinutes: null },
+    sortOrder: 0,
+    createdAt: NOW,
+    updatedAt: NOW,
+    ...overrides,
+  };
+}
+
+/** Lokale Startzeiten (Europe/Berlin) für gut lesbare Vergleiche. */
+async function localStarts(
+  service: SingleServiceDocument | GroupServiceDocument,
+  date = DAY,
+  now = NOW,
+): Promise<string[]> {
+  const slots = await slotService.slotsForDate(service, date, now);
+  return slots.map((s) =>
+    new Intl.DateTimeFormat('de-DE', {
+      timeZone: 'Europe/Berlin',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(s.startsAt),
+  );
+}
+
+/** Belegt die Ressource von `from` bis `to` (UTC) in 5-Minuten-Einheiten. */
+async function occupy(from: string, to: string, refType: OccupancyRefType = 'booking') {
+  const refId = new ObjectId();
+  const units = [];
+  for (let ms = Date.parse(from); ms < Date.parse(to); ms += 5 * 60_000) {
+    units.push({
+      _id: new ObjectId(),
+      resourceId: DEFAULT_RESOURCE_ID,
+      unitStart: new Date(ms),
+      refType,
+      refId,
+    });
+  }
+  await collections(t.db).resourceOccupancy.insertMany(units);
+}
+
+describe('Raster, Dauer und Puffer', () => {
+  it('erzeugt Slots im Raster ab Fensterbeginn', async () => {
+    expect(await localStarts(single())).toEqual([
+      '09:00',
+      '09:30',
+      '10:00',
+      '10:30',
+      '11:00',
+      '11:30',
+    ]);
+  });
+
+  it('nutzt das Raster des Angebots (45 Minuten)', async () => {
+    expect(await localStarts(single({ slotGridMinutes: 45 }))).toEqual([
+      '09:00',
+      '09:45',
+      '10:30',
+      '11:15',
+    ]);
+  });
+
+  it('verlangt, dass die Dauer ins Fenster passt', async () => {
+    expect(await localStarts(single({ durationMinutes: 60 }))).toEqual([
+      '09:00',
+      '09:30',
+      '10:00',
+      '10:30',
+      '11:00',
+    ]);
+  });
+
+  it('lässt den Puffer über das Fensterende hinausragen', async () => {
+    expect((await localStarts(single({ bufferMinutes: 15 }))).at(-1)).toBe('11:30');
+  });
+
+  it('setzt das Ende auf Beginn plus Dauer (ohne Puffer)', async () => {
+    const [first] = await slotService.slotsForDate(single({ bufferMinutes: 15 }), DAY, NOW);
+    expect(first?.startsAt.toISOString()).toBe('2026-12-01T08:00:00.000Z');
+    expect(first?.endsAt.toISOString()).toBe('2026-12-01T08:30:00.000Z');
+  });
+
+  it('berücksichtigt Sperrzeiten aus den Ausnahmen', async () => {
+    await collections(t.db).availabilityExceptions.insertOne({
+      _id: new ObjectId(),
+      kind: 'closed',
+      start: `${DAY}T10:00`,
+      end: `${DAY}T11:00`,
+      note: null,
+      createdAt: NOW,
+    });
+    expect(await localStarts(single())).toEqual(['09:00', '09:30', '11:00', '11:30']);
+  });
+});
+
+describe('Belegung der Ressource', () => {
+  it('schließt belegte Zeiten aus', async () => {
+    await occupy('2026-12-01T09:00:00Z', '2026-12-01T09:30:00Z'); // 10:00–10:30 Ortszeit
+    expect(await localStarts(single())).toEqual(['09:00', '09:30', '10:30', '11:00', '11:30']);
+  });
+
+  it('prüft Dauer plus Puffer gegen die Belegung', async () => {
+    await occupy('2026-12-01T09:00:00Z', '2026-12-01T09:30:00Z');
+    // 09:30 + 30 Min + 15 Min Puffer reicht bis 10:15 und kollidiert.
+    expect(await localStarts(single({ bufferMinutes: 15 }))).toEqual([
+      '09:00',
+      '10:30',
+      '11:00',
+      '11:30',
+    ]);
+  });
+
+  it('blockiert auch durch Kurstermine (gemeinsame Ressource)', async () => {
+    await occupy('2026-12-01T10:00:00Z', '2026-12-01T11:00:00Z', 'session'); // 11:00–12:00
+    expect(await localStarts(single())).toEqual(['09:00', '09:30', '10:00', '10:30']);
+  });
+
+  it('blockiert bei langen Terminen alle überlappenden Slots', async () => {
+    await occupy('2026-12-01T09:25:00Z', '2026-12-01T09:30:00Z'); // nur 10:25–10:30
+    expect(await localStarts(single({ durationMinutes: 90 }))).toEqual(['10:30']);
+  });
+});
+
+describe('Fristen', () => {
+  it('wendet den Standard-Mindestvorlauf von 24 Stunden an', async () => {
+    // Jetzt: 30.11. 10:10 Ortszeit → frühester Beginn 01.12. 10:10.
+    const now = new Date('2026-11-30T09:10:00Z');
+    expect(await localStarts(single(), DAY, now)).toEqual(['10:30', '11:00', '11:30']);
+  });
+
+  it('nutzt den Mindestvorlauf des Angebots', async () => {
+    const now = new Date('2026-12-01T09:10:00Z'); // 10:10 Ortszeit am selben Tag
+    const service = single({
+      bookingRules: { minLeadMinutes: 0, horizonDays: null, changeDeadlineMinutes: null },
+    });
+    expect(await localStarts(service, DAY, now)).toEqual(['10:30', '11:00', '11:30']);
+  });
+
+  it('nutzt den Standard-Mindestvorlauf aus den Einstellungen', async () => {
+    await collections(t.db).settings.updateOne(
+      { _id: SETTINGS_ID },
+      { $set: { defaultMinLeadMinutes: 60 } },
+    );
+    const now = new Date('2026-12-01T08:10:00Z'); // 09:10 Ortszeit
+    expect(await localStarts(single(), DAY, now)).toEqual(['10:30', '11:00', '11:30']);
+    await collections(t.db).settings.updateOne(
+      { _id: SETTINGS_ID },
+      { $set: { defaultMinLeadMinutes: 1440 } },
+    );
+  });
+
+  it('wendet den Buchungshorizont an', async () => {
+    const now = new Date('2026-09-01T09:00:00Z'); // 01.12. liegt 91 Tage später
+    expect(await localStarts(single(), DAY, now)).toEqual([]);
+    const shortHorizon = single({
+      bookingRules: { minLeadMinutes: null, horizonDays: 7, changeDeadlineMinutes: null },
+    });
+    expect(await localStarts(shortHorizon)).toEqual([]);
+  });
+});
+
+describe('Nicht buchbare Angebote', () => {
+  it('liefert keine Slots für Gruppenkurse und deaktivierte Angebote', async () => {
+    const group: GroupServiceDocument = {
+      ...single(),
+      type: 'group',
+      defaultCapacity: 10,
+    } as unknown as GroupServiceDocument;
+    expect(await slotService.slotsForDate(group, DAY, NOW)).toEqual([]);
+    expect(await localStarts(single({ active: false }))).toEqual([]);
+  });
+
+  it('liefert keine Slots an geschlossenen Tagen', async () => {
+    expect(await localStarts(single(), '2026-12-02')).toEqual([]);
+  });
+});
+
+describe('Zeitumstellung (Sonntag 01:00–04:00)', () => {
+  it('Sommerzeitbeginn 29.03.2026: Slots in der übersprungenen Stunde entfallen', async () => {
+    const now = new Date('2026-03-01T00:00:00Z');
+    const slots = await slotService.slotsForDate(single(), '2026-03-29', now);
+    expect(slots.map((s) => s.startsAt.toISOString())).toEqual([
+      '2026-03-29T00:00:00.000Z', // 01:00 MEZ
+      '2026-03-29T00:30:00.000Z', // 01:30 MEZ
+      '2026-03-29T01:00:00.000Z', // 03:00 MESZ
+      '2026-03-29T01:30:00.000Z', // 03:30 MESZ
+    ]);
+  });
+
+  it('Winterzeitbeginn 25.10.2026: erstes Vorkommen, keine doppelten Slots', async () => {
+    const now = new Date('2026-10-01T00:00:00Z');
+    const slots = await slotService.slotsForDate(
+      single({ durationMinutes: 60, slotGridMinutes: 60 }),
+      '2026-10-25',
+      now,
+    );
+    expect(slots.map((s) => s.startsAt.toISOString())).toEqual([
+      '2026-10-24T23:00:00.000Z', // 01:00 MESZ
+      '2026-10-25T00:00:00.000Z', // 02:00 MESZ (erstes Vorkommen)
+      '2026-10-25T02:00:00.000Z', // 03:00 MEZ
+    ]);
+    expect(slots.every((s) => s.endsAt.getTime() - s.startsAt.getTime() === 3_600_000)).toBe(true);
+  });
+});
+
+describe('Freie Tage', () => {
+  it('nennt nur Tage mit mindestens einem freien Slot', async () => {
+    const service = single();
+    // Dienstag 08.12. vollständig belegen (09:00–12:00 Ortszeit).
+    await occupy('2026-12-08T08:00:00Z', '2026-12-08T11:00:00Z');
+    expect(await slotService.availableDates(service, '2026-11-30', '2026-12-13', NOW)).toEqual([
+      '2026-12-01',
+      '2026-12-06',
+      '2026-12-13',
+    ]);
+  });
+});
+
+describe('Owner-Endpunkte', () => {
+  const http = () => request(t.app.getHttpServer());
+  const authed = (url: string) => http().get(url).set('Cookie', owner.cookie);
+
+  async function insert(service: SingleServiceDocument | GroupServiceDocument) {
+    await collections(t.db).services.insertOne(service);
+    return service._id.toHexString();
+  }
+
+  it('verlangt Anmeldung', async () => {
+    const id = await insert(single());
+    await http().get(`/api/owner/services/${id}/slots?date=${DAY}`).expect(401);
+  });
+
+  it('liefert Slots im öffentlichen Antwortformat', async () => {
+    // Weit in der Zukunft liegt außerhalb des Horizonts; ein naher Tag hängt vom echten "jetzt" ab.
+    // Daher: Mindestvorlauf 0 und den nächsten Dienstag ab heute verwenden.
+    const id = await insert(
+      single({ bookingRules: { minLeadMinutes: 0, horizonDays: 30, changeDeadlineMinutes: null } }),
+    );
+    const next = new Date();
+    next.setUTCDate(next.getUTCDate() + ((9 - next.getUTCDay()) % 7 || 7));
+    const date = next.toISOString().slice(0, 10);
+    const response = await authed(`/api/owner/services/${id}/slots?date=${date}`).expect(200);
+    const body = publicSlotsResponseSchema.parse(response.body);
+    expect(body.timeZone).toBe('Europe/Berlin');
+    expect(body.slots).toHaveLength(6);
+    const firstLocal = new Intl.DateTimeFormat('de-DE', {
+      timeZone: 'Europe/Berlin',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(body.slots[0]?.startsAt ?? ''));
+    expect(firstLocal).toBe('09:00');
+  });
+
+  it('liefert freie Tage', async () => {
+    const id = await insert(
+      single({ bookingRules: { minLeadMinutes: 0, horizonDays: 60, changeDeadlineMinutes: null } }),
+    );
+    const from = new Date().toISOString().slice(0, 10);
+    const to = new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10);
+    const response = await authed(
+      `/api/owner/services/${id}/available-dates?from=${from}&to=${to}`,
+    ).expect(200);
+    const body = availableDatesResponseSchema.parse(response.body);
+    expect(body.dates.length).toBeGreaterThanOrEqual(5);
+    // Nur Dienstage und Sonntage sind geöffnet.
+    expect(body.dates.every((d) => [0, 2].includes(new Date(`${d}T12:00:00Z`).getUTCDay()))).toBe(
+      true,
+    );
+  });
+
+  it('validiert Parameter und Angebot', async () => {
+    const id = await insert(single());
+    const group = await insert({
+      ...single(),
+      _id: new ObjectId(),
+      type: 'group',
+      defaultCapacity: 10,
+    } as unknown as GroupServiceDocument);
+    await authed(`/api/owner/services/${id}/slots`).expect(400);
+    await authed(`/api/owner/services/${id}/slots?date=01.12.2026`).expect(400);
+    await authed(`/api/owner/services/${group}/slots?date=${DAY}`).expect(400);
+    await authed(`/api/owner/services/${new ObjectId().toHexString()}/slots?date=${DAY}`).expect(
+      404,
+    );
+    await authed(`/api/owner/services/${id}/available-dates?from=2026-10-01&to=2026-12-31`).expect(
+      400,
+    );
+  });
+});

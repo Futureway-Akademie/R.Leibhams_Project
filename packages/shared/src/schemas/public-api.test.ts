@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  availableDatesQuerySchema,
   bookingRequestSchema,
   publicServicesResponseSchema,
   publicSessionsResponseSchema,
@@ -130,5 +131,21 @@ describe('Self-Service', () => {
     expect(selfServiceRebookRequestSchema.safeParse({ type: 'group', sessionId: id }).success).toBe(
       false,
     );
+  });
+});
+
+describe('availableDatesQuerySchema', () => {
+  it('erlaubt bis zu 62 Tage', () => {
+    expect(
+      availableDatesQuerySchema.safeParse({ from: '2026-10-01', to: '2026-12-01' }).success,
+    ).toBe(true);
+    expect(
+      availableDatesQuerySchema.safeParse({ from: '2026-10-01', to: '2026-12-02' }).success,
+    ).toBe(false);
+  });
+  it('lehnt umgekehrte Zeiträume ab', () => {
+    expect(
+      availableDatesQuerySchema.safeParse({ from: '2026-10-02', to: '2026-10-01' }).success,
+    ).toBe(false);
   });
 });

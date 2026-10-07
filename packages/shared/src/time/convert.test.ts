@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   addLocalDays,
+  addLocalMinutes,
   localBoundaryToUtc,
   addMinutesUtc,
   eachLocalDate,
@@ -178,5 +179,15 @@ describe('localBoundaryToUtc', () => {
   });
   it('wählt bei doppelter Uhrzeit das erste Vorkommen', () => {
     expect(localBoundaryToUtc('2026-10-25T02:30', BERLIN)).toBe('2026-10-25T00:30:00Z');
+  });
+});
+
+describe('addLocalMinutes', () => {
+  it('rechnet auf der Wanduhr, auch über Mitternacht', () => {
+    expect(addLocalMinutes('2026-12-01T09:00', 45)).toBe('2026-12-01T09:45');
+    expect(addLocalMinutes('2026-12-31T23:30', 45)).toBe('2027-01-01T00:15');
+  });
+  it('ignoriert Zeitumstellungen (lokale Uhrzeit)', () => {
+    expect(addLocalMinutes('2026-03-29T01:30', 60)).toBe('2026-03-29T02:30');
   });
 });

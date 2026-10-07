@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { bookingStatusSchema } from '../enums.js';
 import {
   idempotencyKeySchema,
+  localDateSchema,
   objectIdSchema,
   timeZoneSchema,
   utcDateTimeSchema,
@@ -46,6 +47,30 @@ export const publicSlotsResponseSchema = z.strictObject({
   slots: z.array(publicSlotSchema),
 });
 export type PublicSlotsResponse = z.infer<typeof publicSlotsResponseSchema>;
+
+/** Maximaler Zeitraum für die Übersicht freier Tage. */
+export const MAX_AVAILABLE_DATES_RANGE_DAYS = 62;
+
+export const slotsQuerySchema = z.object({ date: localDateSchema });
+export type SlotsQuery = z.infer<typeof slotsQuerySchema>;
+
+export const availableDatesQuerySchema = z
+  .object({ from: localDateSchema, to: localDateSchema })
+  .refine((q) => q.from <= q.to, { message: 'to muss am oder nach from liegen', path: ['to'] })
+  .refine(
+    (q) =>
+      (Date.parse(q.to) - Date.parse(q.from)) / 86_400_000 + 1 <= MAX_AVAILABLE_DATES_RANGE_DAYS,
+    { message: `Höchstens ${String(MAX_AVAILABLE_DATES_RANGE_DAYS)} Tage`, path: ['to'] },
+  );
+export type AvailableDatesQuery = z.infer<typeof availableDatesQuerySchema>;
+
+/** Lokale Daten, an denen mindestens ein freier Slot existiert. */
+export const availableDatesResponseSchema = z.strictObject({
+  serviceId: objectIdSchema,
+  timeZone: timeZoneSchema,
+  dates: z.array(localDateSchema),
+});
+export type AvailableDatesResponse = z.infer<typeof availableDatesResponseSchema>;
 
 export const publicSessionSchema = z.strictObject({
   id: objectIdSchema,

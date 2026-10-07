@@ -181,3 +181,17 @@ Zeitzone nur bei der Einrichtung festgelegt, für den Owner nur lesbar. Sperrzei
 ### Begründung
 
 Eine feste Zeitzone verhindert, dass alle lokalen Zeiten nachträglich verschoben werden. Der Vorrang der Sperrzeit schützt eingetragenen Urlaub. Das 5-Minuten-Raster passt zu den Belegungseinheiten.
+
+## 2026-10-07 – Slot-Berechnung
+
+### Kontext
+
+Einzeltermine werden nicht gespeichert, sondern aus Öffnungszeiten, Belegung und Fristen berechnet.
+
+### Entscheidung
+
+Raster in lokaler Zeit ab Fensterbeginn; übersprungene Zeiten entfallen, doppelte ergeben das erste Vorkommen. Belegungen werden ausschließlich aus `resourceOccupancy` gelesen, damit Einzeltermine und Kurse dieselbe Quelle nutzen. Die Berechnung erhält `jetzt` als Parameter. Zusätzlich gibt es eine Owner-Vorschau und eine Übersicht freier Tage (max. 62 Tage) für die Monatsansicht im Widget.
+
+### Begründung
+
+Ein lokales Raster entspricht dem, was Kunden auf der Uhr sehen, und vermeidet doppelte Uhrzeiten am Tag der Winterzeitumstellung. Eine einzige Belegungsquelle verhindert widersprüchliche Verfügbarkeiten.

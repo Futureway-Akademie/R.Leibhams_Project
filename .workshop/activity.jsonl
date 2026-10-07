@@ -56,3 +56,7 @@
 {"timestamp": "2026-10-07T13:08:09Z", "type": "task_completed", "taskId": "task-2-5", "summary": "Öffnungszeiten, Ausnahmen und Berechnung der geöffneten UTC-Fenster je Tag umgesetzt."}
 {"timestamp": "2026-10-07T13:08:09Z", "type": "decision_recorded", "summary": "Zeitzone nur bei Einrichtung, Sperrzeit vor Zusatzöffnung, 5-Minuten-Raster, Ausnahmen anlegen und löschen."}
 {"timestamp": "2026-10-07T13:08:09Z", "type": "task_ready", "taskId": "task-2-6", "summary": "Task bereit: Freie Slots berechnen."}
+{"timestamp": "2026-10-07T13:12:26Z", "type": "task_started", "taskId": "task-2-6", "summary": "Slot-Berechnung begonnen, inkl. Owner-Vorschau und Übersicht freier Tage (max. 62 Tage)."}
+{"timestamp": "2026-10-07T13:15:20Z", "type": "verification_passed", "taskId": "task-2-6", "summary": "Slot-Tests inkl. Belegung, Fristen und Zeitumstellung grün; Owner-Vorschau manuell geprüft."}
+{"timestamp": "2026-10-07T13:15:20Z", "type": "task_completed", "taskId": "task-2-6", "summary": "Slot-Berechnung für Einzeltermine mit Owner-Vorschau und Übersicht freier Tage umgesetzt."}
+{"timestamp": "2026-10-07T13:15:20Z", "type": "decision_recorded", "summary": "Raster in lokaler Zeit, Belegung nur aus resourceOccupancy, Owner-Vorschau und freie Tage (max. 62)."}

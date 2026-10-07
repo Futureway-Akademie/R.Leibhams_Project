@@ -81,6 +81,13 @@ export function minutesBetweenUtc(start: string, end: string): number {
   return Temporal.Instant.from(start).until(Temporal.Instant.from(end)).total('minutes');
 }
 
+/** Addiert Minuten auf einen lokalen Zeitpunkt `YYYY-MM-DDTHH:MM` (Wanduhr, ohne Zeitzone). */
+export function addLocalMinutes(localDateTime: string, minutes: number): string {
+  return Temporal.PlainDateTime.from(localDateTime, { overflow: 'reject' })
+    .add({ minutes })
+    .toString({ smallestUnit: 'minute' });
+}
+
 export function addLocalDays(localDate: string, days: number): string {
   return Temporal.PlainDate.from(localDate, { overflow: 'reject' }).add({ days }).toString();
 }

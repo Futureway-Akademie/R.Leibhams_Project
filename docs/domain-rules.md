@@ -51,6 +51,8 @@ Ein Slot mit Beginn `S` ist buchbar, wenn alle Bedingungen gelten:
 4. `S` ≥ jetzt + Mindestvorlauf.
 5. `S` ≤ jetzt + Buchungshorizont.
 
+Das Raster läuft in **lokaler Zeit** (Wanduhr). Am Tag der Sommerzeitumstellung entfallen Kandidaten in der übersprungenen Stunde; am Tag der Winterzeitumstellung gilt das erste Vorkommen, sodass keine Uhrzeit doppelt angeboten wird. Mindestvorlauf und Horizont stammen aus dem Angebot, sonst aus den Standardwerten der Installation.
+
 Die angezeigte Slot-Liste ist unverbindlich. Verbindlich ist nur die atomare Prüfung beim Buchen.
 
 ## 3. Gruppenkurs

@@ -351,7 +351,7 @@
           "description": "Berechnung freier Einzeltermin-Slots aus Öffnungszeiten, Ausnahmen, Dauer, Puffer, Mindestvorlauf, Buchungshorizont und belegten Zeiten der Ressource.",
           "order": 6,
           "weight": 3,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-5"
           ],
@@ -361,13 +361,21 @@
             "Mindestvorlauf und Buchungshorizont werden eingehalten",
             "Tests decken Zeitumstellung und Ränder von Öffnungszeiten ab"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T13:12:26Z",
+          "completedAt": "2026-10-07T13:15:20Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "23 neue API-Tests (158 in der API) und 4 Shared-Tests: Raster ab Fensterbeginn (30/45 Min), Dauer muss ins Fenster passen, Puffer darf herausragen, Ende = Beginn + Dauer, Sperrzeiten, Belegung durch Einzeltermine und Kurse inkl. Puffer und langer Termine, Standard- und angebotsbezogener Mindestvorlauf sowie Wert aus den Einstellungen, Horizont, keine Slots für Gruppenkurse/deaktivierte Angebote/geschlossene Tage, Sommerzeitbeginn (übersprungene Slots entfallen), Winterzeitbeginn (erstes Vorkommen, keine Duplikate, echte Dauer), freie Tage, Owner-Endpunkte (401, Antwortformat, Validierung, 400 für Gruppenkurse, 404). Manuell gegen Docker-MongoDB: Wochenplan und Angebot (45 Min + 15 Min Puffer) anlegen, Vorschau und freie Tage plausibel (24 h Vorlauf, nur Montage und Samstage); Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm --filter @fw-booking/api test",
+              "curl GET /api/owner/services/:id/slots, /available-dates",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T13:15:20Z"
           }
         },
         {
