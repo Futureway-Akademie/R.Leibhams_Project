@@ -77,6 +77,18 @@ Dokumenttypen: `apps/api/src/database/documents.ts`. Zeitpunkte sind BSON-Dates 
 | `PATCH /api/owner/services/:id` | Teiländerung (`serviceUpdateSchema`), auch Deaktivieren über `active`; Wechsel der Terminart → 409 |
 | `PUT /api/owner/services/order` | Reihenfolge aller Angebote (`serviceOrderUpdateSchema`) |
 
+## Owner-API: Öffnungszeiten und Ausnahmen
+
+| Endpunkt | Wirkung |
+|---|---|
+| `GET /api/owner/opening-hours` | Wochenplan und (nur lesbar) Zeitzone der Installation |
+| `PUT /api/owner/opening-hours` | Ersetzt den ganzen Wochenplan (Transaktion) |
+| `GET /api/owner/availability-exceptions[?from&to]` | Ausnahmen, die den Zeitraum berühren; Standard ab heute |
+| `POST /api/owner/availability-exceptions` | Sperrzeit oder zusätzliche Öffnung; Antwort nennt betroffene bestätigte Buchungen |
+| `DELETE /api/owner/availability-exceptions/:id` | Ausnahme entfernen |
+
+`AvailabilityService.openWindowsForDate(datum)` liefert die geöffneten UTC-Fenster eines lokalen Tages: (Wochenplan ∪ zusätzliche Öffnungen) − Sperrzeiten, begrenzt auf den Tag. Darauf baut die Slot-Berechnung auf.
+
 ## Zentrale Abnahmetests
 
 - Parallele Anfragen auf denselben Einzeltermin-Slot → genau eine Buchung.

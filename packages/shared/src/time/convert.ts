@@ -41,6 +41,19 @@ export function localToUtc(localDateTime: string, timeZone: string): LocalToUtcR
   return { ok: true, utc: toUtcString(zoned.toInstant()) };
 }
 
+/**
+ * Wie `localToUtc`, aber für Grenzen von Zeitfenstern: Liegt die Grenze in einer übersprungenen
+ * Stunde, gilt der Umstellungszeitpunkt (z. B. 02:30 am Sommerzeitbeginn → 03:00 Ortszeit).
+ */
+export function localBoundaryToUtc(localDateTime: string, timeZone: string): string {
+  const local = Temporal.PlainDateTime.from(localDateTime, { overflow: 'reject' });
+  const zoned = local.toZonedDateTime(timeZone, { disambiguation: 'earlier' });
+  if (zoned.toPlainDateTime().equals(local)) return toUtcString(zoned.toInstant());
+  const transition = zoned.getTimeZoneTransition('next');
+  if (!transition) throw new RangeError('Keine Zeitumstellung gefunden');
+  return toUtcString(transition.toInstant());
+}
+
 /** Zerlegt einen UTC-Zeitpunkt in lokale Datums- und Zeitangaben der Zeitzone. */
 export function utcToLocal(utc: string, timeZone: string): LocalDateTimeParts {
   const zoned = Temporal.Instant.from(utc).toZonedDateTimeISO(timeZone);

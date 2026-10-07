@@ -2,17 +2,18 @@ import { z } from 'zod';
 import { availabilityExceptionKindSchema, isoWeekdaySchema } from '../enums.js';
 import {
   localDateSchema,
-  localDateTimeSchema,
   localTimeSchema,
   localTimeToMinutes,
   objectIdSchema,
   timeZoneSchema,
+  unitLocalDateTimeSchema,
+  unitLocalTimeSchema,
 } from '../primitives.js';
 import { groupCapacitySchema } from './service.js';
 
-/** Zeitfenster innerhalb eines Tages in lokaler Zeit. */
+/** Zeitfenster innerhalb eines Tages in lokaler Zeit, auf dem 5-Minuten-Raster. */
 export const timeWindowSchema = z
-  .object({ start: localTimeSchema, end: localTimeSchema })
+  .object({ start: unitLocalTimeSchema, end: unitLocalTimeSchema })
   .refine((w) => localTimeToMinutes(w.start) < localTimeToMinutes(w.end), {
     message: 'Ende muss nach dem Beginn liegen',
     path: ['end'],
@@ -48,8 +49,8 @@ export type WeeklyOpeningHours = z.infer<typeof weeklyOpeningHoursSchema>;
 export const availabilityExceptionFields = z
   .object({
     kind: availabilityExceptionKindSchema,
-    start: localDateTimeSchema,
-    end: localDateTimeSchema,
+    start: unitLocalDateTimeSchema,
+    end: unitLocalDateTimeSchema,
     note: z.string().trim().max(200).nullable().default(null),
   })
   .refine((e) => e.start < e.end, { message: 'Ende muss nach dem Beginn liegen', path: ['end'] });
@@ -59,6 +60,29 @@ export const availabilityExceptionSchema = z.intersection(
   z.object({ id: objectIdSchema }),
 );
 export type AvailabilityException = z.infer<typeof availabilityExceptionSchema>;
+
+/** Antwort für den Wochenplan; die Zeitzone ist nur lesbar. */
+export const openingHoursResponseSchema = z.object({
+  timeZone: timeZoneSchema,
+  days: weeklyOpeningHoursSchema,
+});
+export type OpeningHoursResponse = z.infer<typeof openingHoursResponseSchema>;
+
+/** Zeitraum für die Liste der Ausnahmen (lokale Daten, jeweils einschließlich). */
+export const availabilityExceptionQuerySchema = z
+  .object({ from: localDateSchema.optional(), to: localDateSchema.optional() })
+  .refine((q) => !q.from || !q.to || q.from <= q.to, {
+    message: 'to muss am oder nach from liegen',
+    path: ['to'],
+  });
+export type AvailabilityExceptionQuery = z.infer<typeof availabilityExceptionQuerySchema>;
+
+export const availabilityExceptionCreatedSchema = z.object({
+  exception: availabilityExceptionSchema,
+  /** Bestätigte Buchungen im gesperrten Zeitraum; werden nicht automatisch abgesagt. */
+  conflictingBookings: z.int().nonnegative(),
+});
+export type AvailabilityExceptionCreated = z.infer<typeof availabilityExceptionCreatedSchema>;
 
 /** Wiederkehrende Regel, aus der Kurstermine im Buchungshorizont erzeugt werden. */
 export const courseRuleFields = z

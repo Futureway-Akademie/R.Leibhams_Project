@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { availabilityExceptionQuerySchema } from './availability.js';
 import {
   availabilityExceptionCreateSchema,
   courseRuleCreateSchema,
@@ -186,6 +187,44 @@ describe('Wiederkehrende Kursregeln', () => {
         startTime: '24:00',
         validFrom: '2026-10-12',
       }).success,
+    ).toBe(false);
+  });
+});
+
+describe('5-Minuten-Raster', () => {
+  it('lehnt Öffnungszeiten außerhalb des Rasters ab', () => {
+    expect(
+      openingHoursUpdateSchema.safeParse({
+        days: [{ weekday: 1, windows: [{ start: '09:07', end: '12:00' }] }],
+      }).success,
+    ).toBe(false);
+    expect(
+      openingHoursUpdateSchema.safeParse({
+        days: [{ weekday: 1, windows: [{ start: '09:05', end: '12:55' }] }],
+      }).success,
+    ).toBe(true);
+  });
+  it('lehnt Ausnahmen außerhalb des Rasters ab', () => {
+    expect(
+      availabilityExceptionCreateSchema.safeParse({
+        kind: 'closed',
+        start: '2026-12-24T10:02',
+        end: '2026-12-24T12:00',
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('availabilityExceptionQuerySchema', () => {
+  it('akzeptiert offene und geschlossene Zeiträume', () => {
+    expect(availabilityExceptionQuerySchema.safeParse({}).success).toBe(true);
+    expect(
+      availabilityExceptionQuerySchema.safeParse({ from: '2026-10-01', to: '2026-10-31' }).success,
+    ).toBe(true);
+  });
+  it('lehnt umgekehrte Zeiträume ab', () => {
+    expect(
+      availabilityExceptionQuerySchema.safeParse({ from: '2026-10-31', to: '2026-10-01' }).success,
     ).toBe(false);
   });
 });

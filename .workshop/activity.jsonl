@@ -51,3 +51,8 @@
 {"timestamp": "2026-10-07T12:23:04Z", "type": "decision_recorded", "summary": "Terminart unveränderlich, nur Deaktivieren statt Löschen, manuelle Reihenfolge per sortOrder."}
 {"timestamp": "2026-10-07T12:23:04Z", "type": "task_ready", "taskId": "task-2-5", "summary": "Task bereit: Öffnungszeiten und Ausnahmen."}
 {"timestamp": "2026-10-07T12:23:04Z", "type": "task_ready", "taskId": "task-2-7", "summary": "Task bereit: Kurstermine anlegen und wiederkehrend erzeugen."}
+{"timestamp": "2026-10-07T13:04:30Z", "type": "task_started", "taskId": "task-2-5", "summary": "Öffnungszeiten und Ausnahmen begonnen: Zeitzone nur bei Einrichtung, Sperrzeit vor Zusatzöffnung, 5-Minuten-Raster, Ausnahmen anlegen und löschen."}
+{"timestamp": "2026-10-07T13:08:09Z", "type": "verification_passed", "taskId": "task-2-5", "summary": "Tests für Wochenplan, Ausnahmen und Fensterberechnung inkl. Zeitumstellung grün."}
+{"timestamp": "2026-10-07T13:08:09Z", "type": "task_completed", "taskId": "task-2-5", "summary": "Öffnungszeiten, Ausnahmen und Berechnung der geöffneten UTC-Fenster je Tag umgesetzt."}
+{"timestamp": "2026-10-07T13:08:09Z", "type": "decision_recorded", "summary": "Zeitzone nur bei Einrichtung, Sperrzeit vor Zusatzöffnung, 5-Minuten-Raster, Ausnahmen anlegen und löschen."}
+{"timestamp": "2026-10-07T13:08:09Z", "type": "task_ready", "taskId": "task-2-6", "summary": "Task bereit: Freie Slots berechnen."}

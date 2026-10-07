@@ -318,7 +318,7 @@
           "description": "Wiederkehrende Öffnungszeiten je Wochentag in Owner-Zeitzone sowie Ausnahmen wie Urlaub und Sperrzeiten für Einzeltermine.",
           "order": 5,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-4",
             "task-1-5"
@@ -328,13 +328,21 @@
             "Ausnahmen sperren oder ergänzen Zeiträume",
             "Zeiten werden in lokaler Zeitzone gespeichert und korrekt interpretiert"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T13:04:30Z",
+          "completedAt": "2026-10-07T13:08:09Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "36 neue API-Tests (135 in der API) und 7 neue Shared-Tests: Intervallrechnung; Wochenplan (Auth/CSRF, Ersetzen und Sortieren, Ablehnung von Überlappung, 09:07, doppeltem Wochentag, Ende vor Beginn, Schließen aller Tage, Audit); Ausnahmen (Anlegen, Liste mit Zeitraumfilter, Löschen inkl. 404/400, Konflikthinweis zählt nur bestätigte überlappende Buchungen ohne sie abzusagen, Ablehnung ungültiger Eingaben); openWindowsForDate in Winter- und Sommerzeit, geschlossene Tage, Sperrzeiten, mehrtägiger Urlaub, Zusatzöffnungen mit Vereinigung, Vorrang der Sperrzeit, tagesübergreifende Ausnahmen, 24:00, Sommerzeitbeginn (3 lokale = 2 echte Stunden), Winterzeitbeginn (3 lokale = 4 echte Stunden), Grenze in übersprungener Stunde, andere Zeitzone. Manuell gegen Docker-MongoDB: Wochenplan setzen, 09:07 → 400, Urlaub anlegen und listen; Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm --filter @fw-booking/api test",
+              "curl PUT/GET /api/owner/opening-hours, POST/GET /api/owner/availability-exceptions",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T13:08:09Z"
           }
         },
         {
@@ -343,7 +351,7 @@
           "description": "Berechnung freier Einzeltermin-Slots aus Öffnungszeiten, Ausnahmen, Dauer, Puffer, Mindestvorlauf, Buchungshorizont und belegten Zeiten der Ressource.",
           "order": 6,
           "weight": 3,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-5"
           ],

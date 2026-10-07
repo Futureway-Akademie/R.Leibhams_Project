@@ -15,10 +15,27 @@ export const localTimeSchema = z
   .string()
   .regex(/^(?:[01]\d|2[0-3]):[0-5]\d$|^24:00$/, 'Erwartet HH:MM');
 
+/** Ob eine Uhrzeit `HH:MM` (auch am Ende eines `YYYY-MM-DDTHH:MM`) auf dem 5-Minuten-Raster liegt. */
+export function isOnUnitGrid(time: string): boolean {
+  return Number(time.slice(-2)) % OCCUPANCY_UNIT_MINUTES === 0;
+}
+
+/** Lokale Uhrzeit auf dem 5-Minuten-Raster der Belegungseinheiten. */
+export const unitLocalTimeSchema = localTimeSchema.refine(
+  isOnUnitGrid,
+  'Nur 5-Minuten-Schritte erlaubt',
+);
+
 /** Lokaler Zeitpunkt `YYYY-MM-DDTHH:MM` ohne Zeitzone. Lexikografisch sortierbar. */
 export const localDateTimeSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d$/, 'Erwartet YYYY-MM-DDTHH:MM');
+
+/** Lokaler Zeitpunkt auf dem 5-Minuten-Raster. */
+export const unitLocalDateTimeSchema = localDateTimeSchema.refine(
+  isOnUnitGrid,
+  'Nur 5-Minuten-Schritte erlaubt',
+);
 
 /** IANA-Zeitzone, z. B. `Europe/Berlin`. */
 export const timeZoneSchema = z.string().refine((value) => {

@@ -32,9 +32,13 @@ Verbindliche fachliche Regeln für WP Buchung Kalender plus PWA. Sie gelten für
 
 - Öffnungszeiten werden je Wochentag als ein oder mehrere Zeitfenster in lokaler Zeit gepflegt (z. B. Mo 09:00–12:00 und 13:00–18:00).
 - Zeitfenster eines Tages dürfen sich nicht überschneiden.
+- Beginn und Ende liegen auf dem 5-Minuten-Raster (z. B. 09:05, nicht 09:07). `24:00` bezeichnet Mitternacht am Ende des Tages.
+- Der Wochenplan wird immer als Ganzes gespeichert; nicht aufgeführte Wochentage sind geschlossen.
 - **Ausnahmen** haben Vorrang vor Öffnungszeiten:
   - *Sperrzeit* (z. B. Urlaub, Arzttermin): Zeitraum ist nicht buchbar.
   - *Zusätzliche Öffnung*: Zeitraum ist zusätzlich buchbar.
+  - Überschneiden sich Sperrzeit und zusätzliche Öffnung, **gewinnt die Sperrzeit**.
+  - Ausnahmen liegen ebenfalls auf dem 5-Minuten-Raster. Sie werden angelegt oder gelöscht, nicht bearbeitet.
 - Ausnahmen, die bereits gebuchte Termine überdecken, sind zulässig, sagen diese aber **nicht** automatisch ab. Das Portal zeigt die betroffenen Buchungen als Konflikt an; der Owner entscheidet über eine Absage (siehe 7).
 
 ### 2.3 Slot-Berechnung
@@ -159,13 +163,14 @@ Alle Owner-Änderungen an Terminen und Buchungen werden in `auditEvents` protoko
 
 ## 8. Zeitzonen
 
-- Jede Installation hat genau eine Zeitzone. Standard: `Europe/Berlin`.
+- Jede Installation hat genau eine Zeitzone. Standard: `Europe/Berlin`. Sie wird bei der Einrichtung festgelegt und ist für den Owner nur lesbar.
 - Öffnungszeiten, Ausnahmen und wiederkehrende Regeln werden in **lokaler Zeit** gespeichert und interpretiert.
 - Konkrete Zeitpunkte (Kurstermine, Buchungen, Belegungen) werden in **UTC** gespeichert, zusammen mit der Zeitzone.
 - Anzeige in Widget, Portal, PWA und E-Mails erfolgt immer in der Zeitzone der Installation, mit Zeitzonenhinweis, wenn das Gerät eine andere verwendet.
 - **Zeitumstellung:**
   - *Übersprungene Stunde* (Frühjahr, z. B. 02:00–03:00): Slots und Kurstermine, deren lokaler Beginn in diese Lücke fällt, entfallen.
   - *Doppelte Stunde* (Herbst, z. B. 02:00–03:00): Es gilt das **erste** Vorkommen.
+  - *Grenzen von Öffnungszeiten und Ausnahmen* in der übersprungenen Stunde gelten ab dem Umstellungszeitpunkt (z. B. „02:30–05:00“ am Tag der Sommerzeitumstellung öffnet um 03:00).
   - Dauern sind reale Minuten; ein Termin über die Umstellung hinweg dauert so lange wie angegeben.
 
 ## 9. Benachrichtigungen

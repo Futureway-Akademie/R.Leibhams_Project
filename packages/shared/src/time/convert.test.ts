@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   addLocalDays,
+  localBoundaryToUtc,
   addMinutesUtc,
   eachLocalDate,
   isoWeekdayOf,
@@ -163,5 +164,19 @@ describe('Kalenderrechnung', () => {
   });
   it('bestimmt das lokale Datum zu einem Zeitpunkt', () => {
     expect(localToday(BERLIN, '2026-10-07T22:30:00Z')).toBe('2026-10-08');
+  });
+});
+
+describe('localBoundaryToUtc', () => {
+  it('rechnet normale Grenzen wie localToUtc um', () => {
+    expect(localBoundaryToUtc('2026-06-01T09:00', BERLIN)).toBe('2026-06-01T07:00:00Z');
+  });
+  it('verschiebt Grenzen in der übersprungenen Stunde auf den Umstellungszeitpunkt', () => {
+    // 29.03.2026: 02:00 Winterzeit springt auf 03:00 Sommerzeit = 01:00Z.
+    expect(localBoundaryToUtc('2026-03-29T02:00', BERLIN)).toBe('2026-03-29T01:00:00Z');
+    expect(localBoundaryToUtc('2026-03-29T02:30', BERLIN)).toBe('2026-03-29T01:00:00Z');
+  });
+  it('wählt bei doppelter Uhrzeit das erste Vorkommen', () => {
+    expect(localBoundaryToUtc('2026-10-25T02:30', BERLIN)).toBe('2026-10-25T00:30:00Z');
   });
 });

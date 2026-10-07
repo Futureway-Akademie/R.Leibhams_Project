@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import type { DynamicModule } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module.js';
+import { AvailabilityModule } from './availability/availability.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
 import type { DestinationStream } from 'pino';
 import { APP_CONFIG } from './config/config.js';
@@ -26,6 +27,7 @@ export class AppModule {
         DatabaseModule,
         AuthModule,
         CatalogModule,
+        AvailabilityModule,
       ],
       controllers: [HealthController],
       providers: [{ provide: APP_CONFIG, useValue: config }],

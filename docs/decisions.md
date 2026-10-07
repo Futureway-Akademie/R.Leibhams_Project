@@ -167,3 +167,17 @@ Die Terminart ist nach dem Anlegen unveränderlich (Abweichung von der ursprüng
 ### Begründung
 
 Eine feste Terminart vermeidet verwaiste Kursregeln, Kurstermine oder Belegungen. Deaktivieren erhält die Historie für Buchungen und Auswertungen.
+
+## 2026-10-07 – Öffnungszeiten und Ausnahmen
+
+### Kontext
+
+Einzeltermine brauchen verlässliche Öffnungsfenster als Grundlage für die Slot-Berechnung, auch an Tagen mit Zeitumstellung.
+
+### Entscheidung
+
+Zeitzone nur bei der Einrichtung festgelegt, für den Owner nur lesbar. Sperrzeit gewinnt gegen zusätzliche Öffnung. Öffnungszeiten und Ausnahmen nur in 5-Minuten-Schritten. Ausnahmen werden angelegt und gelöscht, nicht bearbeitet; Sperrzeiten melden betroffene Buchungen, sagen sie aber nicht ab. Der Wochenplan wird als Ganzes ersetzt. Grenzen in der übersprungenen Stunde gelten ab dem Umstellungszeitpunkt (`localBoundaryToUtc`). Die Fensterberechnung erfolgt mit halboffenen Intervallen in UTC.
+
+### Begründung
+
+Eine feste Zeitzone verhindert, dass alle lokalen Zeiten nachträglich verschoben werden. Der Vorrang der Sperrzeit schützt eingetragenen Urlaub. Das 5-Minuten-Raster passt zu den Belegungseinheiten.
