@@ -1,7 +1,1252 @@
 {
   "schemaVersion": 1,
-  "roadmapVersion": 0,
-  "status": "not_initialized",
-  "phases": []
+  "roadmapVersion": 1,
+  "status": "active",
+  "phases": [
+    {
+      "id": "phase-1",
+      "title": "Fachliches Modell und Fundament",
+      "description": "Verbindliche Fachregeln, Monorepo-Gerüst, lokale Infrastruktur und gemeinsame Domänentypen.",
+      "order": 1,
+      "weight": 8,
+      "status": "ready",
+      "tasks": [
+        {
+          "id": "task-1-1",
+          "title": "Fachregeln dokumentieren",
+          "description": "Regeln für beide Terminarten (Einzeltermin, Gruppenkurs) zu Kapazität, Dauer, Puffer, Mindestvorlauf, Buchungshorizont, Zeitzonen, Storno- und Umbuchungsfristen in docs/domain-rules.md festhalten.",
+          "order": 1,
+          "weight": 1,
+          "status": "completed",
+          "dependsOn": [],
+          "definitionOfDone": [
+            "docs/domain-rules.md beschreibt Einzeltermin und Gruppenkurs mit Kapazitätsregeln",
+            "Fristen, Mindestvorlauf, Buchungshorizont und Puffer sind definiert",
+            "Zeitzonenregeln inklusive Sommer-/Winterzeit sind festgelegt",
+            "Regeln für Storno, Umbuchung und Owner-Absage sind beschrieben"
+          ],
+          "startedAt": "2026-10-07T08:59:15Z",
+          "completedAt": "2026-10-07T09:00:17Z",
+          "verification": {
+            "status": "passed",
+            "summary": "Dokumentations-Task: docs/domain-rules.md manuell gegen alle vier DoD-Punkte geprüft. Beide Terminarten mit Kapazitätsregeln (Abschnitte 2–4), Fristen/Mindestvorlauf/Horizont/Puffer (2.1, 5.3), Zeitzonen inkl. Sommer-/Winterzeit (8) sowie Storno, Umbuchung und Owner-Absage (6, 7) sind beschrieben. Lint/Typecheck/Tests entfallen laut Quality Gate für Dokumentations-Tasks.",
+            "commands": [
+              "grep -nE \"^## |Mindestvorlauf \\||Buchungshorizont \\||Puffer \\||Übersprungene|Doppelte Stunde|Storno:|Umbuchung:|Termin absagen\" docs/domain-rules.md"
+            ],
+            "checkedAt": "2026-10-07T09:00:17Z"
+          }
+        },
+        {
+          "id": "task-1-2",
+          "title": "Monorepo-Gerüst",
+          "description": "pnpm-Workspaces mit apps/api, apps/worker, apps/portal, packages/shared, packages/widget und plugins/wordpress; TypeScript, ESLint, Prettier und Test-Runner einrichten.",
+          "order": 2,
+          "weight": 2,
+          "status": "ready",
+          "dependsOn": [],
+          "definitionOfDone": [
+            "pnpm install läuft ohne Fehler",
+            "pnpm lint, pnpm typecheck und pnpm test laufen im Root über alle Pakete",
+            "Workspace-Struktur entspricht docs/architecture.md",
+            "Quality Gate in .workshop/specialization/QUALITY_GATE.md ist ausführbar"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-1-3",
+          "title": "Lokale Infrastruktur",
+          "description": "docker-compose mit MongoDB als Single-Node-Replica-Set und Mailpit für lokale E-Mails.",
+          "order": 3,
+          "weight": 1,
+          "status": "planned",
+          "dependsOn": [
+            "task-1-2"
+          ],
+          "definitionOfDone": [
+            "docker compose up startet MongoDB und Mailpit",
+            "MongoDB läuft als Replica Set und unterstützt Transaktionen",
+            "Mailpit-Weboberfläche ist lokal erreichbar",
+            "Start und Nutzung sind in der README dokumentiert"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-1-4",
+          "title": "Shared-Paket: Domänentypen und Validierung",
+          "description": "Gemeinsame Typen und Validierungsschemas für Angebote, Terminarten, Termine, Buchungen und API-Payloads.",
+          "order": 4,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-1-1",
+            "task-1-2"
+          ],
+          "definitionOfDone": [
+            "Typen für Angebot, Terminart, Termin, Buchung und Teilnehmer sind exportiert",
+            "Validierungsschemas für öffentliche und Owner-Payloads existieren",
+            "Unit-Tests decken gültige und ungültige Eingaben ab"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-1-5",
+          "title": "Zeitzonen-Utilities",
+          "description": "Umrechnung lokaler Owner-Zeiten in UTC inklusive Behandlung nicht existierender und doppelter Uhrzeiten bei Zeitumstellung.",
+          "order": 5,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-1-4"
+          ],
+          "definitionOfDone": [
+            "Lokale Zeit plus Zeitzone wird korrekt nach UTC umgerechnet",
+            "Tests für Sommer- und Winterzeitumstellung in Europe/Berlin sind grün",
+            "Nicht existierende und doppelte lokale Uhrzeiten werden definiert behandelt"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "title": "Buchungskern (API)",
+      "description": "NestJS-API mit Owner-Login, Angeboten beider Terminarten, Slot-Berechnung, Kursterminen sowie atomarer Buchung, Storno und Umbuchung.",
+      "order": 2,
+      "weight": 35,
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-2-1",
+          "title": "API-Grundgerüst",
+          "description": "NestJS-Anwendung mit Konfiguration aus Umgebungsvariablen, Healthcheck und MongoDB-Verbindung.",
+          "order": 1,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-1-3"
+          ],
+          "definitionOfDone": [
+            "API startet lokal und verbindet sich mit MongoDB",
+            "GET /health meldet Status von API und Datenbank",
+            "Konfiguration kommt ausschließlich aus Umgebungsvariablen, keine Secrets im Repository"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-2",
+          "title": "Collections, Indizes und Provisionierung",
+          "description": "Datenmodell für owners, services, availabilityRules, availabilityExceptions, sessions, bookings, resourceOccupancy, actionTokens, outboxJobs und auditEvents mit Indizes und Provisionierungsskript.",
+          "order": 2,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-1",
+            "task-1-4"
+          ],
+          "definitionOfDone": [
+            "Provisionierungsskript legt Collections und Indizes idempotent an",
+            "Eindeutige Indizes für Idempotenzschlüssel und Belegungseinheiten existieren",
+            "Integrationstest prüft die angelegten Indizes"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-3",
+          "title": "Owner-Login und Logout",
+          "description": "Serverseitige Sessions mit Secure/HttpOnly-Cookies, SameSite und CSRF-Schutz für verändernde Aktionen.",
+          "order": 3,
+          "weight": 3,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-2"
+          ],
+          "definitionOfDone": [
+            "Owner kann sich an- und abmelden",
+            "Passwörter werden mit sicherem Hash gespeichert",
+            "Geschützte Routen liefern ohne Session 401",
+            "Verändernde Anfragen ohne gültiges CSRF-Token werden abgelehnt"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-4",
+          "title": "Angebote mit Terminart",
+          "description": "CRUD für Angebote mit Terminart Einzeltermin (Dauer, Puffer) oder Gruppenkurs (Standardkapazität) sowie Buchungs- und Stornoregeln.",
+          "order": 4,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-3"
+          ],
+          "definitionOfDone": [
+            "Owner kann Angebote beider Terminarten anlegen, ändern und deaktivieren",
+            "Einzeltermine haben immer Kapazität 1, Gruppenkurse Kapazität größer 1",
+            "Ungültige Kombinationen werden serverseitig abgelehnt"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-5",
+          "title": "Öffnungszeiten und Ausnahmen",
+          "description": "Wiederkehrende Öffnungszeiten je Wochentag in Owner-Zeitzone sowie Ausnahmen wie Urlaub und Sperrzeiten für Einzeltermine.",
+          "order": 5,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-4",
+            "task-1-5"
+          ],
+          "definitionOfDone": [
+            "Öffnungszeiten können je Wochentag gepflegt werden",
+            "Ausnahmen sperren oder ergänzen Zeiträume",
+            "Zeiten werden in lokaler Zeitzone gespeichert und korrekt interpretiert"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-6",
+          "title": "Freie Slots berechnen",
+          "description": "Berechnung freier Einzeltermin-Slots aus Öffnungszeiten, Ausnahmen, Dauer, Puffer, Mindestvorlauf, Buchungshorizont und belegten Zeiten der Ressource.",
+          "order": 6,
+          "weight": 3,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-5"
+          ],
+          "definitionOfDone": [
+            "Slots berücksichtigen Dauer und Puffer des Angebots",
+            "Belegte Zeiten durch Einzeltermine und Kurse werden ausgeschlossen",
+            "Mindestvorlauf und Buchungshorizont werden eingehalten",
+            "Tests decken Zeitumstellung und Ränder von Öffnungszeiten ab"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-7",
+          "title": "Kurstermine anlegen und wiederkehrend erzeugen",
+          "description": "Konkrete Kurstermine mit Kapazität anlegen, sperren und über wiederkehrende Regeln im Buchungshorizont ohne Duplikate erzeugen.",
+          "order": 7,
+          "weight": 3,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-4",
+            "task-1-5"
+          ],
+          "definitionOfDone": [
+            "Owner kann einzelne Kurstermine anlegen und sperren",
+            "Wiederkehrende Regeln erzeugen Termine ohne Duplikate bei erneuter Ausführung",
+            "Regeländerungen verschieben bereits gebuchte Termine nicht",
+            "Überschneidungen auf derselben Ressource werden verhindert"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-8",
+          "title": "Öffentliche Verfügbarkeits-API",
+          "description": "Öffentliche Endpunkte für Angebote, freie Slots und Kurstermine mit freien Plätzen, ohne personenbezogene Daten.",
+          "order": 8,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-6",
+            "task-2-7"
+          ],
+          "definitionOfDone": [
+            "Endpunkte liefern Angebote, Slots und Kurstermine je öffentlicher Kalenderkennung",
+            "Antworten enthalten keine Teilnehmernamen oder sonstigen personenbezogenen Daten",
+            "Tests prüfen das Antwortformat für beide Terminarten"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-9",
+          "title": "Atomare Kursbuchung",
+          "description": "Buchung eines Kursplatzes in einer MongoDB-Transaktion mit atomarer Kapazitätsprüfung, Idempotenzschlüssel und Outbox-Eintrag.",
+          "order": 9,
+          "weight": 3,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-8"
+          ],
+          "definitionOfDone": [
+            "Belegte Plätze werden nur erhöht, wenn Kapazität frei ist",
+            "Buchung, Platzbelegung und Outbox-Job entstehen gemeinsam oder gar nicht",
+            "Wiederholte Anfrage mit gleichem Idempotenzschlüssel erzeugt keine zweite Buchung",
+            "Volle Kurse liefern einen eindeutigen Ausgebucht-Fehler"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-10",
+          "title": "Atomare Einzeltermin-Buchung",
+          "description": "Buchung eines Einzeltermins mit Sperrung der Ressource über Belegungseinheiten mit eindeutigem Index, übergreifend zwischen Angeboten und Kursen.",
+          "order": 10,
+          "weight": 3,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-9"
+          ],
+          "definitionOfDone": [
+            "Ein Einzeltermin belegt alle betroffenen Belegungseinheiten der Ressource atomar",
+            "Überschneidende Buchungen unterschiedlicher Angebote werden abgelehnt",
+            "Kurstermine blockieren Einzeltermine derselben Ressource",
+            "Idempotenz und Outbox-Eintrag funktionieren wie bei Kursbuchungen"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-11",
+          "title": "Nebenläufigkeitstests",
+          "description": "Integrationstests mit vielen gleichzeitigen Buchungsanfragen für beide Terminarten.",
+          "order": 11,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-10"
+          ],
+          "definitionOfDone": [
+            "Viele parallele Anfragen auf denselben Einzeltermin-Slot ergeben genau eine Buchung",
+            "Ein Kurs mit N Plätzen nimmt bei parallelen Anfragen genau N Buchungen an",
+            "Tests laufen gegen ein echtes Replica Set"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-12",
+          "title": "Action-Tokens und Storno",
+          "description": "Zufällige, gehashte, begrenzt gültige Tokens zum Abrufen der eigenen Buchung; Storno erst nach bewusster Bestätigung.",
+          "order": 12,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-10"
+          ],
+          "definitionOfDone": [
+            "Nur der Token-Hash wird gespeichert",
+            "GET mit Token führt keine Stornierung aus",
+            "Mehrfache Stornoaufrufe geben Plätze bzw. Belegungseinheiten genau einmal frei",
+            "Storno-Fristen werden serverseitig geprüft"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-13",
+          "title": "Umbuchung",
+          "description": "Umbuchung auf einen anderen Slot oder Kurstermin in einer Transaktion.",
+          "order": 13,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-12"
+          ],
+          "definitionOfDone": [
+            "Neuer Termin wird reserviert und alter freigegeben in derselben Transaktion",
+            "Ist der neue Termin belegt, bleibt die ursprüngliche Buchung unverändert",
+            "Umbuchungsfristen werden serverseitig geprüft"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-14",
+          "title": "Teilnehmerliste und Owner-Absage",
+          "description": "Owner sieht Buchungen und Teilnehmer je Termin und kann Termine nachvollziehbar absagen.",
+          "order": 14,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-10"
+          ],
+          "definitionOfDone": [
+            "Teilnehmerliste ist nur für angemeldete Owner abrufbar",
+            "Absage setzt Buchungen auf abgesagt und erzeugt Benachrichtigungsaufträge",
+            "Kapazitätsänderungen unter bestätigte Plätze werden abgelehnt",
+            "Absagen werden in auditEvents protokolliert"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-15",
+          "title": "Missbrauchsschutz und CORS",
+          "description": "Rate Limiting für öffentliche Endpunkte, konsequente Eingabevalidierung und Domainfreigabe per CORS.",
+          "order": 15,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-10"
+          ],
+          "definitionOfDone": [
+            "Öffentliche Endpunkte sind ratenbegrenzt",
+            "Nicht freigegebene Origins werden per CORS abgewiesen",
+            "Ungültige Eingaben liefern 400 ohne interne Details"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "title": "Hintergrund-Worker und E-Mail",
+      "description": "Separater Worker verarbeitet die Outbox mit Leases und Wiederholungen und versendet transaktionale E-Mails.",
+      "order": 3,
+      "weight": 8,
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-3-1",
+          "title": "Worker mit Job-Leases",
+          "description": "Node.js-Worker beansprucht Outbox-Jobs mit zeitlich begrenzten Leases und Wiederholungsregeln.",
+          "order": 1,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-10"
+          ],
+          "definitionOfDone": [
+            "Mehrere Worker verarbeiten einen Job nicht gleichzeitig",
+            "Abgelaufene Leases werden erneut vergeben",
+            "Fehlgeschlagene Jobs werden mit Backoff wiederholt und nach Maximalversuchen als fehlgeschlagen markiert"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-3-2",
+          "title": "Bestätigungsmail",
+          "description": "Bestätigungsmail per SMTP mit sicherem Verwaltungslink für Storno und Umbuchung.",
+          "order": 2,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-3-1",
+            "task-2-12"
+          ],
+          "definitionOfDone": [
+            "Nach erfolgreicher Buchung wird eine Bestätigung versendet",
+            "Mail enthält Termin, Angebot und Verwaltungslink",
+            "Ein Versandfehler macht die Buchung nicht rückgängig",
+            "Versand ist lokal in Mailpit überprüfbar"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-3-3",
+          "title": "Storno-, Umbuchungs- und Absagemails",
+          "description": "Transaktionale Mails für Storno, Umbuchung und Owner-Absage.",
+          "order": 3,
+          "weight": 1,
+          "status": "planned",
+          "dependsOn": [
+            "task-3-2",
+            "task-2-13",
+            "task-2-14"
+          ],
+          "definitionOfDone": [
+            "Jede der drei Aktionen löst die passende Mail aus",
+            "Mails sind dedupliziert"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-3-4",
+          "title": "Erinnerungen",
+          "description": "Erinnerungsmails mit konfigurierbarem Vorlauf; vor Versand wird geprüft, ob Buchung und Termin noch aktuell sind.",
+          "order": 4,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-3-2"
+          ],
+          "definitionOfDone": [
+            "Erinnerung wird zum konfigurierten Zeitpunkt versendet",
+            "Stornierte oder umgebuchte Buchungen erhalten keine veraltete Erinnerung"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-3-5",
+          "title": "API für fehlgeschlagene Jobs",
+          "description": "Owner-Endpunkt listet endgültig fehlgeschlagene Benachrichtigungen.",
+          "order": 5,
+          "weight": 1,
+          "status": "planned",
+          "dependsOn": [
+            "task-3-1"
+          ],
+          "definitionOfDone": [
+            "Endpunkt liefert fehlgeschlagene Jobs mit Typ, Zeitpunkt und Fehlerkategorie",
+            "Keine Secrets oder vollständigen Treiberfehler in der Antwort"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "title": "Öffentliches Widget und WordPress",
+      "description": "Schlankes TypeScript-Widget im Light DOM ohne iframe für Kurse und Einzeltermine, Self-Service-Seite und WordPress-Plugin.",
+      "order": 4,
+      "weight": 14,
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-4-1",
+          "title": "Widget-Build",
+          "description": "Eigener kleiner Build, der Container erkennt, mehrere Kalender pro Seite unterstützt und nur einmal geladen wird.",
+          "order": 1,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-1-4"
+          ],
+          "definitionOfDone": [
+            "Widget-Bundle wird separat gebaut und enthält keine Portal-Abhängigkeiten",
+            "Mehrere Container auf einer Seite werden unabhängig initialisiert",
+            "Mehrfaches Einbinden des Scripts führt nicht zu doppelter Initialisierung"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-4-2",
+          "title": "Kursansicht",
+          "description": "Anzeige von Kursterminen mit freien Plätzen inklusive Lade-, Leer- und Fehlerzustand.",
+          "order": 2,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-4-1",
+            "task-2-8"
+          ],
+          "definitionOfDone": [
+            "Kurstermine und freie Plätze werden angezeigt",
+            "Lade-, Leer- und Fehlerzustände sind sichtbar",
+            "API-Daten werden mit sicherer DOM-Erzeugung ausgegeben, nicht als HTML"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-4-3",
+          "title": "Slot-Auswahl für Einzeltermine",
+          "description": "Tagesauswahl und Anzeige freier Uhrzeiten für ein Einzeltermin-Angebot.",
+          "order": 3,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-4-1",
+            "task-2-8"
+          ],
+          "definitionOfDone": [
+            "Nutzer wählt einen Tag und sieht freie Uhrzeiten",
+            "Zeiten werden in der Zeitzone des Owners korrekt dargestellt",
+            "Lade-, Leer- und Fehlerzustände sind sichtbar"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-4-4",
+          "title": "Buchungsformular",
+          "description": "Formular für Name und E-Mail für beide Terminarten mit Idempotenzschlüssel und Behandlung von bereits vergebenen Plätzen.",
+          "order": 4,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-4-2",
+            "task-4-3",
+            "task-2-10"
+          ],
+          "definitionOfDone": [
+            "Buchung beider Terminarten ist über das Widget möglich",
+            "Doppelklick erzeugt keine zweite Buchung",
+            "Zwischenzeitlich vergebene Termine zeigen eine verständliche Meldung"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-4-5",
+          "title": "CSS-Schnittstelle und Barrierefreiheit",
+          "description": "Klassen mit Präfix fw-booking-, CSS Custom Properties, gekapselte Basisstyles, Tastaturbedienung und sichtbarer Fokus.",
+          "order": 5,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-4-4"
+          ],
+          "definitionOfDone": [
+            "Alle Basisregeln sind unter dem Widget-Root gekapselt",
+            "Farben, Schrift, Abstände und Fokus sind über Custom Properties steuerbar",
+            "Widget ist vollständig per Tastatur bedienbar",
+            "Styling-Schnittstelle ist dokumentiert"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-4-6",
+          "title": "Self-Service-Seite",
+          "description": "Seite für Interessenten zum Ansehen, Stornieren und Umbuchen der eigenen Buchung über den Verwaltungslink.",
+          "order": 6,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-4-4",
+            "task-2-13"
+          ],
+          "definitionOfDone": [
+            "Buchung ist über den Link einsehbar",
+            "Storno und Umbuchung erfordern eine bewusste Bestätigung",
+            "Token gelangt nicht in Referrer oder Analytics"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-4-7",
+          "title": "WordPress-Plugin",
+          "description": "Schlankes PHP-Plugin mit Shortcode und Block, Asset-Laden und Einstellungen für API-Adresse und Kalenderkennung.",
+          "order": 7,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-4-5"
+          ],
+          "definitionOfDone": [
+            "Shortcode und Block erzeugen den Widget-Container",
+            "Assets werden über WordPress-Mechanismen nur einmal geladen",
+            "Plugin speichert keine Datenbank-Zugangsdaten",
+            "Plugin ist in einer lokalen WordPress-Instanz getestet"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "title": "Owner-Portal",
+      "description": "React-Portal für Angebote, Öffnungszeiten, Kurstermine, Buchungen und Benachrichtigungsfehler.",
+      "order": 5,
+      "weight": 12,
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-5-1",
+          "title": "Portal-Gerüst und Login",
+          "description": "React/Vite-Portal mit Routing, API-Client sowie Login und Logout.",
+          "order": 1,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-3"
+          ],
+          "definitionOfDone": [
+            "Owner kann sich im Portal an- und abmelden",
+            "Geschützte Seiten leiten ohne Session zum Login",
+            "Keine Zugangstoken im JavaScript-Speicher"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-5-2",
+          "title": "Angebote verwalten",
+          "description": "Oberfläche für Angebote inklusive Wahl der Terminart.",
+          "order": 2,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-5-1",
+            "task-2-4"
+          ],
+          "definitionOfDone": [
+            "Angebote beider Terminarten können angelegt und bearbeitet werden",
+            "Felder passen sich der gewählten Terminart an"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-5-3",
+          "title": "Öffnungszeiten und Ausnahmen",
+          "description": "Oberfläche zur Pflege von Öffnungszeiten und Ausnahmen.",
+          "order": 3,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-5-2",
+            "task-2-5"
+          ],
+          "definitionOfDone": [
+            "Öffnungszeiten je Wochentag sind pflegbar",
+            "Ausnahmen wie Urlaub können angelegt und entfernt werden"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-5-4",
+          "title": "Kurstermine verwalten",
+          "description": "Oberfläche für Kurstermine und wiederkehrende Regeln inklusive Sperren und Absagen.",
+          "order": 4,
+          "weight": 3,
+          "status": "planned",
+          "dependsOn": [
+            "task-5-2",
+            "task-2-7",
+            "task-2-14"
+          ],
+          "definitionOfDone": [
+            "Kurstermine und Regeln können angelegt und bearbeitet werden",
+            "Termine können gesperrt und mit Bestätigung abgesagt werden",
+            "Belegung im Verhältnis zur Kapazität ist sichtbar"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-5-5",
+          "title": "Buchungen und Teilnehmerliste",
+          "description": "Übersicht der Buchungen und Teilnehmer für beide Terminarten.",
+          "order": 5,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-5-3",
+            "task-5-4"
+          ],
+          "definitionOfDone": [
+            "Buchungen sind nach Datum filterbar",
+            "Teilnehmernamen sind in der Termin-Detailansicht sichtbar"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-5-6",
+          "title": "Fehlgeschlagene Benachrichtigungen",
+          "description": "Anzeige endgültig fehlgeschlagener Benachrichtigungen im Portal.",
+          "order": 6,
+          "weight": 1,
+          "status": "planned",
+          "dependsOn": [
+            "task-5-1",
+            "task-3-5"
+          ],
+          "definitionOfDone": [
+            "Fehlgeschlagene Benachrichtigungen werden mit Typ und Zeitpunkt angezeigt"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase-6",
+      "title": "PWA",
+      "description": "Installierbare mobile Terminübersicht mit sicherer, länger gültiger Sitzung und klarem Offline-Zustand.",
+      "order": 6,
+      "weight": 7,
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-6-1",
+          "title": "Manifest und Service Worker",
+          "description": "Web-App-Manifest und Service Worker, der ausschließlich statische App-Dateien cacht.",
+          "order": 1,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-5-1"
+          ],
+          "definitionOfDone": [
+            "Portal ist auf Android und iPhone installierbar",
+            "Service Worker cacht nur statische Assets"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-6-2",
+          "title": "Mobile Startansicht",
+          "description": "Heute und als Nächstes anstehende Termine mit Belegung, Navigation zu den nächsten Tagen und Zeitpunkt der letzten Aktualisierung.",
+          "order": 2,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-6-1",
+            "task-5-5"
+          ],
+          "definitionOfDone": [
+            "Startansicht zeigt heutige und nächste Termine mit Belegung",
+            "Teilnehmernamen sind in der Detailansicht sichtbar",
+            "Zeitpunkt der letzten erfolgreichen Aktualisierung wird angezeigt"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-6-3",
+          "title": "Offline-Zustand und Cache-Schutz",
+          "description": "Klarer Offline-Zustand und Prüfung, dass personenbezogene Daten nicht gecacht werden.",
+          "order": 3,
+          "weight": 1,
+          "status": "planned",
+          "dependsOn": [
+            "task-6-2"
+          ],
+          "definitionOfDone": [
+            "Ohne Verbindung wird ein Offline-Zustand statt veralteter Daten angezeigt",
+            "API-Antworten mit Personendaten haben passende Cache-Header",
+            "Nach Logout liefert der Service-Worker-Cache keine Teilnehmerdaten"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-6-4",
+          "title": "Länger gültige Sitzung",
+          "description": "Sitzungsdauer, Rotation und Widerruf für dauerhaft angemeldete PWA-Nutzung.",
+          "order": 4,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-6-1"
+          ],
+          "definitionOfDone": [
+            "Sitzung bleibt über definierte Dauer gültig und wird rotiert",
+            "Owner kann aktive Sitzungen widerrufen"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase-7",
+      "title": "Einrichtung, Betrieb und Pilot",
+      "description": "Geschützter Entwicklerbereich für die kundeneigene Datenbank, Deployment, Backups und Pilotinstallation.",
+      "order": 7,
+      "weight": 13,
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "task-7-1",
+          "title": "Geschützter Entwicklerzugang",
+          "description": "Entwicklerzugang über Deployment-Secrets, unabhängig von der Buchungsdatenbank.",
+          "order": 1,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-2-1"
+          ],
+          "definitionOfDone": [
+            "Entwicklerbereich ist nur mit separatem Zugang erreichbar",
+            "Zugang funktioniert ohne eingerichtete Buchungsdatenbank",
+            "Es gibt keine offene Setup-Route"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-7-2",
+          "title": "Verbindungstest und Funktionsprüfung",
+          "description": "Serverseitiger Test von Erreichbarkeit, Authentifizierung, Transaktionsfähigkeit und Rechten der Ziel-Datenbank.",
+          "order": 2,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-7-1"
+          ],
+          "definitionOfDone": [
+            "Test meldet nur Erfolg, Fehlerkategorie und Zeitpunkt",
+            "Zugangsdaten werden nie zurückgegeben oder geloggt",
+            "Unzulässige Ziele werden abgelehnt"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-7-3",
+          "title": "Secrets speichern und austauschen",
+          "description": "Serverseitige Ablage im Secret Store, gemeinsame Freigabe für API und Worker, kontrollierter Austausch.",
+          "order": 3,
+          "weight": 3,
+          "status": "planned",
+          "dependsOn": [
+            "task-7-2",
+            "task-3-1"
+          ],
+          "definitionOfDone": [
+            "Secrets werden nur serverseitig gespeichert und nicht wieder angezeigt",
+            "API und Worker laden dieselbe freigegebene Konfigurationsversion",
+            "Änderungen werden ohne Secret-Werte protokolliert"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-7-4",
+          "title": "Container und Deployment-Vorlage",
+          "description": "Container-Images für API, Worker und Portal sowie Deployment-Vorlage mit Reverse Proxy und HTTPS je Kunde.",
+          "order": 4,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-6-4",
+            "task-4-7"
+          ],
+          "definitionOfDone": [
+            "Images werden reproduzierbar gebaut",
+            "Deployment-Vorlage startet eine Kundeninstallation mit HTTPS",
+            "Kundenspezifische Konfiguration ist vom Code getrennt"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-7-5",
+          "title": "Backup und Monitoring",
+          "description": "Backups mit getestetem Wiederherstellungsweg und Überwachung von API, Worker und Versandfehlern.",
+          "order": 5,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-7-4"
+          ],
+          "definitionOfDone": [
+            "Backup lässt sich in einer sauberen Umgebung wiederherstellen",
+            "Ausfälle von API und Worker werden erkannt"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        },
+        {
+          "id": "task-7-6",
+          "title": "Abnahmetests und Pilot",
+          "description": "Sicherheits- und Isolationstests zwischen Installationen sowie erste Pilotinstallation.",
+          "order": 6,
+          "weight": 2,
+          "status": "planned",
+          "dependsOn": [
+            "task-7-3",
+            "task-7-5"
+          ],
+          "definitionOfDone": [
+            "Zugangsdaten einer Installation eröffnen keinen Zugriff auf eine andere",
+            "Abnahmetests aus docs/architecture.md sind dokumentiert ausgeführt",
+            "Pilotinstallation ist mit einer WordPress-Seite verbunden"
+          ],
+          "startedAt": null,
+          "completedAt": null,
+          "verification": {
+            "status": "not_run",
+            "summary": null,
+            "commands": [],
+            "checkedAt": null
+          }
+        }
+      ]
+    }
+  ]
 }
-

@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
-  "projectId": null,
-  "name": null,
-  "status": "not_initialized",
+  "projectId": "wp-buchung-kalender-plus-pwa",
+  "name": "WP Buchung Kalender plus PWA",
+  "status": "active",
   "workshopType": null,
   "owner": null,
-  "description": null,
-  "createdAt": null,
-  "updatedAt": null
+  "description": "Eigenständige Buchungsanwendung für Einzeltermine und Gruppenkurse mit API und MongoDB, eingebettetem WordPress-Widget ohne iframe und einem Verwaltungsportal als installierbare PWA; je Kunde eine getrennte Installation.",
+  "createdAt": "2026-10-07T08:28:16Z",
+  "updatedAt": "2026-10-07T08:28:16Z"
 }
-

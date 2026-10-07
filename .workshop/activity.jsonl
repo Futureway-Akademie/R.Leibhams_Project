@@ -1,0 +1,9 @@
+{"timestamp":"2026-10-07T08:28:16Z","type":"project_initialized","summary":"Projekt 'WP Buchung Kalender plus PWA' initialisiert; Projektbrief mit zwei Terminarten (Einzeltermin, Gruppenkurs) festgelegt."}
+{"timestamp":"2026-10-07T08:28:16Z","type":"roadmap_created","summary":"Roadmap v1 mit 7 Phasen und 48 Tasks (Gesamtgewicht 97) angelegt."}
+{"timestamp":"2026-10-07T08:28:16Z","type":"decision_recorded","summary":"Architekturentscheidungen festgehalten: eigenes Portal als PWA, Widget ohne iframe, getrennte Installation je Kunde, zwei Terminarten, eine Ressource je Installation."}
+{"timestamp":"2026-10-07T08:28:16Z","type":"task_ready","taskId":"task-1-1","summary":"Task bereit: Fachregeln dokumentieren."}
+{"timestamp":"2026-10-07T08:28:16Z","type":"task_ready","taskId":"task-1-2","summary":"Task bereit: Monorepo-Gerüst."}
+{"timestamp": "2026-10-07T08:59:15Z", "type": "task_started", "taskId": "task-1-1", "summary": "Arbeit an Fachregeln begonnen; Produktentscheidungen zu Bestätigung, Slot-Raster, Fristen und Pflichtfeldern mit Nutzer abgestimmt."}
+{"timestamp": "2026-10-07T09:00:17Z", "type": "verification_passed", "taskId": "task-1-1", "summary": "docs/domain-rules.md gegen Definition of Done geprüft."}
+{"timestamp": "2026-10-07T09:00:17Z", "type": "task_completed", "taskId": "task-1-1", "summary": "Fachregeln für Einzeltermin und Gruppenkurs in docs/domain-rules.md dokumentiert."}
+{"timestamp": "2026-10-07T09:00:17Z", "type": "decision_recorded", "summary": "Fachentscheidungen festgehalten: sofort verbindliche Buchung, Slot-Raster 20/30/45/60/90 Min, Vorlauf 24 h, Horizont 90 Tage, Storno-/Umbuchungsfrist 24 h, Telefon als Pflichtfeld."}
