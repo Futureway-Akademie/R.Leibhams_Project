@@ -84,19 +84,33 @@ describe('bookingRequestSchema', () => {
         startsAt: '2026-10-08T08:00:00Z',
         participant,
         idempotencyKey,
+        privacyAccepted: true,
       }).success,
     ).toBe(true);
   });
   it('akzeptiert eine Kurs-Anfrage', () => {
     expect(
-      bookingRequestSchema.safeParse({ type: 'group', sessionId: id, participant, idempotencyKey })
-        .success,
+      bookingRequestSchema.safeParse({
+        type: 'group',
+        sessionId: id,
+        participant,
+        idempotencyKey,
+        privacyAccepted: true,
+      }).success,
     ).toBe(true);
   });
   it('verlangt einen Idempotenzschlüssel', () => {
     expect(
       bookingRequestSchema.safeParse({ type: 'group', sessionId: id, participant }).success,
     ).toBe(false);
+  });
+  it('verlangt die ausdrückliche Bestätigung der Datenschutzhinweise', () => {
+    const base = { type: 'group', sessionId: id, participant, idempotencyKey };
+    expect(bookingRequestSchema.safeParse(base).success).toBe(false);
+    expect(bookingRequestSchema.safeParse({ ...base, privacyAccepted: false }).success).toBe(false);
+    expect(bookingRequestSchema.safeParse({ ...base, privacyAccepted: 'true' }).success).toBe(
+      false,
+    );
   });
   it('lehnt Einzeltermin ohne Startzeit ab', () => {
     expect(
@@ -111,6 +125,7 @@ describe('bookingRequestSchema', () => {
         sessionId: id,
         participant,
         idempotencyKey,
+        privacyAccepted: true,
         seats: 2,
       }).success,
     ).toBe(false);

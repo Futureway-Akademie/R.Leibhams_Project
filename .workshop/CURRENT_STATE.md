@@ -2,7 +2,7 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v1 mit 7 Phasen und 48 Tasks (Gesamtgewicht 97). Fortschritt: 27,84 % (27 von 97 Gewichtspunkten, 13 von 48 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v1 mit 7 Phasen und 48 Tasks (Gesamtgewicht 97). Fortschritt: 30,93 % (30 von 97 Gewichtspunkten, 14 von 48 Tasks).
 
 ## Aktive Phase
 
@@ -14,7 +14,8 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
-- task-2-8 – Öffentliche Verfügbarkeits-API (`/api/public/calendars/:calendarId/…`, Kalenderkennung per Migration 004, `GET /api/owner/calendar`; 208 API-Tests)
+- task-2-9 – Atomare Kursbuchung (`POST /api/public/calendars/:calendarId/bookings`, Transaktion mit bedingtem `$inc`, Idempotenz, Outbox, Pflicht-Datenschutzbestätigung, Migration 005; 227 API-Tests)
+- task-2-8 – Öffentliche Verfügbarkeits-API
 - task-2-7 – Kurstermine und Kursregeln
 - task-2-6 – Freie Slots berechnen
 - task-2-5 – Öffnungszeiten und Ausnahmen
@@ -26,7 +27,7 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-2-9 – Atomare Kursbuchung
+- task-2-10 – Atomare Einzeltermin-Buchung
 - task-4-1 – Widget-Build
 - task-5-1 – Portal-Gerüst und Login
 - task-7-1 – Geschützter Entwicklerzugang
@@ -37,14 +38,15 @@ Nichts.
 
 ## Wichtige Entscheidungen
 
-Siehe `docs/decisions.md`: eigenes Verwaltungsportal als PWA, Widget ohne iframe, getrennte Installation je Kunde, zwei Terminarten, eine Ressource je Installation, ein Platz pro Buchung, Fachregeln zu Fristen und Pflichtfeldern, Monorepo-Werkzeuge, Zod 4, temporal-polyfill, API mit Express, nativem MongoDB-Treiber, nestjs-pino und SWC, BSON-Dates, versionierte Migrationen, DB-Validatoren, Owner-Anmeldung mit Argon2id und serverseitigen Sitzungen, Terminart unveränderlich, Angebote nur deaktivierbar, manuelle Reihenfolge, Zeitzone nur bei Einrichtung, Sperrzeit vor Zusatzöffnung, 5-Minuten-Raster, Slot-Raster in lokaler Zeit, Belegung nur aus `resourceOccupancy`, Kurstermine belegen die Ressource ab Anlage, Regeländerung nach 3.3, keine Kurse in Sperrzeiten, Nachschub alle 6 h, eine öffentliche Kalenderkennung je Installation, volle Kurse sichtbar, kurzes Caching, strikte Prüfung öffentlicher Antworten.
+Siehe `docs/decisions.md`. Zuletzt: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
 
 ## Bekannte Probleme
 
 - PHP ist auf dem Entwicklungsrechner nicht installiert; wird für task-4-7 benötigt.
 - In der lokalen Datenbank existiert kein Owner-Konto; bei Bedarf mit `pnpm --filter @fw-booking/api owner:create --email …` anlegen.
 - `availableDates` berechnet jeden Tag einzeln (mehrere Abfragen pro Tag); bei Bedarf später optimieren.
+- Bei wiederholten Läufen der Buchungstests schlugen einmal (in rund 40 Läufen) 2 Tests fehl. Die Ausgabe wurde nicht gesichert; der Fehler ließ sich danach weder durch Wiederholung, Parallelbetrieb noch einen Stresstest reproduzieren. Vermutung: Zeitüberschreitung unter Last, nicht bestätigt. In task-2-11 gezielt mit protokollierten Wiederholungsläufen prüfen.
 
 ## Empfohlener nächster Schritt
 
-task-2-9 (Atomare Kursbuchung) als Kern des Buchungsablaufs.
+task-2-10 (Atomare Einzeltermin-Buchung), danach task-2-11 (Nebenläufigkeitstests inkl. Prüfung des einmaligen Testfehlschlags).

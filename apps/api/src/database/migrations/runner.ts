@@ -3,6 +3,7 @@ import { initialMigration } from './001-initial.js';
 import { authMigration } from './002-auth.js';
 import { serviceOrderMigration } from './003-service-order.js';
 import { publicCalendarMigration } from './004-public-calendar.js';
+import { bookingPrivacyMigration } from './005-booking-privacy.js';
 import type { Migration } from './migration.js';
 
 /** Alle Migrationen in Ausführungsreihenfolge. Neue Schritte nur anhängen. */
@@ -11,6 +12,7 @@ export const MIGRATIONS: readonly Migration[] = [
   authMigration,
   serviceOrderMigration,
   publicCalendarMigration,
+  bookingPrivacyMigration,
 ];
 
 export const MIGRATIONS_COLLECTION = '_migrations';

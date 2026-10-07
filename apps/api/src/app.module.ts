@@ -3,6 +3,7 @@ import type { DynamicModule } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module.js';
 import { AvailabilityModule } from './availability/availability.module.js';
+import { BookingsModule } from './bookings/bookings.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
 import { CoursesModule } from './courses/courses.module.js';
 import { PublicModule } from './public/public.module.js';
@@ -32,6 +33,7 @@ export class AppModule {
         AvailabilityModule,
         CoursesModule,
         PublicModule,
+        BookingsModule,
       ],
       controllers: [HealthController],
       providers: [{ provide: APP_CONFIG, useValue: config }],

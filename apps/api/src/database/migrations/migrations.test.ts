@@ -45,7 +45,13 @@ describe('runMigrations', () => {
     const db = freshDb();
     const result = await runMigrations(db);
     expect(result).toEqual({
-      applied: ['001-initial', '002-auth', '003-service-order', '004-public-calendar'],
+      applied: [
+        '001-initial',
+        '002-auth',
+        '003-service-order',
+        '004-public-calendar',
+        '005-booking-privacy',
+      ],
       alreadyApplied: [],
     });
     const records = await db.collection(MIGRATIONS_COLLECTION).find().toArray();
@@ -54,6 +60,7 @@ describe('runMigrations', () => {
       '002-auth',
       '003-service-order',
       '004-public-calendar',
+      '005-booking-privacy',
     ]);
   });
 
@@ -64,7 +71,13 @@ describe('runMigrations', () => {
     const second = await runMigrations(db);
     expect(second).toEqual({
       applied: [],
-      alreadyApplied: ['001-initial', '002-auth', '003-service-order', '004-public-calendar'],
+      alreadyApplied: [
+        '001-initial',
+        '002-auth',
+        '003-service-order',
+        '004-public-calendar',
+        '005-booking-privacy',
+      ],
     });
     expect(await indexNames(db, COLLECTIONS.bookings)).toEqual(before);
   });
@@ -192,6 +205,7 @@ describe('Validatoren und eindeutige Indizes', () => {
     participant: { name: 'Erika', email: 'Erika@example.test', phone: '030 123456' },
     participantEmailKey: 'erika@example.test',
     idempotencyKey: new ObjectId().toHexString(),
+    privacyAcceptedAt: new Date(),
     rebookedToBookingId: null,
     createdAt: now,
     updatedAt: now,

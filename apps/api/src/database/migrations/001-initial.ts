@@ -87,7 +87,7 @@ const sessionsValidator = {
   },
 };
 
-const bookingsValidator = {
+export const bookingsValidator = {
   $jsonSchema: {
     bsonType: 'object',
     required: [

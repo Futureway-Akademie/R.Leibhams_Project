@@ -70,3 +70,8 @@
 {"timestamp": "2026-10-07T13:49:11Z", "type": "task_completed", "taskId": "task-2-8", "summary": "Öffentliche Verfügbarkeits-API für Angebote, Slots, freie Tage und Kurstermine je Kalenderkennung umgesetzt."}
 {"timestamp": "2026-10-07T13:49:11Z", "type": "decision_recorded", "summary": "Eine Kalenderkennung je Installation, volle Kurse sichtbar, belegte Einzeltermine nicht, Caching 5 Min / 30 s, strikte Antwortprüfung."}
 {"timestamp": "2026-10-07T13:49:11Z", "type": "task_ready", "taskId": "task-2-9", "summary": "Task bereit: Atomare Kursbuchung."}
+{"timestamp": "2026-10-07T13:54:32Z", "type": "task_started", "taskId": "task-2-9", "summary": "Atomare Kursbuchung begonnen: eine aktive Buchung je E-Mail, Verwaltungslink nur per E-Mail, Pflicht-Bestätigung der Datenschutzhinweise, 409 bei Idempotenzkonflikt."}
+{"timestamp": "2026-10-07T14:04:33Z", "type": "verification_passed", "taskId": "task-2-9", "summary": "Buchungstests inkl. Gleichzeitigkeit und Idempotenz grün; ein früher, nicht reproduzierbarer Testfehlschlag vermerkt."}
+{"timestamp": "2026-10-07T14:04:33Z", "type": "task_completed", "taskId": "task-2-9", "summary": "Atomare Kursbuchung mit Transaktion, Idempotenz, Outbox-Auftrag und Pflicht-Datenschutzbestätigung umgesetzt."}
+{"timestamp": "2026-10-07T14:04:33Z", "type": "decision_recorded", "summary": "Eine aktive Buchung je E-Mail, Link nur per E-Mail, Pflicht-Checkbox Datenschutz, 409 bei Idempotenzkonflikt."}
+{"timestamp": "2026-10-07T14:04:33Z", "type": "task_ready", "taskId": "task-2-10", "summary": "Task bereit: Atomare Einzeltermin-Buchung."}

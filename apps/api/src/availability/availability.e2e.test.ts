@@ -217,6 +217,7 @@ describe('Ausnahmen', () => {
       participant: { name: 'Erika', email: 'erika@example.test', phone: '030 123456' },
       participantEmailKey: 'erika@example.test',
       idempotencyKey: new ObjectId().toHexString(),
+      privacyAcceptedAt: new Date(),
       rebookedToBookingId: null,
       createdAt: new Date(),
       updatedAt: new Date(),

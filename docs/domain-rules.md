@@ -107,6 +107,8 @@ Die angezeigte Slot-Liste ist unverbindlich. Verbindlich ist nur die atomare Pr�
 | E-Mail | Pflicht, syntaktisch gültige Adresse. |
 | Telefon | **Pflicht**, 6–20 Zeichen, Ziffern, Leerzeichen und `+ - / ( )`. |
 
+| Datenschutzhinweise | **Pflicht-Checkbox**: Die Buchung ist nur mit ausdrücklicher Bestätigung möglich; der Zeitpunkt wird mit der Buchung gespeichert. |
+
 Die Telefonnummer dient ausschließlich kurzfristigen Rückfragen zum Termin. Dieser Zweck muss in den Datenschutzhinweisen des jeweiligen Kunden genannt werden. Teilnehmerdaten erscheinen nie in öffentlichen API-Antworten.
 
 ### 5.2 Verbindlichkeit
@@ -130,6 +132,8 @@ Alle drei Werte sind je Angebot überschreibbar und werden serverseitig zum Zeit
 - Buchung, Platz- bzw. Ressourcenbelegung, Action-Token und Benachrichtigungsauftrag entstehen gemeinsam in einer Transaktion oder gar nicht.
 - Ist der Slot bzw. Kursplatz inzwischen vergeben, lautet das Ergebnis „Termin inzwischen vergeben“; es entsteht keine Buchung.
 - Dieselbe E-Mail-Adresse darf denselben Kurstermin nur einmal aktiv buchen.
+- Fehlschläge liefern einen fachlichen Code für das Widget: `session_full` (Kurs voll), `slot_taken` (Einzeltermin vergeben), `not_bookable` (gesperrt, abgesagt, außerhalb von Mindestvorlauf oder Horizont), `already_booked` (E-Mail hat den Kurstermin bereits aktiv gebucht), `idempotency_conflict` (gleicher Schlüssel mit anderen Daten).
+- Die Bestätigungsantwort enthält keinen Verwaltungslink; dieser wird ausschließlich per E-Mail versendet.
 
 ### 5.5 Buchungsstatus
 

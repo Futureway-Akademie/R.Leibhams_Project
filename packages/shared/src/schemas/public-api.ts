@@ -101,15 +101,37 @@ export const bookingRequestSchema = z.discriminatedUnion('type', [
     startsAt: utcDateTimeSchema,
     participant: participantSchema,
     idempotencyKey: idempotencyKeySchema,
+    /** Ausdrückliche Bestätigung der Datenschutzhinweise (Pflicht). */
+    privacyAccepted: z.literal(true),
   }),
   z.strictObject({
     type: z.literal('group'),
     sessionId: objectIdSchema,
     participant: participantSchema,
     idempotencyKey: idempotencyKeySchema,
+    privacyAccepted: z.literal(true),
   }),
 ]);
 export type BookingRequest = z.infer<typeof bookingRequestSchema>;
+export type GroupBookingRequest = Extract<BookingRequest, { type: 'group' }>;
+export type SingleBookingRequest = Extract<BookingRequest, { type: 'single' }>;
+
+/** Fachliche Fehlercodes einer Buchungsanfrage, damit das Widget passende Meldungen zeigt. */
+export const bookingErrorCodeSchema = z.enum([
+  'session_full',
+  'slot_taken',
+  'not_bookable',
+  'already_booked',
+  'idempotency_conflict',
+]);
+export type BookingErrorCode = z.infer<typeof bookingErrorCodeSchema>;
+
+export const bookingErrorResponseSchema = z.object({
+  statusCode: z.int(),
+  message: z.string(),
+  code: bookingErrorCodeSchema,
+});
+export type BookingErrorResponse = z.infer<typeof bookingErrorResponseSchema>;
 
 /** Antwort auf eine erfolgreiche Buchung. Der Verwaltungslink wird nur per E-Mail versendet. */
 export const bookingConfirmationSchema = z.strictObject({

@@ -451,7 +451,7 @@
           "description": "Buchung eines Kursplatzes in einer MongoDB-Transaktion mit atomarer Kapazitätsprüfung, Idempotenzschlüssel und Outbox-Eintrag.",
           "order": 9,
           "weight": 3,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-8"
           ],
@@ -461,13 +461,23 @@
             "Wiederholte Anfrage mit gleichem Idempotenzschlüssel erzeugt keine zweite Buchung",
             "Volle Kurse liefern einen eindeutigen Ausgebucht-Fehler"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T13:54:32Z",
+          "completedAt": "2026-10-07T14:04:33Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "19 neue API-Tests (227 in der API) und 1 Shared-Test: Buchung mit Platzbelegung, Outbox-Auftrag und Audit ohne Teilnehmerdaten; Antwort ohne Teilnehmerdaten/Link; Idempotenz (Wiederholung 200 ohne erneute Buchung, abweichende Daten 409, 5 gleichzeitige Wiederholungen → 1 Buchung); ausgebucht 409 ohne Schreibzugriffe; 20 gleichzeitige Anfragen auf 3 Plätze → genau 3 Buchungen; zweite Buchung derselben E-Mail 409 mit Rücknahme der Platzbelegung; neue Buchung nach Storno; gesperrt/abgesagt/Mindestvorlauf/Horizont → not_bookable; 404 für unbekannte Termine, deaktivierte Kurse, unbekannte Kalender; Pflicht-Datenschutzbestätigung; Validierung ohne Rückgabe von Werten; 415 ohne JSON. Zusätzlich temporärer Stresstest (40 Runden × 10 gleiche Anfragen, 25 Runden × 30 Anfragen auf 3 Plätze) ohne Abweichung, Buchungstests 30× wiederholt und parallel unter Last. Hinweis: In einem frühen Wiederholungslauf schlugen einmal 2 Tests fehl; die Ausgabe wurde nicht gesichert, der Fehler war in allen weiteren Läufen nicht reproduzierbar (siehe CURRENT_STATE, Prüfung in task-2-11). Manuell gegen Docker-MongoDB: Migration 005, Buchung 201, Doppelklick 200, zweite Person 201, dritte 409 session_full, ohne Datenschutz 400, öffentliche Ansicht 0 freie Plätze, zwei Outbox-Aufträge, keine Teilnehmerdaten im Log; Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm --filter @fw-booking/api test",
+              "pnpm exec vitest run src/bookings/group-booking.e2e.test.ts (wiederholt, auch parallel)",
+              "pnpm --filter @fw-booking/api db:migrate",
+              "curl POST /api/public/calendars/:id/bookings",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T14:04:33Z"
           }
         },
         {
@@ -476,7 +486,7 @@
           "description": "Buchung eines Einzeltermins mit Sperrung der Ressource über Belegungseinheiten mit eindeutigem Index, übergreifend zwischen Angeboten und Kursen.",
           "order": 10,
           "weight": 3,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-9"
           ],

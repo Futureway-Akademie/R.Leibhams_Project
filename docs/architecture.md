@@ -123,6 +123,10 @@ Ohne Anmeldung, je öffentlicher Kalenderkennung (`cal_…`, eine je Installatio
 
 Unbekannte Kalender sowie unbekannte oder deaktivierte Angebote ergeben 404. Jede Antwort wird vor dem Senden gegen das strikte Schema aus `@fw-booking/shared` geprüft (`assertPublic`); zusätzliche Felder wie Teilnehmerdaten verhindern die Auslieferung.
 
+## Öffentliche Buchung
+
+`POST /api/public/calendars/:calendarId/bookings` (ohne Anmeldung, JSON, `bookingRequestSchema`). Kursbuchungen laufen in einer Transaktion: Platz per Schreibbedingung `bookedCount < capacity` belegen, Buchung, Outbox-Auftrag `booking_confirmation` und Audit-Eintrag anlegen. Wiederholte Anfragen mit gleichem Idempotenzschlüssel liefern 200 mit derselben Buchung; abweichende Daten 409. Fehler tragen einen Code (`session_full`, `not_bookable`, `already_booked`, `idempotency_conflict`). Einzeltermine folgen mit task-2-10.
+
 ## Zentrale Abnahmetests
 
 - Parallele Anfragen auf denselben Einzeltermin-Slot → genau eine Buchung.

@@ -223,3 +223,17 @@ Eine öffentliche Kalenderkennung je Installation (`cal_…`, per Migration erze
 ### Begründung
 
 Interessenten sollen sehen, dass ein Kurs stattfindet, auch wenn er voll ist; bei Einzelterminen wäre eine belegte Uhrzeit ohne Nutzen. Die Schema-Prüfung ist eine zweite Sicherung gegen versehentlich veröffentlichte Daten. Verbindlich bleibt die Prüfung beim Buchen, daher ist kurzes Caching unkritisch.
+
+## 2026-10-07 – Atomare Kursbuchung
+
+### Kontext
+
+Gleichzeitige Anfragen dürfen einen Kurs nie überbuchen; wiederholte Klicks dürfen keine zweite Buchung erzeugen.
+
+### Entscheidung
+
+Kursbuchung in einer MongoDB-Transaktion mit bedingtem `$inc` (`bookedCount < capacity`), Buchung, Outbox-Auftrag und Audit. Eine aktive Buchung je E-Mail und Kurstermin (eindeutiger Teilindex). Gleicher Idempotenzschlüssel mit gleicher Anfrage → 200 mit derselben Buchung, mit anderen Daten → 409. Pflicht-Bestätigung der Datenschutzhinweise (`privacyAccepted: true`, gespeichert als `privacyAcceptedAt`, Migration `005`). Der Verwaltungslink wird nur per E-Mail versendet; das Token entsteht erst beim Versand bzw. in task-2-12 und liegt nie im Klartext in der Datenbank.
+
+### Begründung
+
+Die Prüfung der Kapazität in der Schreibbedingung ist auch bei gleichzeitigen Anfragen verlässlich. Ein Link nur per E-Mail stellt sicher, dass nur Inhaber der Adresse die Buchung ändern können.

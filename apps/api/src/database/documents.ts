@@ -143,6 +143,8 @@ export interface BookingDocument {
   /** Kleingeschriebene E-Mail für die Eindeutigkeit je Kurstermin. */
   participantEmailKey: string;
   idempotencyKey: string;
+  /** Zeitpunkt, zu dem die Datenschutzhinweise ausdrücklich bestätigt wurden. */
+  privacyAcceptedAt: Date;
   rebookedToBookingId: ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
