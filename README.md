@@ -14,6 +14,9 @@ Voraussetzungen: Node.js 24 (siehe `.nvmrc`), Docker Desktop und pnpm 12 (über 
 ```bash
 corepack enable pnpm   # falls keine Schreibrechte: --install-directory <Verzeichnis im PATH>
 pnpm install
+cp .env.example .env
+pnpm infra:up
+pnpm --filter @fw-booking/api dev   # API auf http://127.0.0.1:3000, Healthcheck unter /health
 ```
 
 | Befehl | Zweck |

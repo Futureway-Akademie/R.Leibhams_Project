@@ -15,6 +15,11 @@ export default tseslint.config(
     },
   },
   {
+    // NestJS-Module sind per Konvention leere bzw. rein statische Klassen mit Decorator.
+    files: ['apps/api/**', 'apps/worker/**'],
+    rules: { '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }] },
+  },
+  {
     files: ['packages/widget/**', 'apps/portal/**'],
     languageOptions: { globals: { ...globals.browser } },
   },

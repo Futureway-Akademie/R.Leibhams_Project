@@ -111,3 +111,17 @@ Umrechnung in `packages/shared/src/time/convert.ts` mit `temporal-polyfill`: üb
 ### Begründung
 
 Temporal hat die benötigte Disambiguierung eingebaut und kann später durch die native Implementierung ersetzt werden; die Trennung hält das Widget-Bundle klein.
+
+## 2026-10-07 – API-Grundgerüst
+
+### Kontext
+
+Die Buchungs-API braucht Konfiguration, Datenbankzugriff, Healthcheck und Logging als Basis für alle weiteren Endpunkte.
+
+### Entscheidung
+
+NestJS 12 mit Express. Zugriff auf MongoDB über den offiziellen Treiber (kein Mongoose); Validierung bleibt bei den Zod-Schemas. Konfiguration ausschließlich aus Umgebungsvariablen, per Zod geprüft; Fehlermeldungen nennen nur Variablennamen. Die API startet auch ohne erreichbare Datenbank; `GET /health` (außerhalb des Präfixes `/api`) meldet dann 503. Logging mit nestjs-pino: Cookies, Authorization, Set-Cookie, Passwörter, Tokens und Teilnehmerfelder werden geschwärzt, Query-Strings nicht geloggt. Build, Entwicklung und Tests nutzen SWC, weil NestJS Decorator-Metadaten benötigt. Integrationstests laufen gegen mongodb-memory-server mit MongoDB 8.0.32. Installationsskripte sind in pnpm nur für `@swc/core` und `mongodb-memory-server` freigegeben (`allowBuilds`).
+
+### Begründung
+
+Express hat die breiteste Unterstützung für die später benötigten Sessions, CSRF-Schutz und Rate Limiting. Der native Treiber gibt volle Kontrolle über Transaktionen und atomare Updates und vermeidet doppelte Schemadefinitionen. Ein Healthcheck, der Datenbankausfälle meldet statt die API zu beenden, erleichtert Betrieb und Monitoring.

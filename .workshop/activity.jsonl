@@ -28,3 +28,9 @@
 {"timestamp": "2026-10-07T10:07:21Z", "type": "verification_passed", "taskId": "task-1-5", "summary": "Zeitzonen-Tests inkl. Sommer-/Winterzeit grün, auch unter abweichenden Systemzeitzonen."}
 {"timestamp": "2026-10-07T10:07:21Z", "type": "task_completed", "taskId": "task-1-5", "summary": "Zeitzonen-Utilities und Intl-Formatierer im Shared-Paket umgesetzt. Phase 1 abgeschlossen."}
 {"timestamp": "2026-10-07T10:07:21Z", "type": "decision_recorded", "summary": "temporal-polyfill für Umrechnung, Intl für Anzeige; Shared-Paket als sideEffects:false markiert."}
+{"timestamp": "2026-10-07T11:08:45Z", "type": "task_started", "taskId": "task-2-1", "summary": "API-Grundgerüst begonnen: NestJS mit Express, offizieller MongoDB-Treiber, nestjs-pino, mongodb-memory-server für Tests."}
+{"timestamp": "2026-10-07T11:13:09Z", "type": "verification_passed", "taskId": "task-2-1", "summary": "API-Tests, manueller Start gegen Docker-MongoDB, DB-Ausfall und Konfigurationsfehler geprüft."}
+{"timestamp": "2026-10-07T11:13:09Z", "type": "task_completed", "taskId": "task-2-1", "summary": "API-Grundgerüst mit NestJS, Konfiguration, MongoDB-Verbindung, Healthcheck und Log-Schwärzung umgesetzt."}
+{"timestamp": "2026-10-07T11:13:09Z", "type": "decision_recorded", "summary": "Express, nativer MongoDB-Treiber, nestjs-pino mit Redaction, SWC, mongodb-memory-server mit MongoDB 8.0.32."}
+{"timestamp": "2026-10-07T11:13:09Z", "type": "task_ready", "taskId": "task-2-2", "summary": "Task bereit: Collections, Indizes und Provisionierung."}
+{"timestamp": "2026-10-07T11:13:09Z", "type": "task_ready", "taskId": "task-7-1", "summary": "Task bereit: Geschützter Entwicklerzugang."}
