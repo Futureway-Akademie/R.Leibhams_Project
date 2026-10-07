@@ -18,3 +18,9 @@
 {"timestamp": "2026-10-07T09:42:32Z", "type": "task_completed", "taskId": "task-1-3", "summary": "Lokale Infrastruktur mit MongoDB 8.0 (Replica Set) und Mailpit per docker-compose eingerichtet."}
 {"timestamp": "2026-10-07T09:42:32Z", "type": "decision_recorded", "summary": "Lokale MongoDB ohne Auth, nur an 127.0.0.1 gebunden, Daten im Docker-Volume."}
 {"timestamp": "2026-10-07T09:42:32Z", "type": "task_ready", "taskId": "task-2-1", "summary": "Task bereit: API-Grundgerüst."}
+{"timestamp": "2026-10-07T09:57:24Z", "type": "task_started", "taskId": "task-1-4", "summary": "Shared-Paket begonnen: Zod 4, englische Bezeichner, ObjectId-Strings, ISO-8601-UTC mit separater Zeitzone."}
+{"timestamp": "2026-10-07T10:01:20Z", "type": "verification_passed", "taskId": "task-1-4", "summary": "104 Unit-Tests für Shared-Schemas grün, Quality Gate grün."}
+{"timestamp": "2026-10-07T10:01:20Z", "type": "task_completed", "taskId": "task-1-4", "summary": "Shared-Paket mit Zod-4-Schemas und Domänentypen für beide Terminarten angelegt."}
+{"timestamp": "2026-10-07T10:01:20Z", "type": "decision_recorded", "summary": "Zod 4, englische Code-Bezeichner, ObjectId-Strings, ISO-8601-UTC mit separater Zeitzone, strikte öffentliche Antwortschemas."}
+{"timestamp": "2026-10-07T10:01:20Z", "type": "task_ready", "taskId": "task-1-5", "summary": "Task bereit: Zeitzonen-Utilities."}
+{"timestamp": "2026-10-07T10:01:20Z", "type": "task_ready", "taskId": "task-4-1", "summary": "Task bereit: Widget-Build."}

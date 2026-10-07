@@ -107,7 +107,7 @@
           "description": "Gemeinsame Typen und Validierungsschemas für Angebote, Terminarten, Termine, Buchungen und API-Payloads.",
           "order": 4,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-1-1",
             "task-1-2"
@@ -117,13 +117,19 @@
             "Validierungsschemas für öffentliche und Owner-Payloads existieren",
             "Unit-Tests decken gültige und ungültige Eingaben ab"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T09:57:24Z",
+          "completedAt": "2026-10-07T10:01:20Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "packages/shared exportiert Konstanten, Enums, Primitive und Zod-4-Schemas mit abgeleiteten Typen für Angebot (beide Terminarten), Öffnungszeiten, Ausnahmen, Kursregeln, Kurstermin, Buchung, Teilnehmer sowie öffentliche und Owner-Payloads. 104 Unit-Tests decken gültige und ungültige Eingaben ab, inkl. strikter öffentlicher Antworten ohne Teilnehmerdaten und Teiländerungen ohne Standardwerte (ein dabei gefundener Defekt wurde behoben). Quality Gate vollständig grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T10:01:20Z"
           }
         },
         {
@@ -132,7 +138,7 @@
           "description": "Umrechnung lokaler Owner-Zeiten in UTC inklusive Behandlung nicht existierender und doppelter Uhrzeiten bei Zeitumstellung.",
           "order": 5,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-1-4"
           ],
@@ -670,7 +676,7 @@
       "description": "Schlankes TypeScript-Widget im Light DOM ohne iframe für Kurse und Einzeltermine, Self-Service-Seite und WordPress-Plugin.",
       "order": 4,
       "weight": 14,
-      "status": "planned",
+      "status": "ready",
       "tasks": [
         {
           "id": "task-4-1",
@@ -678,7 +684,7 @@
           "description": "Eigener kleiner Build, der Container erkennt, mehrere Kalender pro Seite unterstützt und nur einmal geladen wird.",
           "order": 1,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-1-4"
           ],

@@ -83,3 +83,17 @@ docker-compose unter `infra/` mit MongoDB 8.0 als Single-Node-Replica-Set `rs0` 
 ### Begründung
 
 Minimaler Einrichtungsaufwand für die Entwicklung bei echter Transaktionsfähigkeit. Authentifizierung und Netzwerkbeschränkung für Kundeninstallationen werden in Phase 7 behandelt.
+
+## 2026-10-07 – Domänentypen und Validierung
+
+### Kontext
+
+API, Portal und Widget benötigen dieselben Typen und Eingaberegeln.
+
+### Entscheidung
+
+`packages/shared` definiert Zod-4-Schemas, aus denen die TypeScript-Typen abgeleitet werden. Technische Bezeichner sind englisch (Zuordnung in `docs/domain-rules.md`, Abschnitt 10). IDs sind ObjectId-Strings, Zeitpunkte ISO-8601 in UTC mit separater `timeZone`. Öffentliche Antwortschemas sind strikt, sodass zusätzliche Felder wie Teilnehmerdaten beim Validieren auffallen. Für Teiländerungen gibt es eigene Schemas ohne Standardwerte, weil Zod Defaults auch in `.partial()` anwendet.
+
+### Begründung
+
+Eine Quelle für Typen und Regeln verhindert Abweichungen zwischen Frontend und API; datenbankabhängige Regeln (z. B. Kapazität nicht unter gebuchte Plätze) bleiben bewusst in der API.

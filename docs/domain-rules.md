@@ -122,10 +122,10 @@ Alle drei Werte sind je Angebot überschreibbar und werden serverseitig zum Zeit
 
 | Status | Bedeutung |
 |---|---|
-| `bestätigt` | Aktive Buchung, belegt Platz bzw. Ressource. |
-| `storniert` | Vom Teilnehmer storniert. |
-| `umgebucht` | Durch Umbuchung ersetzt; verweist auf die neue Buchung. |
-| `vom_owner_abgesagt` | Termin wurde vom Owner abgesagt. |
+| `bestätigt` (`confirmed`) | Aktive Buchung, belegt Platz bzw. Ressource. |
+| `storniert` (`cancelled`) | Vom Teilnehmer storniert. |
+| `umgebucht` (`rebooked`) | Durch Umbuchung ersetzt; verweist auf die neue Buchung. |
+| `vom Owner abgesagt` (`cancelled_by_owner`) | Termin wurde vom Owner abgesagt. |
 
 Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einmal und gibt die Belegung genau einmal frei.
 
@@ -147,7 +147,7 @@ Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einma
 | Aktion | Regel |
 |---|---|
 | Kurstermin sperren | Keine neuen Buchungen; bestehende Buchungen bleiben gültig; Ressource bleibt belegt. Wieder entsperrbar. |
-| Termin absagen | Jederzeit möglich, mit Bestätigungsdialog. Alle aktiven Buchungen erhalten Status `vom_owner_abgesagt`, jeder Teilnehmer bekommt eine Absagemail. Nicht umkehrbar. |
+| Termin absagen | Jederzeit möglich, mit Bestätigungsdialog. Alle aktiven Buchungen erhalten Status „vom Owner abgesagt“, jeder Teilnehmer bekommt eine Absagemail. Nicht umkehrbar. |
 | Einzelne Buchung absagen | Wie Termin absagen, aber nur für diese Buchung. |
 | Löschen | Nur für Kurstermine ohne Buchungshistorie. Termine mit Buchungen werden abgesagt, nicht gelöscht. |
 | Terminart ändern | Nur solange für das Angebot keine Buchungen existieren. |
@@ -178,6 +178,26 @@ Alle Owner-Änderungen an Terminen und Buchungen werden in `auditEvents` protoko
 - Benachrichtigungen werden über die Outbox versendet. Ein Versandfehler macht keine Buchung rückgängig.
 - Endgültig fehlgeschlagene Benachrichtigungen sind für den Owner im Portal sichtbar.
 
-## 10. Nicht in der ersten Version
+## 10. Bezeichner im Code
+
+Fachbegriffe stehen in Dokumentation und Oberfläche auf Deutsch, im Code auf Englisch. Die Schemas liegen in `packages/shared`.
+
+| Fachbegriff | Code |
+|---|---|
+| Angebot | `service` |
+| Terminart Einzeltermin / Gruppenkurs | `type: 'single'` / `type: 'group'` |
+| Kurstermin | `session` |
+| Wiederkehrende Kursregel | `courseRule` |
+| Öffnungszeiten | `openingHours` |
+| Ausnahme: Sperrzeit / zusätzliche Öffnung | `availabilityException`, `kind: 'closed'` / `'extra_opening'` |
+| Buchung / Teilnehmer | `booking` / `participant` |
+| Status bestätigt / storniert / umgebucht / vom Owner abgesagt | `confirmed` / `cancelled` / `rebooked` / `cancelled_by_owner` |
+| Kurstermin geplant / gesperrt / abgesagt | `scheduled` / `blocked` / `cancelled` |
+| Mindestvorlauf / Buchungshorizont / Storno- und Umbuchungsfrist | `minLeadMinutes` / `horizonDays` / `changeDeadlineMinutes` |
+| Puffer / Slot-Raster | `bufferMinutes` / `slotGridMinutes` |
+
+IDs sind MongoDB-ObjectIds als 24-stellige Hex-Strings. Zeitpunkte werden in der API als ISO-8601 in UTC (`…Z`) übertragen, die Zeitzone der Installation separat als `timeZone`. Lokale Angaben (Öffnungszeiten, Ausnahmen, Kursregeln) verwenden `HH:MM`, `YYYY-MM-DD` bzw. `YYYY-MM-DDTHH:MM` ohne Zeitzone.
+
+## 11. Nicht in der ersten Version
 
 Owner-Freigabe von Buchungen, mehrere Ressourcen, Sammelbuchungen, Wartelisten, Zahlungen, Teilnehmerkonten.
