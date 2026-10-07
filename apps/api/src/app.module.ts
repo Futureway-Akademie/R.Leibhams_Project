@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import type { DynamicModule } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
+import { AuthModule } from './auth/auth.module.js';
 import type { DestinationStream } from 'pino';
 import { APP_CONFIG } from './config/config.js';
 import type { AppConfig } from './config/config.js';
@@ -19,7 +20,11 @@ export class AppModule {
     return {
       module: AppModule,
       global: true,
-      imports: [LoggerModule.forRoot(loggerParams(config, options.logStream)), DatabaseModule],
+      imports: [
+        LoggerModule.forRoot(loggerParams(config, options.logStream)),
+        DatabaseModule,
+        AuthModule,
+      ],
       controllers: [HealthController],
       providers: [{ provide: APP_CONFIG, useValue: config }],
       exports: [APP_CONFIG],

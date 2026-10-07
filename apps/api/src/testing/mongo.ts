@@ -21,6 +21,8 @@ export function testConfig(mongoUri: string, overrides: Partial<AppConfig> = {})
     port: 0,
     mongodb: { uri: url.toString(), dbName: 'fw_booking_test' },
     logLevel: 'silent',
+    session: { cookieSecure: false },
+    trustProxy: 0,
     ...overrides,
   };
 }

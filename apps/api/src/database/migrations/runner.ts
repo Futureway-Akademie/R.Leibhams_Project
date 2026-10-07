@@ -1,9 +1,10 @@
 import type { Db } from 'mongodb';
 import { initialMigration } from './001-initial.js';
+import { authMigration } from './002-auth.js';
 import type { Migration } from './migration.js';
 
 /** Alle Migrationen in Ausführungsreihenfolge. Neue Schritte nur anhängen. */
-export const MIGRATIONS: readonly Migration[] = [initialMigration];
+export const MIGRATIONS: readonly Migration[] = [initialMigration, authMigration];
 
 export const MIGRATIONS_COLLECTION = '_migrations';
 const LOCK_ID = '__lock';

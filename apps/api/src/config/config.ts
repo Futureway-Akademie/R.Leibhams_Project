@@ -13,6 +13,10 @@ const envSchema = z.object({
       'muss mit mongodb:// oder mongodb+srv:// beginnen und einen Datenbanknamen enthalten',
     ),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
+  /** Standard: `true` außer in development/test, wo die API über http://localhost läuft. */
+  SESSION_COOKIE_SECURE: z.enum(['true', 'false']).optional(),
+  /** Anzahl vertrauenswürdiger Reverse-Proxys vor der API (für die Client-IP). */
+  TRUST_PROXY: z.coerce.number().int().min(0).max(10).default(0),
 });
 
 export interface AppConfig {
@@ -21,6 +25,8 @@ export interface AppConfig {
   port: number;
   mongodb: { uri: string; dbName: string };
   logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent';
+  session: { cookieSecure: boolean };
+  trustProxy: number;
 }
 
 /** Konfigurationsfehler. Die Meldung nennt nur Variablennamen und Regeln, niemals Werte. */
@@ -44,6 +50,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     port: values.PORT,
     mongodb: { uri: values.MONGODB_URI, dbName },
     logLevel: values.LOG_LEVEL,
+    session: {
+      cookieSecure:
+        values.SESSION_COOKIE_SECURE === undefined
+          ? values.NODE_ENV === 'production'
+          : values.SESSION_COOKIE_SECURE === 'true',
+    },
+    trustProxy: values.TRUST_PROXY,
   };
 }
 

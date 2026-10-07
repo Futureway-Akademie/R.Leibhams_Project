@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { RequestMethod } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import cookieParser from 'cookie-parser';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module.js';
@@ -17,6 +18,8 @@ export async function createApp(
   });
   app.useLogger(app.get(Logger));
   app.disable('x-powered-by');
+  app.set('trust proxy', config.trustProxy);
+  app.use(cookieParser());
   app.setGlobalPrefix('api', { exclude: [{ path: 'health', method: RequestMethod.GET }] });
   app.enableShutdownHooks();
   return app;

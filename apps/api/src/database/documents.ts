@@ -24,6 +24,8 @@ export const COLLECTIONS = {
   actionTokens: 'actionTokens',
   outboxJobs: 'outboxJobs',
   auditEvents: 'auditEvents',
+  authSessions: 'authSessions',
+  loginAttempts: 'loginAttempts',
 } as const;
 
 /** In der ersten Version gibt es genau eine Ressource je Installation. */
@@ -199,6 +201,26 @@ export interface AuditEventDocument {
   details: Record<string, unknown>;
 }
 
+export interface AuthSessionDocument {
+  /** SHA-256 des Sitzungstokens als Hex; der Klartext steht nur im Cookie. */
+  _id: string;
+  ownerId: ObjectId;
+  csrfToken: string;
+  createdAt: Date;
+  lastSeenAt: Date;
+  idleExpiresAt: Date;
+  absoluteExpiresAt: Date;
+  /** Frühester der beiden Abläufe; TTL-Index räumt abgelaufene Sitzungen auf. */
+  expiresAt: Date;
+}
+
+export interface LoginAttemptDocument {
+  /** `email:<sha256>` oder `ip:<adresse>`; E-Mail-Adressen werden nicht im Klartext gespeichert. */
+  _id: string;
+  count: number;
+  expiresAt: Date;
+}
+
 /** Typisierte Zugriffe auf alle Collections. */
 export function collections(db: Db) {
   return {
@@ -216,6 +238,8 @@ export function collections(db: Db) {
     actionTokens: db.collection<ActionTokenDocument>(COLLECTIONS.actionTokens),
     outboxJobs: db.collection<OutboxJobDocument>(COLLECTIONS.outboxJobs),
     auditEvents: db.collection<AuditEventDocument>(COLLECTIONS.auditEvents),
+    authSessions: db.collection<AuthSessionDocument>(COLLECTIONS.authSessions),
+    loginAttempts: db.collection<LoginAttemptDocument>(COLLECTIONS.loginAttempts),
   };
 }
 export type Collections = ReturnType<typeof collections>;

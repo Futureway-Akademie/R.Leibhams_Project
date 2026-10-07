@@ -139,3 +139,17 @@ Zeitpunkte als BSON-Date. Versionierte Migrationen (`001-initial`, …) mit eige
 ### Begründung
 
 Datenbankseitige Eindeutigkeit ist auch bei gleichzeitigen Anfragen verlässlich. Ein getrennter Migrationsbefehl erlaubt einen eigenen Provisionierungszugang mit erweiterten Rechten, während die API mit eingeschränkten Rechten laufen kann.
+
+## 2026-10-07 – Owner-Anmeldung
+
+### Kontext
+
+Owner-Funktionen in API, Portal und PWA brauchen eine sichere Anmeldung; Tokens dürfen nicht im JavaScript-Speicher liegen.
+
+### Entscheidung
+
+Eigene serverseitige Sitzungen in `authSessions` (nur SHA-256-Hash des Tokens) mit HttpOnly-Cookie, `SameSite=Lax` und `__Host-`-Präfix bei HTTPS; 12 h Inaktivität, maximal 7 Tage, neue Sitzung bei jedem Login. Passwörter mit Argon2id (19 MiB, t=2, p=1). CSRF-Token je Sitzung im Header `X-CSRF-Token`; ändernde Anfragen müssen JSON senden. Globaler Guard mit Freigabe per `@Public()`. Login-Sperre nach 5 Fehlversuchen in 15 Minuten je E-Mail (gehasht gespeichert) und je IP. Owner-Konten nur per CLI `owner:create`.
+
+### Begründung
+
+Serverseitige Sitzungen sind sofort widerrufbar, etwa bei deaktivierten Owners. Der Guard mit Standard-Sperre verhindert, dass eine vergessene Absicherung Owner-Daten offenlegt. Die Sperre je E-Mail kann von Dritten ausgelöst werden; das wird für 15 Minuten in Kauf genommen.

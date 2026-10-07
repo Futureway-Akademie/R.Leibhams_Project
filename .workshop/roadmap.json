@@ -251,7 +251,7 @@
           "description": "Serverseitige Sessions mit Secure/HttpOnly-Cookies, SameSite und CSRF-Schutz für verändernde Aktionen.",
           "order": 3,
           "weight": 3,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-2"
           ],
@@ -261,13 +261,22 @@
             "Geschützte Routen liefern ohne Session 401",
             "Verändernde Anfragen ohne gültiges CSRF-Token werden abgelehnt"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T11:38:24Z",
+          "completedAt": "2026-10-07T11:43:48Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "31 neue Tests (79 in der API): Login mit Cookie-Flags und CSRF-Token, nur Token-Hash gespeichert, gleiche Antwort bei falschem Passwort/unbekannter E-Mail, deaktivierte Owner, Eingabevalidierung ohne Wertrückgabe, 415 ohne JSON, Sitzungswechsel, Audit ohne Geheimnisse, 401 ohne/mit ungültigem Cookie, Ablauf nach 12 h Inaktivität und 7 Tagen, CSRF (fehlend, falsch, fremde Sitzung), Logout, Login-Sperre je E-Mail und IP inkl. Freigabe nach Fensterablauf, __Host-/Secure bei HTTPS, Argon2id-Parameter, owner-Anlage. Manuell gegen Docker-MongoDB: Migration 002, owner:create (inkl. Duplikat und zu kurzem Passwort), Login/Session/Logout per curl mit 200/403/204/401, ähnliche Antwortzeiten, keine Passwörter oder Tokens im Log; Test-Owner danach entfernt. Dabei gefundenen Fehler (pnpm reicht `--` an das CLI durch) behoben. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/api db:migrate",
+              "pnpm --filter @fw-booking/api owner:create -- --email …",
+              "curl POST /api/auth/login, GET /api/auth/session, POST /api/auth/logout",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T11:43:48Z"
           }
         },
         {
@@ -276,7 +285,7 @@
           "description": "CRUD für Angebote mit Terminart Einzeltermin (Dauer, Puffer) oder Gruppenkurs (Standardkapazität) sowie Buchungs- und Stornoregeln.",
           "order": 4,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-3"
           ],
@@ -891,7 +900,7 @@
       "description": "React-Portal für Angebote, Öffnungszeiten, Kurstermine, Buchungen und Benachrichtigungsfehler.",
       "order": 5,
       "weight": 12,
-      "status": "planned",
+      "status": "ready",
       "tasks": [
         {
           "id": "task-5-1",
@@ -899,7 +908,7 @@
           "description": "React/Vite-Portal mit Routing, API-Client sowie Login und Logout.",
           "order": 1,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-3"
           ],

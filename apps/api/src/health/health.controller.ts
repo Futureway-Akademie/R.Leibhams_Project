@@ -1,5 +1,6 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
+import { Public } from '../auth/decorators.js';
 import { DatabaseService } from '../database/database.module.js';
 
 export interface HealthResponse {
@@ -7,6 +8,7 @@ export interface HealthResponse {
   db: 'up' | 'down';
 }
 
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(private readonly database: DatabaseService) {}

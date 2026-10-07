@@ -11,7 +11,20 @@ describe('loadConfig', () => {
       port: 3000,
       mongodb: { uri: validEnv.MONGODB_URI, dbName: 'fw_booking' },
       logLevel: 'info',
+      session: { cookieSecure: false },
+      trustProxy: 0,
     });
+  });
+
+  it('setzt Secure-Cookies in Produktion standardmäßig', () => {
+    expect(loadConfig({ ...validEnv, NODE_ENV: 'production' }).session.cookieSecure).toBe(true);
+    expect(
+      loadConfig({ ...validEnv, NODE_ENV: 'production', SESSION_COOKIE_SECURE: 'false' }).session
+        .cookieSecure,
+    ).toBe(false);
+    expect(loadConfig({ ...validEnv, SESSION_COOKIE_SECURE: 'true' }).session.cookieSecure).toBe(
+      true,
+    );
   });
 
   it('übernimmt gesetzte Werte', () => {

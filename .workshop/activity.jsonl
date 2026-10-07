@@ -39,3 +39,9 @@
 {"timestamp": "2026-10-07T11:33:51Z", "type": "task_completed", "taskId": "task-2-2", "summary": "Collections, Validatoren, Indizes und versionierte Migrationen mit db:migrate umgesetzt; Shared-Paket baubar."}
 {"timestamp": "2026-10-07T11:33:51Z", "type": "decision_recorded", "summary": "BSON Date, versionierte Migrationen per eigenem Befehl, DB-Validatoren für kritische Invarianten."}
 {"timestamp": "2026-10-07T11:33:51Z", "type": "task_ready", "taskId": "task-2-3", "summary": "Task bereit: Owner-Login und Logout."}
+{"timestamp": "2026-10-07T11:38:24Z", "type": "task_started", "taskId": "task-2-3", "summary": "Owner-Login begonnen: Argon2id, Sitzung 12 h Inaktivität / max. 7 Tage, CLI owner:create, Login-Sperre nach 5 Fehlversuchen in 15 Min."}
+{"timestamp": "2026-10-07T11:43:48Z", "type": "verification_passed", "taskId": "task-2-3", "summary": "Auth-Tests und manueller Login-Ablauf gegen Docker-MongoDB erfolgreich."}
+{"timestamp": "2026-10-07T11:43:48Z", "type": "task_completed", "taskId": "task-2-3", "summary": "Owner-Login und Logout mit serverseitigen Sitzungen, CSRF-Schutz, Login-Sperre und CLI owner:create umgesetzt."}
+{"timestamp": "2026-10-07T11:43:48Z", "type": "decision_recorded", "summary": "Argon2id, eigene Sitzungen (12 h / 7 Tage), globaler Guard mit @Public(), Login-Sperre 5/15 Min, Konten per CLI."}
+{"timestamp": "2026-10-07T11:43:48Z", "type": "task_ready", "taskId": "task-2-4", "summary": "Task bereit: Angebote mit Terminart."}
+{"timestamp": "2026-10-07T11:43:48Z", "type": "task_ready", "taskId": "task-5-1", "summary": "Task bereit: Portal-Gerüst und Login."}

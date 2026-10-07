@@ -17,6 +17,7 @@ pnpm install
 cp .env.example .env
 pnpm infra:up
 pnpm --filter @fw-booking/api db:migrate   # Collections, Validatoren, Indizes
+pnpm --filter @fw-booking/api owner:create --email du@example.de   # Passwort wird verdeckt abgefragt
 pnpm --filter @fw-booking/api dev   # API auf http://127.0.0.1:3000, Healthcheck unter /health
 ```
 
