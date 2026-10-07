@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { availabilityExceptionKindSchema, isoWeekdaySchema } from '../enums.js';
 import {
   localDateSchema,
-  localTimeSchema,
   localTimeToMinutes,
   objectIdSchema,
   timeZoneSchema,
@@ -84,27 +83,63 @@ export const availabilityExceptionCreatedSchema = z.object({
 });
 export type AvailabilityExceptionCreated = z.infer<typeof availabilityExceptionCreatedSchema>;
 
+// Feldformen ohne Standardwerte, damit Teiländerungen keine Defaults setzen (siehe service.ts).
+const courseRuleShape = {
+  weekdays: z
+    .array(isoWeekdaySchema)
+    .min(1)
+    .refine((d) => new Set(d).size === d.length, 'Wochentage dürfen nicht doppelt vorkommen'),
+  startTime: unitLocalTimeSchema.refine((t) => t !== '24:00', 'Ungültige Startzeit'),
+  validFrom: localDateSchema,
+  validUntil: localDateSchema.nullable(),
+  capacity: groupCapacitySchema.nullable(),
+  location: z.string().trim().max(200).nullable(),
+};
+
+const validRange = (r: {
+  validFrom?: string | undefined;
+  validUntil?: string | null | undefined;
+}) => !r.validFrom || !r.validUntil || r.validFrom <= r.validUntil;
+const validRangeIssue = {
+  message: 'Gültig bis muss am oder nach Gültig ab liegen',
+  path: ['validUntil'],
+};
+
 /** Wiederkehrende Regel, aus der Kurstermine im Buchungshorizont erzeugt werden. */
 export const courseRuleFields = z
   .object({
     serviceId: objectIdSchema,
-    weekdays: z
-      .array(isoWeekdaySchema)
-      .min(1)
-      .refine((d) => new Set(d).size === d.length, 'Wochentage dürfen nicht doppelt vorkommen'),
-    startTime: localTimeSchema.refine((t) => t !== '24:00', 'Ungültige Startzeit'),
-    validFrom: localDateSchema,
-    validUntil: localDateSchema.nullable().default(null),
-    capacity: groupCapacitySchema.nullable().default(null),
-    location: z.string().trim().max(200).nullable().default(null),
+    ...courseRuleShape,
+    validUntil: courseRuleShape.validUntil.default(null),
+    capacity: courseRuleShape.capacity.default(null),
+    location: courseRuleShape.location.default(null),
   })
-  .refine((r) => r.validUntil === null || r.validFrom <= r.validUntil, {
-    message: 'Gültig bis muss am oder nach Gültig ab liegen',
-    path: ['validUntil'],
-  });
+  .refine(validRange, validRangeIssue);
+
+/** Teiländerung einer Kursregel; das Angebot ist nicht änderbar. */
+export const courseRulePatchSchema = z
+  .strictObject(courseRuleShape)
+  .partial()
+  .refine(validRange, validRangeIssue);
 
 export const courseRuleSchema = z.intersection(courseRuleFields, z.object({ id: objectIdSchema }));
 export type CourseRule = z.infer<typeof courseRuleSchema>;
+
+/** Ergebnis einer (erneuten) Erzeugung von Kursterminen aus einer Regel. */
+export const courseGenerationReportSchema = z.object({
+  created: z.int().nonnegative(),
+  /** Lokale Beginne, die wegen Überschneidung mit belegter Zeit übersprungen wurden. */
+  conflicts: z.array(z.string()),
+  /** Künftige Termine mit Buchungen, die bei einer Regeländerung unverändert blieben. */
+  keptWithBookings: z.array(z.string()),
+});
+export type CourseGenerationReport = z.infer<typeof courseGenerationReportSchema>;
+
+export const courseRuleResultSchema = z.object({
+  rule: courseRuleSchema,
+  generation: courseGenerationReportSchema,
+});
+export type CourseRuleResult = z.infer<typeof courseRuleResultSchema>;
 
 /** Installationsweite Einstellungen, die für Verfügbarkeiten relevant sind. */
 export const installationSettingsSchema = z.object({

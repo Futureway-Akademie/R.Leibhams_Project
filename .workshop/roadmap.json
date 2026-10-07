@@ -384,7 +384,7 @@
           "description": "Konkrete Kurstermine mit Kapazität anlegen, sperren und über wiederkehrende Regeln im Buchungshorizont ohne Duplikate erzeugen.",
           "order": 7,
           "weight": 3,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-4",
             "task-1-5"
@@ -395,13 +395,21 @@
             "Regeländerungen verschieben bereits gebuchte Termine nicht",
             "Überschneidungen auf derselben Ressource werden verhindert"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T13:24:13Z",
+          "completedAt": "2026-10-07T13:32:00Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "38 neue API-Tests (196 in der API) und 4 Shared-Tests. Erzeugung mit festem 'jetzt': Termine im Horizont mit Belegung (15 Einheiten je 75 Min), Idempotenz und Nachschub bei wanderndem Horizont, Zeitumstellung (18:30 = 16:30Z bzw. 17:30Z), Gültigkeitszeitraum/Kapazität/Ort, keine Kurse in Sperrzeiten, Konfliktmeldung bei Überschneidung, übersprungene Stunde, deaktivierte Angebote, Vergangenheit, generateAll, Blockade der Einzeltermin-Slots. Regeländerung erzeugt ungebuchte Termine neu und behält gebuchte (inkl. Konfliktmeldung), Kapazitätsänderung nur für ungebuchte, ungültiger Zeitraum, Löschen behält gebuchte, Vergangenheit unberührt, entfernte Regeltermine als abgesagt ohne Neuerzeugung, Verschieben behält Wiederholungsschlüssel. HTTP: Anlegen mit Ende/Kapazität/Belegung, Validierung, Einzeltermin- und deaktivierte Angebote, Überschneidung ohne Teildaten (auch mit Einzeltermin-Belegung), Liste mit Filtern, Kapazität nicht unter gebuchte Plätze, Sperren, Verschieben samt Belegung, kein Verschieben mit Buchungen oder in belegte Zeit, Löschen ohne/mit Historie, Regeln anlegen/ändern/löschen. Dabei gefundener Fehler (Bulk-Duplikatfehler ohne keyPattern → 500) behoben und per Unit-Test abgesichert. Manuell gegen Docker-MongoDB: Regel Mo+Mi 18:30 erzeugt 9 Termine mit korrekter Ortszeit über die Zeitumstellung, überlappender manueller Kurs → 409, Regel löschen, Scheduler startet fehlerfrei; Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm --filter @fw-booking/api test",
+              "curl POST /api/owner/course-rules, GET /api/owner/sessions, POST /api/owner/sessions, DELETE /api/owner/course-rules/:id",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T13:32:00Z"
           }
         },
         {
@@ -410,7 +418,7 @@
           "description": "Öffentliche Endpunkte für Angebote, freie Slots und Kurstermine mit freien Plätzen, ohne personenbezogene Daten.",
           "order": 8,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-6",
             "task-2-7"

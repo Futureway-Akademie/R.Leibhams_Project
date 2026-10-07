@@ -3,6 +3,7 @@ import { availabilityExceptionQuerySchema } from './availability.js';
 import {
   availabilityExceptionCreateSchema,
   courseRuleCreateSchema,
+  courseRuleUpdateSchema,
   openingHoursUpdateSchema,
 } from './owner-api.js';
 
@@ -225,6 +226,29 @@ describe('availabilityExceptionQuerySchema', () => {
   it('lehnt umgekehrte Zeiträume ab', () => {
     expect(
       availabilityExceptionQuerySchema.safeParse({ from: '2026-10-31', to: '2026-10-01' }).success,
+    ).toBe(false);
+  });
+});
+
+describe('Kursregeln: Raster und Teiländerung', () => {
+  it('verlangt Startzeiten im 5-Minuten-Raster', () => {
+    expect(
+      courseRuleCreateSchema.safeParse({
+        serviceId,
+        weekdays: [1],
+        startTime: '18:32',
+        validFrom: '2026-10-12',
+      }).success,
+    ).toBe(false);
+  });
+  it('setzt bei Teiländerungen keine Standardwerte', () => {
+    expect(courseRuleUpdateSchema.parse({ startTime: '19:00' })).toEqual({ startTime: '19:00' });
+  });
+  it('erlaubt keine Änderung des Angebots und prüft den Zeitraum', () => {
+    expect(courseRuleUpdateSchema.safeParse({ serviceId }).success).toBe(false);
+    expect(
+      courseRuleUpdateSchema.safeParse({ validFrom: '2026-10-12', validUntil: '2026-10-01' })
+        .success,
     ).toBe(false);
   });
 });

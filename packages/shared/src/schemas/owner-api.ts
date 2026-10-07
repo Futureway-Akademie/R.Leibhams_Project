@@ -1,10 +1,12 @@
 // Eingaben aus dem Owner-Portal. Regeln, die Datenbankzustand benötigen
 // (z. B. Kapazität nicht unter gebuchte Plätze), prüft die API zusätzlich.
 import { z } from 'zod';
-import { objectIdSchema, utcDateTimeSchema } from '../primitives.js';
+import { OCCUPANCY_UNIT_MINUTES } from '../constants.js';
+import { localDateSchema, objectIdSchema, utcDateTimeSchema } from '../primitives.js';
 import {
   availabilityExceptionFields,
   courseRuleFields,
+  courseRulePatchSchema,
   weeklyOpeningHoursSchema,
 } from './availability.js';
 import {
@@ -49,13 +51,16 @@ export type OpeningHoursUpdate = z.infer<typeof openingHoursUpdateSchema>;
 export const availabilityExceptionCreateSchema = availabilityExceptionFields;
 export type AvailabilityExceptionCreate = z.infer<typeof availabilityExceptionCreateSchema>;
 
-export const courseRuleCreateSchema = courseRuleFields;
-export type CourseRuleCreate = z.infer<typeof courseRuleCreateSchema>;
+/** UTC-Zeitpunkt auf dem 5-Minuten-Raster (Belegungseinheiten). */
+const unitUtcDateTimeSchema = utcDateTimeSchema.refine(
+  (v) => Date.parse(v) % (OCCUPANCY_UNIT_MINUTES * 60_000) === 0,
+  'Nur 5-Minuten-Schritte erlaubt',
+);
 
 /** Einzelner Kurstermin. Das Ende ergibt sich aus der Dauer des Angebots. */
 export const sessionCreateSchema = z.strictObject({
   serviceId: objectIdSchema,
-  startsAt: utcDateTimeSchema,
+  startsAt: unitUtcDateTimeSchema,
   capacity: groupCapacitySchema.nullable().default(null),
   location: z.string().trim().max(200).nullable().default(null),
 });
@@ -63,12 +68,31 @@ export type SessionCreate = z.infer<typeof sessionCreateSchema>;
 
 /** Absagen erfolgt über eine eigene Aktion, nicht über diese Änderung. */
 export const sessionUpdateSchema = z.strictObject({
-  startsAt: utcDateTimeSchema.optional(),
+  startsAt: unitUtcDateTimeSchema.optional(),
   capacity: groupCapacitySchema.optional(),
   location: z.string().trim().max(200).nullable().optional(),
   status: z.enum(['scheduled', 'blocked']).optional(),
 });
 export type SessionUpdate = z.infer<typeof sessionUpdateSchema>;
+
+export const sessionQuerySchema = z
+  .object({
+    from: localDateSchema.optional(),
+    to: localDateSchema.optional(),
+    serviceId: objectIdSchema.optional(),
+    includeCancelled: z.enum(['true', 'false']).optional(),
+  })
+  .refine((q) => !q.from || !q.to || q.from <= q.to, {
+    message: 'to muss am oder nach from liegen',
+    path: ['to'],
+  });
+export type SessionQuery = z.infer<typeof sessionQuerySchema>;
+
+export const courseRuleCreateSchema = courseRuleFields;
+export type CourseRuleCreate = z.infer<typeof courseRuleCreateSchema>;
+
+export const courseRuleUpdateSchema = courseRulePatchSchema;
+export type CourseRuleUpdate = z.infer<typeof courseRuleUpdateSchema>;
 
 /** Absage eines Kurstermins oder einer einzelnen Buchung durch den Owner. */
 export const ownerCancellationSchema = z.strictObject({

@@ -59,3 +59,12 @@ describe('ownerCancellationSchema', () => {
     });
   });
 });
+
+describe('Kurstermine im 5-Minuten-Raster', () => {
+  it('lehnt Startzeiten außerhalb des Rasters ab', () => {
+    expect(
+      sessionCreateSchema.safeParse({ serviceId: id, startsAt: '2026-10-08T16:32:00Z' }).success,
+    ).toBe(false);
+    expect(sessionUpdateSchema.safeParse({ startsAt: '2026-10-08T16:30:30Z' }).success).toBe(false);
+  });
+});

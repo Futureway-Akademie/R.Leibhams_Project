@@ -195,3 +195,17 @@ Raster in lokaler Zeit ab Fensterbeginn; übersprungene Zeiten entfallen, doppel
 ### Begründung
 
 Ein lokales Raster entspricht dem, was Kunden auf der Uhr sehen, und vermeidet doppelte Uhrzeiten am Tag der Winterzeitumstellung. Eine einzige Belegungsquelle verhindert widersprüchliche Verfügbarkeiten.
+
+## 2026-10-07 – Kurstermine und Kursregeln
+
+### Kontext
+
+Gruppenkurse brauchen einzelne und wiederkehrende Termine, die sich die Ressource mit Einzelterminen teilen.
+
+### Entscheidung
+
+Kurstermine belegen die Ressource ab dem Anlegen in derselben Transaktion; Überschneidungen scheitern am eindeutigen Index. Uhrzeit nur ohne Buchungen verschiebbar. Regeln sind nach domain-rules 3.3 änderbar: künftige Termine ohne Buchungshistorie werden neu erzeugt, gebuchte bleiben und werden gemeldet. Keine Erzeugung in Sperrzeiten. Nachschub beim API-Start, alle 6 Stunden und bei Regeländerungen. `localStart` bleibt bei Regelterminen der Wiederholungsschlüssel, auch nach dem Verschieben; entfernte Regeltermine werden als abgesagt markiert statt gelöscht, damit die Erzeugung sie nicht neu anlegt. Konflikte werden über den Indexnamen in der Fehlermeldung erkannt, weil Bulk-Fehler kein `keyPattern` liefern.
+
+### Begründung
+
+Eine gemeinsame, datenbankseitig eindeutige Belegung hält Kurse und Einzeltermine konsistent. Der feste Wiederholungsschlüssel und die Markierung als abgesagt verhindern, dass Owner-Eingriffe durch die automatische Erzeugung rückgängig gemacht werden.

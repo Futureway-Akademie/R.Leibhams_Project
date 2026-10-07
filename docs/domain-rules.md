@@ -68,13 +68,17 @@ Die angezeigte Slot-Liste ist unverbindlich. Verbindlich ist nur die atomare Pr�
 
 - Kurstermine werden einzeln angelegt oder über **wiederkehrende Regeln** erzeugt (Wochentage, lokale Startzeit, Gültigkeitszeitraum).
 - Die Erzeugung erfolgt innerhalb des Buchungshorizonts und ist idempotent: Je Regel und lokalem Startzeitpunkt existiert höchstens ein Kurstermin.
-- Ein einzelner Kurstermin kann abweichende Kapazität, Uhrzeit oder Ort erhalten, ohne die Regel zu ändern.
+- Startzeiten liegen auf dem 5-Minuten-Raster. In **Sperrzeiten** (z. B. Urlaub) werden keine Kurstermine aus Regeln erzeugt; einzelne Kurstermine kann der Owner dort bewusst anlegen.
+- Überschneidet sich ein zu erzeugender Termin mit belegter Zeit, wird er übersprungen und als Konflikt gemeldet.
+- Die Erzeugung läuft beim Anlegen oder Ändern einer Regel, beim API-Start und danach alle 6 Stunden, damit der Horizont nachwandert. Deaktivierte Angebote erzeugen keine neuen Termine.
+- Ein einzelner Kurstermin kann abweichende Kapazität, Uhrzeit oder Ort erhalten, ohne die Regel zu ändern. Die **Uhrzeit** ist nur änderbar, solange es für den Termin keine Buchungen gibt; sonst wird abgesagt und neu angelegt.
 - Ein Kurstermin darf sich nicht mit anderen Kursterminen oder gebuchten Einzelterminen derselben Ressource überschneiden; die Anlage wird sonst abgelehnt.
 
 ### 3.3 Änderung wiederkehrender Regeln
 
-- Änderungen wirken nur auf **zukünftige Kurstermine ohne Buchungen**; diese werden neu erzeugt bzw. entfernt.
-- Kurstermine mit mindestens einer aktiven Buchung bleiben unverändert. Das Portal zeigt einen Hinweis, welche Termine von der Änderung ausgenommen wurden.
+- Änderungen wirken nur auf **zukünftige Kurstermine ohne Buchungshistorie**; diese werden neu erzeugt bzw. entfernt.
+- Kurstermine mit Buchungen (auch stornierten) bleiben unverändert. Die Antwort nennt sie als Hinweis.
+- Wird eine Regel gelöscht, entfallen ihre künftigen Termine ohne Buchungshistorie; gebuchte bleiben bestehen.
 
 ### 3.4 Kapazität
 
@@ -155,7 +159,7 @@ Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einma
 | Kurstermin sperren | Keine neuen Buchungen; bestehende Buchungen bleiben gültig; Ressource bleibt belegt. Wieder entsperrbar. |
 | Termin absagen | Jederzeit möglich, mit Bestätigungsdialog. Alle aktiven Buchungen erhalten Status „vom Owner abgesagt“, jeder Teilnehmer bekommt eine Absagemail. Nicht umkehrbar. |
 | Einzelne Buchung absagen | Wie Termin absagen, aber nur für diese Buchung. |
-| Löschen | Nur für Kurstermine ohne Buchungshistorie. Termine mit Buchungen werden abgesagt, nicht gelöscht. |
+| Löschen | Nur für Kurstermine ohne Buchungshistorie. Manuell angelegte werden gelöscht, aus Regeln erzeugte als abgesagt markiert (damit sie nicht neu entstehen). Termine mit Buchungen werden abgesagt, nicht gelöscht. |
 | Terminart ändern | Nicht möglich. Für eine andere Terminart wird ein neues Angebot angelegt und das alte deaktiviert. |
 | Angebot deaktivieren | Keine neuen Buchungen, nicht im Widget sichtbar; bestehende Buchungen bleiben gültig. Jederzeit reaktivierbar. Angebote werden nicht gelöscht. |
 | Angebot ändern | Dauer, Puffer, Raster, Kapazität und Fristen wirken nur auf künftige Slots und Kurstermine; bestehende Buchungen und Kurstermine bleiben unverändert. |

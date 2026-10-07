@@ -98,6 +98,18 @@ Dokumenttypen: `apps/api/src/database/documents.ts`. Zeitpunkte sind BSON-Dates 
 | `GET /api/owner/services/:id/slots?date=` | Vorschau der freien Slots (Format wie öffentliche API) |
 | `GET /api/owner/services/:id/available-dates?from=&to=` | Tage mit freien Slots |
 
+## Owner-API: Kurstermine und Kursregeln
+
+| Endpunkt | Wirkung |
+|---|---|
+| `GET /api/owner/sessions[?from&to&serviceId&includeCancelled]` | Kurstermine mit Belegung |
+| `POST /api/owner/sessions` | Einzelnen Kurstermin anlegen (Belegung der Ressource in derselben Transaktion) |
+| `PATCH /api/owner/sessions/:id` | Kapazität (≥ gebuchte Plätze), Ort, Sperren; Uhrzeit nur ohne Buchungen |
+| `DELETE /api/owner/sessions/:id` | Nur ohne Buchungshistorie |
+| `GET/POST /api/owner/course-rules`, `GET/PATCH/DELETE /api/owner/course-rules/:id` | Kursregeln; Anlegen und Ändern erzeugen Termine und liefern einen Bericht (erzeugt, Konflikte, unverändert gebuchte) |
+
+`CourseRulesService.generateForRule` erzeugt fehlende Termine idempotent über den eindeutigen Index `sessions(ruleId, localStart)`. `localStart` ist bei Regelterminen der Wiederholungsschlüssel und bleibt beim Verschieben erhalten. `CourseGenerationScheduler` ruft die Erzeugung beim Start und alle 6 Stunden auf.
+
 ## Zentrale Abnahmetests
 
 - Parallele Anfragen auf denselben Einzeltermin-Slot → genau eine Buchung.

@@ -2,7 +2,7 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v1 mit 7 Phasen und 48 Tasks (Gesamtgewicht 97). Fortschritt: 22,68 % (22 von 97 Gewichtspunkten, 11 von 48 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v1 mit 7 Phasen und 48 Tasks (Gesamtgewicht 97). Fortschritt: 25,77 % (25 von 97 Gewichtspunkten, 12 von 48 Tasks).
 
 ## Aktive Phase
 
@@ -14,7 +14,8 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
-- task-2-6 – Freie Slots berechnen (`SlotService`, Owner-Vorschau `/slots`, `/available-dates`; 158 API-Tests)
+- task-2-7 – Kurstermine und Kursregeln (`/api/owner/sessions`, `/api/owner/course-rules`, idempotente Erzeugung, Nachschub alle 6 h; 196 API-Tests)
+- task-2-6 – Freie Slots berechnen
 - task-2-5 – Öffnungszeiten und Ausnahmen
 - task-2-4 – Angebote mit Terminart
 - task-2-3 – Owner-Login und Logout
@@ -24,7 +25,7 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-2-7 – Kurstermine anlegen und wiederkehrend erzeugen
+- task-2-8 – Öffentliche Verfügbarkeits-API
 - task-4-1 – Widget-Build
 - task-5-1 – Portal-Gerüst und Login
 - task-7-1 – Geschützter Entwicklerzugang
@@ -35,7 +36,7 @@ Nichts.
 
 ## Wichtige Entscheidungen
 
-Siehe `docs/decisions.md`: eigenes Verwaltungsportal als PWA, Widget ohne iframe, getrennte Installation je Kunde, zwei Terminarten, eine Ressource je Installation, ein Platz pro Buchung, Fachregeln zu Fristen und Pflichtfeldern, Monorepo-Werkzeuge, Zod 4, temporal-polyfill, API mit Express, nativem MongoDB-Treiber, nestjs-pino und SWC, BSON-Dates, versionierte Migrationen, DB-Validatoren, Owner-Anmeldung mit Argon2id und serverseitigen Sitzungen, Terminart unveränderlich, Angebote nur deaktivierbar, manuelle Reihenfolge, Zeitzone nur bei Einrichtung, Sperrzeit vor Zusatzöffnung, 5-Minuten-Raster, Slot-Raster in lokaler Zeit, Belegung nur aus `resourceOccupancy`.
+Siehe `docs/decisions.md`: eigenes Verwaltungsportal als PWA, Widget ohne iframe, getrennte Installation je Kunde, zwei Terminarten, eine Ressource je Installation, ein Platz pro Buchung, Fachregeln zu Fristen und Pflichtfeldern, Monorepo-Werkzeuge, Zod 4, temporal-polyfill, API mit Express, nativem MongoDB-Treiber, nestjs-pino und SWC, BSON-Dates, versionierte Migrationen, DB-Validatoren, Owner-Anmeldung mit Argon2id und serverseitigen Sitzungen, Terminart unveränderlich, Angebote nur deaktivierbar, manuelle Reihenfolge, Zeitzone nur bei Einrichtung, Sperrzeit vor Zusatzöffnung, 5-Minuten-Raster, Slot-Raster in lokaler Zeit, Belegung nur aus `resourceOccupancy`, Kurstermine belegen die Ressource ab Anlage, Verschieben nur ohne Buchungen, Regeländerung nach 3.3, keine Kurse in Sperrzeiten, Nachschub beim Start und alle 6 h.
 
 ## Bekannte Probleme
 
@@ -45,4 +46,4 @@ Siehe `docs/decisions.md`: eigenes Verwaltungsportal als PWA, Widget ohne iframe
 
 ## Empfohlener nächster Schritt
 
-task-2-7 (Kurstermine), danach wird task-2-8 (öffentliche Verfügbarkeits-API) startbar.
+task-2-8 (Öffentliche Verfügbarkeits-API) für Angebote, Slots und Kurstermine ohne personenbezogene Daten; danach die atomare Kursbuchung (task-2-9).
