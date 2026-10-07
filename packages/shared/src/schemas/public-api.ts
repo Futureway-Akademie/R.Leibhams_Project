@@ -64,6 +64,10 @@ export const availableDatesQuerySchema = z
   );
 export type AvailableDatesQuery = z.infer<typeof availableDatesQuerySchema>;
 
+/** Zeitraum für öffentliche Kurstermine; gleiche Grenzen wie bei freien Tagen. */
+export const publicSessionsQuerySchema = availableDatesQuerySchema;
+export type PublicSessionsQuery = AvailableDatesQuery;
+
 /** Lokale Daten, an denen mindestens ein freier Slot existiert. */
 export const availableDatesResponseSchema = z.strictObject({
   serviceId: objectIdSchema,

@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { AvailabilityModule } from './availability/availability.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
 import { CoursesModule } from './courses/courses.module.js';
+import { PublicModule } from './public/public.module.js';
 import type { DestinationStream } from 'pino';
 import { APP_CONFIG } from './config/config.js';
 import type { AppConfig } from './config/config.js';
@@ -30,6 +31,7 @@ export class AppModule {
         CatalogModule,
         AvailabilityModule,
         CoursesModule,
+        PublicModule,
       ],
       controllers: [HealthController],
       providers: [{ provide: APP_CONFIG, useValue: config }],

@@ -100,3 +100,10 @@ export const ownerCancellationSchema = z.strictObject({
   reason: z.string().trim().max(500).nullable().default(null),
 });
 export type OwnerCancellation = z.infer<typeof ownerCancellationSchema>;
+
+/** Öffentliche Kalenderkennung für die Einbindung des Widgets. */
+export const ownerCalendarResponseSchema = z.object({
+  calendarId: z.string().regex(/^cal_[A-Za-z0-9_-]{16,}$/),
+  timeZone: z.string(),
+});
+export type OwnerCalendarResponse = z.infer<typeof ownerCalendarResponseSchema>;

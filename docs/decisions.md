@@ -209,3 +209,17 @@ Kurstermine belegen die Ressource ab dem Anlegen in derselben Transaktion; Über
 ### Begründung
 
 Eine gemeinsame, datenbankseitig eindeutige Belegung hält Kurse und Einzeltermine konsistent. Der feste Wiederholungsschlüssel und die Markierung als abgesagt verhindern, dass Owner-Eingriffe durch die automatische Erzeugung rückgängig gemacht werden.
+
+## 2026-10-07 – Öffentliche Verfügbarkeits-API
+
+### Kontext
+
+Das Widget braucht Angebote, Slots und Kurstermine ohne Anmeldung, ohne personenbezogene Daten preiszugeben.
+
+### Entscheidung
+
+Eine öffentliche Kalenderkennung je Installation (`cal_…`, per Migration erzeugt, kein Geheimnis). Ausgebuchte Kurstermine werden mit 0 freien Plätzen angezeigt; vergebene Einzeltermine erscheinen nicht. Kurzes Caching: Angebote 5 Minuten, Verfügbarkeiten 30 Sekunden. Öffentliche Antworten werden vor dem Senden gegen strikte Schemas geprüft. Unbekannte, ungültige und deaktivierte Angebote ergeben einheitlich 404.
+
+### Begründung
+
+Interessenten sollen sehen, dass ein Kurs stattfindet, auch wenn er voll ist; bei Einzelterminen wäre eine belegte Uhrzeit ohne Nutzen. Die Schema-Prüfung ist eine zweite Sicherung gegen versehentlich veröffentlichte Daten. Verbindlich bleibt die Prüfung beim Buchen, daher ist kurzes Caching unkritisch.

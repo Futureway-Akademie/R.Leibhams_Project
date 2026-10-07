@@ -36,6 +36,8 @@ export const SETTINGS_ID = 'installation';
 export interface SettingsDocument {
   _id: typeof SETTINGS_ID;
   timeZone: string;
+  /** Öffentliche Kalenderkennung für das Widget; kein Geheimnis. */
+  publicCalendarId: string;
   defaultMinLeadMinutes: number;
   defaultHorizonDays: number;
   defaultChangeDeadlineMinutes: number;

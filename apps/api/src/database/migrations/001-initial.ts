@@ -240,7 +240,7 @@ export const initialMigration: Migration = {
     ]);
 
     // Nur beim ersten Mal anlegen; spätere Anpassungen des Owners bleiben erhalten.
-    const defaults: Omit<SettingsDocument, '_id'> = {
+    const defaults: Omit<SettingsDocument, '_id' | 'publicCalendarId'> = {
       timeZone: DEFAULT_TIME_ZONE,
       defaultMinLeadMinutes: DEFAULT_MIN_LEAD_MINUTES,
       defaultHorizonDays: DEFAULT_BOOKING_HORIZON_DAYS,

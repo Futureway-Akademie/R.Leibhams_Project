@@ -55,6 +55,8 @@ Das Raster läuft in **lokaler Zeit** (Wanduhr). Am Tag der Sommerzeitumstellung
 
 Die angezeigte Slot-Liste ist unverbindlich. Verbindlich ist nur die atomare Prüfung beim Buchen.
 
+Öffentlich werden bei Einzelterminen nur freie Slots angezeigt; vergebene Zeiten erscheinen nicht.
+
 ## 3. Gruppenkurs
 
 ### 3.1 Angebotsparameter
@@ -83,6 +85,7 @@ Die angezeigte Slot-Liste ist unverbindlich. Verbindlich ist nur die atomare Pr�
 ### 3.4 Kapazität
 
 - Freie Plätze = Kapazität − aktive Buchungen.
+- Öffentlich erscheinen geplante Kurstermine innerhalb von Mindestvorlauf und Horizont, **auch ausgebuchte** (mit 0 freien Plätzen). Gesperrte und abgesagte Termine erscheinen nicht.
 - Die Kapazität kann erhöht werden.
 - Eine Senkung **unter die Zahl aktiver Buchungen** wird abgelehnt.
 

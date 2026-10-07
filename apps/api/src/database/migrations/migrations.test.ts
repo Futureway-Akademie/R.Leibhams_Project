@@ -45,11 +45,16 @@ describe('runMigrations', () => {
     const db = freshDb();
     const result = await runMigrations(db);
     expect(result).toEqual({
-      applied: ['001-initial', '002-auth', '003-service-order'],
+      applied: ['001-initial', '002-auth', '003-service-order', '004-public-calendar'],
       alreadyApplied: [],
     });
     const records = await db.collection(MIGRATIONS_COLLECTION).find().toArray();
-    expect(records.map((r) => r._id)).toEqual(['001-initial', '002-auth', '003-service-order']);
+    expect(records.map((r) => r._id)).toEqual([
+      '001-initial',
+      '002-auth',
+      '003-service-order',
+      '004-public-calendar',
+    ]);
   });
 
   it('ist bei erneuter Ausführung idempotent', async () => {
@@ -59,7 +64,7 @@ describe('runMigrations', () => {
     const second = await runMigrations(db);
     expect(second).toEqual({
       applied: [],
-      alreadyApplied: ['001-initial', '002-auth', '003-service-order'],
+      alreadyApplied: ['001-initial', '002-auth', '003-service-order', '004-public-calendar'],
     });
     expect(await indexNames(db, COLLECTIONS.bookings)).toEqual(before);
   });

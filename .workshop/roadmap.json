@@ -418,7 +418,7 @@
           "description": "Öffentliche Endpunkte für Angebote, freie Slots und Kurstermine mit freien Plätzen, ohne personenbezogene Daten.",
           "order": 8,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-6",
             "task-2-7"
@@ -428,13 +428,21 @@
             "Antworten enthalten keine Teilnehmernamen oder sonstigen personenbezogenen Daten",
             "Tests prüfen das Antwortformat für beide Terminarten"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T13:45:50Z",
+          "completedAt": "2026-10-07T13:49:11Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "12 neue API-Tests (208 in der API): Kalenderkennung per Migration erzeugt und stabil, Owner-Abruf mit 401 ohne Sitzung, 404 für unbekannte Kalender; öffentliche Angebote ohne Anmeldung, nur aktive in Reihenfolge, ohne interne Felder, Cache 5 Min; Slots mit Wegfall belegter Einzeltermine, Cache 30 s, freie Tage; 400/404 für Gruppenkurse, deaktivierte, unbekannte und ungültige IDs; Kurstermine nur geplant, ausgebucht mit 0 Plätzen, ohne gesperrte/abgesagte/jenseits des Horizonts, ohne interne Felder, mit Mindestvorlauf; 400 für Einzeltermine und Zeiträume > 62 Tage; assertPublic blockiert zusätzliche Felder. Manuell gegen Docker-MongoDB: Migration 004, Kennung, öffentliche Angebote ohne Cookie mit Cache-Header, 6 Slots, Kurse ab Mindestvorlauf, 404 für falschen Kalender; Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/api db:migrate",
+              "curl GET /api/owner/calendar, /api/public/calendars/:id/services, /slots, /sessions",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T13:49:11Z"
           }
         },
         {
@@ -443,7 +451,7 @@
           "description": "Buchung eines Kursplatzes in einer MongoDB-Transaktion mit atomarer Kapazitätsprüfung, Idempotenzschlüssel und Outbox-Eintrag.",
           "order": 9,
           "weight": 3,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-8"
           ],

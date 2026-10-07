@@ -65,3 +65,8 @@
 {"timestamp": "2026-10-07T13:32:00Z", "type": "task_completed", "taskId": "task-2-7", "summary": "Kurstermine und wiederkehrende Kursregeln mit idempotenter Erzeugung, Ressourcenbelegung und Nachschub umgesetzt."}
 {"timestamp": "2026-10-07T13:32:00Z", "type": "decision_recorded", "summary": "Verschieben nur ohne Buchungen, Regeländerung nach 3.3, keine Kurse in Sperrzeiten, Nachschub beim Start und alle 6 h, fester Wiederholungsschlüssel."}
 {"timestamp": "2026-10-07T13:32:00Z", "type": "task_ready", "taskId": "task-2-8", "summary": "Task bereit: Öffentliche Verfügbarkeits-API."}
+{"timestamp": "2026-10-07T13:45:50Z", "type": "task_started", "taskId": "task-2-8", "summary": "Öffentliche Verfügbarkeits-API begonnen: eine Kalenderkennung je Installation, volle Kurse sichtbar, belegte Einzeltermine nicht, kurzes Caching."}
+{"timestamp": "2026-10-07T13:49:11Z", "type": "verification_passed", "taskId": "task-2-8", "summary": "Tests der öffentlichen API inkl. Datenschutzprüfung grün; manueller Abruf ohne Anmeldung erfolgreich."}
+{"timestamp": "2026-10-07T13:49:11Z", "type": "task_completed", "taskId": "task-2-8", "summary": "Öffentliche Verfügbarkeits-API für Angebote, Slots, freie Tage und Kurstermine je Kalenderkennung umgesetzt."}
+{"timestamp": "2026-10-07T13:49:11Z", "type": "decision_recorded", "summary": "Eine Kalenderkennung je Installation, volle Kurse sichtbar, belegte Einzeltermine nicht, Caching 5 Min / 30 s, strikte Antwortprüfung."}
+{"timestamp": "2026-10-07T13:49:11Z", "type": "task_ready", "taskId": "task-2-9", "summary": "Task bereit: Atomare Kursbuchung."}
