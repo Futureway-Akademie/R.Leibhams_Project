@@ -9,7 +9,7 @@
       "description": "Verbindliche Fachregeln, Monorepo-Gerüst, lokale Infrastruktur und gemeinsame Domänentypen.",
       "order": 1,
       "weight": 8,
-      "status": "ready",
+      "status": "in_progress",
       "tasks": [
         {
           "id": "task-1-1",
@@ -42,7 +42,7 @@
           "description": "pnpm-Workspaces mit apps/api, apps/worker, apps/portal, packages/shared, packages/widget und plugins/wordpress; TypeScript, ESLint, Prettier und Test-Runner einrichten.",
           "order": 2,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [],
           "definitionOfDone": [
             "pnpm install läuft ohne Fehler",
@@ -50,13 +50,20 @@
             "Workspace-Struktur entspricht docs/architecture.md",
             "Quality Gate in .workshop/specialization/QUALITY_GATE.md ist ausführbar"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T09:13:21Z",
+          "completedAt": "2026-10-07T09:15:19Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "pnpm install, lint, typecheck (5 Pakete), test (5 Smoke-Tests) und format:check grün. Gegenprobe mit temporärer Fehlerdatei: ESLint meldete no-explicit-any/no-unsafe-*, tsc meldete TS2322; Datei danach entfernt. Workspace-Struktur entspricht docs/architecture.md; QUALITY_GATE.md ist ausführbar.",
+            "commands": [
+              "pnpm add -D -w typescript@~6.0.0 eslint@^9 @eslint/js@^9 typescript-eslint eslint-config-prettier globals prettier vitest @types/node",
+              "pnpm peers check",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T09:15:19Z"
           }
         },
         {
@@ -65,7 +72,7 @@
           "description": "docker-compose mit MongoDB als Single-Node-Replica-Set und Mailpit für lokale E-Mails.",
           "order": 3,
           "weight": 1,
-          "status": "planned",
+          "status": "completed",
           "dependsOn": [
             "task-1-2"
           ],
@@ -75,13 +82,23 @@
             "Mailpit-Weboberfläche ist lokal erreichbar",
             "Start und Nutzung sind in der README dokumentiert"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T09:40:06Z",
+          "completedAt": "2026-10-07T09:42:32Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "pnpm infra:up startet MongoDB 8.0.32 und Mailpit v1.31.4 (beide healthy). infra:verify: rs0 ist PRIMARY, Transaktion abort/commit korrekt, Testmail per SMTP in Mailpit empfangen. Zusätzlich vom Host mit Node-MongoDB-Treiber über die URI aus .env.example: Transaktion geschrieben, Daten nach infra:down/up erhalten, nach infra:reset gelöscht. Mailpit-Oberfläche über 127.0.0.1:8025 per API erreichbar. Quality Gate grün. Nutzung in infra/README.md und README.md dokumentiert.",
+            "commands": [
+              "pnpm infra:up",
+              "pnpm infra:verify",
+              "node check.mjs mongodb://localhost:27017/fw_booking?replicaSet=rs0 write|read|cleanup (Host-Verbindung, Persistenz, Reset)",
+              "pnpm infra:down",
+              "pnpm infra:reset",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T09:42:32Z"
           }
         },
         {
@@ -90,7 +107,7 @@
           "description": "Gemeinsame Typen und Validierungsschemas für Angebote, Terminarten, Termine, Buchungen und API-Payloads.",
           "order": 4,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-1-1",
             "task-1-2"
@@ -141,7 +158,7 @@
       "description": "NestJS-API mit Owner-Login, Angeboten beider Terminarten, Slot-Berechnung, Kursterminen sowie atomarer Buchung, Storno und Umbuchung.",
       "order": 2,
       "weight": 35,
-      "status": "planned",
+      "status": "ready",
       "tasks": [
         {
           "id": "task-2-1",
@@ -149,7 +166,7 @@
           "description": "NestJS-Anwendung mit Konfiguration aus Umgebungsvariablen, Healthcheck und MongoDB-Verbindung.",
           "order": 1,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-1-3"
           ],

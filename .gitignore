@@ -22,3 +22,9 @@ Desktop.ini
 !.vscode/extensions.json
 !.vscode/settings.json
 
+
+# Node / Build
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo

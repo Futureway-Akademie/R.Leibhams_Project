@@ -1,0 +1,14 @@
+{
+  "name": "@fw-booking/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Hintergrund-Worker für Outbox und E-Mail (folgt in task-3-1).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

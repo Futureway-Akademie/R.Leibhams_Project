@@ -1,0 +1,5 @@
+pnpm-lock.yaml
+.workshop/
+*.md
+dist/
+coverage/

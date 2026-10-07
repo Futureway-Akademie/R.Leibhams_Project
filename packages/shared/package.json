@@ -1,0 +1,14 @@
+{
+  "name": "@fw-booking/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Gemeinsame Domänentypen, Validierung und Zeitzonen-Utilities.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

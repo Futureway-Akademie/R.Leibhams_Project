@@ -1,0 +1,14 @@
+{
+  "name": "@fw-booking/portal",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Owner-Portal und PWA (React/Vite folgt in task-5-1).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

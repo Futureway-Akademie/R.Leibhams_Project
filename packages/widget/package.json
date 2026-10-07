@@ -1,0 +1,14 @@
+{
+  "name": "@fw-booking/widget",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Öffentliches Buchungs-Widget (Build folgt in task-4-1).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

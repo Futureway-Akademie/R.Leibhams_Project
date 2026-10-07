@@ -7,3 +7,14 @@
 {"timestamp": "2026-10-07T09:00:17Z", "type": "verification_passed", "taskId": "task-1-1", "summary": "docs/domain-rules.md gegen Definition of Done geprüft."}
 {"timestamp": "2026-10-07T09:00:17Z", "type": "task_completed", "taskId": "task-1-1", "summary": "Fachregeln für Einzeltermin und Gruppenkurs in docs/domain-rules.md dokumentiert."}
 {"timestamp": "2026-10-07T09:00:17Z", "type": "decision_recorded", "summary": "Fachentscheidungen festgehalten: sofort verbindliche Buchung, Slot-Raster 20/30/45/60/90 Min, Vorlauf 24 h, Horizont 90 Tage, Storno-/Umbuchungsfrist 24 h, Telefon als Pflichtfeld."}
+{"timestamp": "2026-10-07T09:13:21Z", "type": "task_started", "taskId": "task-1-2", "summary": "Monorepo-Gerüst begonnen: pnpm -r, Vitest, ESLint 9 + Prettier, leere Pakete mit Smoke-Tests."}
+{"timestamp": "2026-10-07T09:15:19Z", "type": "verification_passed", "taskId": "task-1-2", "summary": "Lint, Typecheck, Tests und Format-Check im Monorepo grün."}
+{"timestamp": "2026-10-07T09:15:19Z", "type": "task_completed", "taskId": "task-1-2", "summary": "Monorepo-Gerüst mit pnpm-Workspaces, TypeScript 6.0, ESLint 9, Prettier und Vitest angelegt."}
+{"timestamp": "2026-10-07T09:15:19Z", "type": "decision_recorded", "summary": "Werkzeugentscheidung: pnpm -r, Vitest überall, ESLint 9 + Prettier, TypeScript 6.0 wegen typescript-eslint-Kompatibilität."}
+{"timestamp": "2026-10-07T09:15:19Z", "type": "task_ready", "taskId": "task-1-3", "summary": "Task bereit: Lokale Infrastruktur."}
+{"timestamp": "2026-10-07T09:15:19Z", "type": "task_ready", "taskId": "task-1-4", "summary": "Task bereit: Shared-Paket: Domänentypen und Validierung."}
+{"timestamp": "2026-10-07T09:40:06Z", "type": "task_started", "taskId": "task-1-3", "summary": "Lokale Infrastruktur begonnen: MongoDB 8.0 als Replica Set ohne Auth (nur localhost) mit Volume, Mailpit."}
+{"timestamp": "2026-10-07T09:42:32Z", "type": "verification_passed", "taskId": "task-1-3", "summary": "Replica Set, Transaktionen, Persistenz, Reset und Mailempfang lokal geprüft."}
+{"timestamp": "2026-10-07T09:42:32Z", "type": "task_completed", "taskId": "task-1-3", "summary": "Lokale Infrastruktur mit MongoDB 8.0 (Replica Set) und Mailpit per docker-compose eingerichtet."}
+{"timestamp": "2026-10-07T09:42:32Z", "type": "decision_recorded", "summary": "Lokale MongoDB ohne Auth, nur an 127.0.0.1 gebunden, Daten im Docker-Volume."}
+{"timestamp": "2026-10-07T09:42:32Z", "type": "task_ready", "taskId": "task-2-1", "summary": "Task bereit: API-Grundgerüst."}

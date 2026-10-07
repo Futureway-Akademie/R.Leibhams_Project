@@ -1,0 +1,14 @@
+{
+  "name": "@fw-booking/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Buchungs-API (NestJS folgt in task-2-1).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

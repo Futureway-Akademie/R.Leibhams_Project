@@ -55,3 +55,31 @@ Buchungen sind sofort verbindlich. Slot-Raster je Einzeltermin-Angebot wählbar 
 ### Begründung
 
 Vom Owner gewählte Produktregeln; die Telefonnummer dient kurzfristigen Rückfragen und muss in den Datenschutzhinweisen des Kunden benannt werden.
+
+## 2026-10-07 – Monorepo-Werkzeuge
+
+### Kontext
+
+Für alle Pakete wird ein einheitliches Gerüst für Lint, Typecheck, Tests und Formatierung benötigt.
+
+### Entscheidung
+
+pnpm-Workspaces (`apps/*`, `packages/*`) mit `pnpm -r` statt Turborepo; Vitest in allen Paketen; ESLint 9 mit typbasiertem `typescript-eslint` (strictTypeChecked) und Prettier über eine zentrale Root-Konfiguration. TypeScript ist auf 6.0 festgelegt, weil `typescript-eslint` 8 TypeScript 7 noch nicht unterstützt. Frameworks (NestJS, React/Vite, Widget-Build) werden erst in ihren eigenen Tasks ergänzt. `plugins/wordpress` ist kein Workspace-Paket.
+
+### Begründung
+
+Ein Runner und eine Lint-Konfiguration halten das Monorepo einfach; ohne Caching-Bedarf bei fünf Paketen bringt Turborepo keinen Mehrwert.
+
+## 2026-10-07 – Lokale Infrastruktur
+
+### Kontext
+
+Buchungen benötigen MongoDB-Transaktionen, die nur in einem Replica Set verfügbar sind; E-Mails sollen lokal ohne echten Versand prüfbar sein.
+
+### Entscheidung
+
+docker-compose unter `infra/` mit MongoDB 8.0 als Single-Node-Replica-Set `rs0` und Mailpit (v1.31.4). Lokal ohne Authentifizierung, alle Ports nur an `127.0.0.1` gebunden. Daten liegen in einem Docker-Volume; `pnpm infra:reset` löscht sie bewusst. Das Replica Set initialisiert sich über den Healthcheck selbst.
+
+### Begründung
+
+Minimaler Einrichtungsaufwand für die Entwicklung bei echter Transaktionsfähigkeit. Authentifizierung und Netzwerkbeschränkung für Kundeninstallationen werden in Phase 7 behandelt.

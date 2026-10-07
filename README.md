@@ -1,8 +1,40 @@
-# Futureway Workshop Repository Template
+# WP Buchung Kalender plus PWA
 
-Dieses Repository ist das technologie- und KI-anbieterunabhängige Master-Template für einen geführten Futureway-Workshop. Die konkrete Projektidee wird erst nach dem Klonen in einem daraus erzeugten Teilnehmer-Repository definiert.
+Eigenständige Buchungsanwendung für Einzeltermine und Gruppenkurse: API mit MongoDB, eingebettetes WordPress-Widget ohne iframe und ein Verwaltungsportal als installierbare PWA. Je Kunde eine getrennte Installation.
 
-Coding-Agenten müssen vor jeder Änderung die Workshop-Dateien lesen. Projektplanung, Fortschritt und wichtige Entscheidungen werden zentral im Repository dokumentiert, damit jederzeit zwischen kompatiblen Coding-Agenten gewechselt werden kann. Eine vorherige Chat-Historie ist nicht erforderlich.
+- Projektbrief: `.workshop/PROJECT_BRIEF.md`
+- Architektur: `docs/architecture.md`
+- Fachregeln: `docs/domain-rules.md`
+- Entscheidungen: `docs/decisions.md`
+
+## Entwicklung
+
+Voraussetzungen: Node.js 24 (siehe `.nvmrc`), Docker Desktop und pnpm 12 (über Corepack, Version in `package.json` → `packageManager`).
+
+```bash
+corepack enable pnpm   # falls keine Schreibrechte: --install-directory <Verzeichnis im PATH>
+pnpm install
+```
+
+| Befehl | Zweck |
+|---|---|
+| `pnpm lint` | ESLint (typbasiert) über das gesamte Repository |
+| `pnpm typecheck` | `tsc --noEmit` in allen Workspace-Paketen |
+| `pnpm test` | Vitest in allen Workspace-Paketen |
+| `pnpm format` / `pnpm format:check` | Prettier schreiben bzw. prüfen |
+| `pnpm infra:up` / `infra:down` / `infra:reset` / `infra:verify` | Lokale MongoDB und Mailpit (siehe `infra/README.md`) |
+
+## Struktur
+
+```
+apps/api          Buchungs-API
+apps/worker       Hintergrund-Worker (Outbox, E-Mail)
+apps/portal       Owner-Portal und PWA
+packages/shared   Domänentypen, Validierung, Zeitzonen
+packages/widget   Öffentliches Buchungs-Widget
+plugins/wordpress PHP-Plugin (nicht Teil des pnpm-Workspaces)
+infra/            docker-compose für lokale MongoDB und Mailpit
+```
 
 ## Für Coding-Agenten
 
@@ -10,20 +42,4 @@ Coding-Agenten müssen vor jeder Änderung die Workshop-Dateien lesen. Projektpl
 - Claude Code: Lies zuerst `CLAUDE.md`.
 - Andere Coding-Agenten: Lies zuerst `.agents/generic/INSTRUCTIONS.md`.
 
-Danach gelten für alle Agenten dieselben autoritativen Dateien unter `.workshop/`.
-
-## Verwendung
-
-Dieses Repository wird als Master-Template gepflegt. Erst in einem abgeleiteten Teilnehmer-Repository werden Projektidee, Workshop-Typ, Technologie, Starter-Code und projektspezifische Rahmenbedingungen festgelegt.
-
-## Workshop Repository Standard v1.1
-
-Der Standard trennt den zentralen Projektzustand unter `.workshop/` von den schlanken, tool-spezifischen Adaptern. Roadmap, Task-Verifikation und abgeleiteter Fortschritt bleiben dadurch auch bei einem Agentenwechsel nachvollziehbar. Das Dashboard arbeitet mit dem synchronisierten Repository-Stand; lokale, noch nicht synchronisierte Änderungen sind dort nicht automatisch sichtbar.
-
-Dieses Master-Template wird später in konkrete Workshop-Repositories abgeleitet. Workshop-Typ, Technologien, Starter-Code, Setup, technische Constraints, Quality Gate und erlaubte Tools oder Libraries werden dort primär unter `.workshop/specialization/` ergänzt. Der zentrale Workflow in `.workshop/AGENT_PROTOCOL.md` bleibt davon unabhängig und darf durch die Spezialisierung nicht überschrieben werden.
-
-## Erwarteter Erststart
-
-Wenn ein frisch erzeugtes Teilnehmerrepository noch nicht initialisiert ist und der Nutzer beispielsweise `starte` eingibt, lautet die erwartete Agent-Antwort: `Was möchtest du entwickeln?`
-
-Danach wartet der Agent auf die Projektidee.
+Danach gelten für alle Agenten dieselben autoritativen Dateien unter `.workshop/`. Das Dashboard arbeitet mit dem synchronisierten Repository-Stand; lokale, noch nicht synchronisierte Änderungen sind dort nicht automatisch sichtbar.
