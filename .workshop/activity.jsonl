@@ -24,3 +24,7 @@
 {"timestamp": "2026-10-07T10:01:20Z", "type": "decision_recorded", "summary": "Zod 4, englische Code-Bezeichner, ObjectId-Strings, ISO-8601-UTC mit separater Zeitzone, strikte öffentliche Antwortschemas."}
 {"timestamp": "2026-10-07T10:01:20Z", "type": "task_ready", "taskId": "task-1-5", "summary": "Task bereit: Zeitzonen-Utilities."}
 {"timestamp": "2026-10-07T10:01:20Z", "type": "task_ready", "taskId": "task-4-1", "summary": "Task bereit: Widget-Build."}
+{"timestamp": "2026-10-07T10:05:47Z", "type": "task_started", "taskId": "task-1-5", "summary": "Zeitzonen-Utilities begonnen: temporal-polyfill für Umrechnung, Intl-Formatierer für Anzeige."}
+{"timestamp": "2026-10-07T10:07:21Z", "type": "verification_passed", "taskId": "task-1-5", "summary": "Zeitzonen-Tests inkl. Sommer-/Winterzeit grün, auch unter abweichenden Systemzeitzonen."}
+{"timestamp": "2026-10-07T10:07:21Z", "type": "task_completed", "taskId": "task-1-5", "summary": "Zeitzonen-Utilities und Intl-Formatierer im Shared-Paket umgesetzt. Phase 1 abgeschlossen."}
+{"timestamp": "2026-10-07T10:07:21Z", "type": "decision_recorded", "summary": "temporal-polyfill für Umrechnung, Intl für Anzeige; Shared-Paket als sideEffects:false markiert."}

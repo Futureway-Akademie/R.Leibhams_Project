@@ -12,6 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "temporal-polyfill": "^1.0.5",
     "zod": "^4.6.5"
-  }
+  },
+  "sideEffects": false
 }

@@ -9,7 +9,7 @@
       "description": "Verbindliche Fachregeln, Monorepo-Gerüst, lokale Infrastruktur und gemeinsame Domänentypen.",
       "order": 1,
       "weight": 8,
-      "status": "in_progress",
+      "status": "completed",
       "tasks": [
         {
           "id": "task-1-1",
@@ -138,7 +138,7 @@
           "description": "Umrechnung lokaler Owner-Zeiten in UTC inklusive Behandlung nicht existierender und doppelter Uhrzeiten bei Zeitumstellung.",
           "order": 5,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-1-4"
           ],
@@ -147,13 +147,22 @@
             "Tests für Sommer- und Winterzeitumstellung in Europe/Berlin sind grün",
             "Nicht existierende und doppelte lokale Uhrzeiten werden definiert behandelt"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-07T10:05:47Z",
+          "completedAt": "2026-10-07T10:07:21Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "26 neue Tests (130 im Shared-Paket) für localToUtc, utcToLocal, localDayRangeUtc, addMinutesUtc, Kalenderrechnung und Intl-Formatierer. Europe/Berlin: 29.03.2026 02:00/02:30 übersprungen, Tag 23 h; 25.10.2026 02:30 → erstes Vorkommen 00:30Z, Tag 25 h; Termin über die Umstellung zählt echte Minuten. Gegenprobe America/New_York. Tests zusätzlich mit Systemzeitzonen America/Los_Angeles, Asia/Tokyo und UTC grün. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/shared test",
+              "TZ=America/Los_Angeles pnpm --filter @fw-booking/shared test",
+              "TZ=Asia/Tokyo pnpm --filter @fw-booking/shared test",
+              "TZ=UTC pnpm --filter @fw-booking/shared test",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-07T10:07:21Z"
           }
         }
       ]

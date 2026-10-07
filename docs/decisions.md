@@ -97,3 +97,17 @@ API, Portal und Widget benötigen dieselben Typen und Eingaberegeln.
 ### Begründung
 
 Eine Quelle für Typen und Regeln verhindert Abweichungen zwischen Frontend und API; datenbankabhängige Regeln (z. B. Kapazität nicht unter gebuchte Plätze) bleiben bewusst in der API.
+
+## 2026-10-07 – Zeitzonen-Umrechnung und Anzeige
+
+### Kontext
+
+Öffnungszeiten und Kursregeln sind lokal, Termine werden in UTC gespeichert. Node 24 bietet noch kein natives Temporal.
+
+### Entscheidung
+
+Umrechnung in `packages/shared/src/time/convert.ts` mit `temporal-polyfill`: übersprungene lokale Zeiten liefern `{ ok: false, reason: 'skipped' }`, doppelte ergeben das erste Vorkommen (`disambiguation: 'earlier'`). Anzeige in `time/format.ts` ausschließlich über `Intl.DateTimeFormat` (Standard `de-DE`), damit Widget und Portal den Polyfill nicht laden müssen; `packages/shared` ist als `sideEffects: false` markiert.
+
+### Begründung
+
+Temporal hat die benötigte Disambiguierung eingebaut und kann später durch die native Implementierung ersetzt werden; die Trennung hält das Widget-Bundle klein.
