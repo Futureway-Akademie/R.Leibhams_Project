@@ -132,13 +132,13 @@ describe('Erfolgreiche Kursbuchung', () => {
 
     const audit = await collections(t.db).auditEvents.findOne({ action: 'booking.created' });
     expect(audit?.actor).toEqual({ type: 'participant', id: null });
-    expect(JSON.stringify(audit)).not.toMatch(/Erika|example\.test|030/);
+    expect(JSON.stringify(audit)).not.toMatch(/Erika|example\.test|030 123456/);
   });
 
   it('enthält weder Teilnehmerdaten noch Verwaltungslink in der Antwort', async () => {
     const { session } = await setup();
     const response = await book(body(session._id)).expect(201);
-    expect(JSON.stringify(response.body)).not.toMatch(/Erika|example\.test|030|token/i);
+    expect(JSON.stringify(response.body)).not.toMatch(/Erika|example\.test|030 123456|token/i);
   });
 });
 
@@ -289,16 +289,5 @@ describe('Eingaben', () => {
   it('verlangt JSON und benötigt keine Anmeldung', async () => {
     const { session } = await setup();
     await http().post(url).type('form').send({ sessionId: session._id.toHexString() }).expect(415);
-  });
-
-  it('nimmt Einzeltermine erst mit task-2-10 an', async () => {
-    await book({
-      type: 'single',
-      serviceId: new ObjectId().toHexString(),
-      startsAt: '2026-12-01T09:00:00Z',
-      participant: { name: 'Max Muster', email: 'max@example.test', phone: '030 123456' },
-      idempotencyKey: newKey(),
-      privacyAccepted: true,
-    }).expect(400);
   });
 });

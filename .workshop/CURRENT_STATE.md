@@ -2,7 +2,7 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 31,63 % (31 von 98 Gewichtspunkten, 15 von 49 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 34,69 % (34 von 98 Gewichtspunkten, 16 von 49 Tasks).
 
 ## Aktive Phase
 
@@ -14,6 +14,7 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
+- task-2-10 – Atomare Einzeltermin-Buchung (Belegung der Dauer in einer Transaktion, gemeinsamer Abschluss mit Kursbuchung; 241 API-Tests)
 - task-2-16 – Slot-Startzeiten im 5-Minuten-Raster, ohne Puffer (Migration 006; Bartrasur 20 Min in 12–13 Uhr → 12:00–12:40)
 - task-2-9 – Atomare Kursbuchung (`POST /api/public/calendars/:calendarId/bookings`, Transaktion mit bedingtem `$inc`, Idempotenz, Outbox, Pflicht-Datenschutzbestätigung, Migration 005; 227 API-Tests)
 - task-2-8 – Öffentliche Verfügbarkeits-API
@@ -28,7 +29,11 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-2-10 – Atomare Einzeltermin-Buchung (Planung abgestimmt: nur berechnete Startzeiten, unbegrenzt je E-Mail, Fehler `slot_taken`/`not_bookable`)
+- task-2-11 – Nebenläufigkeitstests
+- task-2-12 – Action-Tokens und Storno
+- task-2-14 – Teilnehmerliste und Owner-Absage
+- task-2-15 – Missbrauchsschutz und CORS
+- task-3-1 – Worker mit Job-Leases
 - task-4-1 – Widget-Build
 - task-5-1 – Portal-Gerüst und Login
 - task-7-1 – Geschützter Entwicklerzugang
@@ -46,8 +51,9 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Einzeltermine bieten jede passende 
 - PHP ist auf dem Entwicklungsrechner nicht installiert; wird für task-4-7 benötigt.
 - In der lokalen Datenbank existiert kein Owner-Konto; bei Bedarf mit `pnpm --filter @fw-booking/api owner:create --email …` anlegen.
 - `availableDates` berechnet jeden Tag einzeln (mehrere Abfragen pro Tag); bei Bedarf später optimieren.
-- Bei wiederholten Läufen der Buchungstests schlugen einmal (in rund 40 Läufen) 2 Tests fehl. Die Ausgabe wurde nicht gesichert; der Fehler ließ sich danach weder durch Wiederholung, Parallelbetrieb noch einen Stresstest reproduzieren. Vermutung: Zeitüberschreitung unter Last, nicht bestätigt. In task-2-11 gezielt mit protokollierten Wiederholungsläufen prüfen.
+- `progress.json` wird von einem strikten Validator (ajv ohne Toleranz) bei manchen korrekt gerundeten Werten abgelehnt, z. B. `overall: 34.69`, weil `multipleOf: 0.01` im Schema an Gleitkomma-Rundung scheitert (34.69 / 0.01 = 3468.9999999999995). Mit Toleranz (`--multiple-of-precision=2`) gültig. Betrifft das Schema der Workshop-Vorlage bzw. das Dashboard; nicht eigenmächtig geändert.
+- Geklärt: Der sporadische Testfehlschlag aus task-2-9 war ein Testfehler (Prüfmuster `/030/` traf Ziffern in Hex-IDs), behoben in task-2-10.
 
 ## Empfohlener nächster Schritt
 
-task-2-10 (Atomare Einzeltermin-Buchung, Planung bereits abgestimmt), danach task-2-11 (Nebenläufigkeitstests inkl. Prüfung des einmaligen Testfehlschlags).
+task-2-12 (Action-Tokens und Storno) als nächster Baustein des Buchungsablaufs; task-2-11 (Nebenläufigkeitstests) ist durch die Gleichzeitigkeitstests in task-2-9 und task-2-10 bereits teilweise vorbereitet.

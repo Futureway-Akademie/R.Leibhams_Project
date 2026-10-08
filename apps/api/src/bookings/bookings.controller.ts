@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Param, Post, Res } from '@nestjs/common';
 import { bookingConfirmationSchema, bookingRequestSchema } from '@fw-booking/shared';
 import type { BookingConfirmation, BookingRequest } from '@fw-booking/shared';
 import type { Response } from 'express';
@@ -26,11 +26,10 @@ export class BookingsController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<BookingConfirmation> {
     const settings = await this.calendar.settingsFor(calendarId);
-    if (body.type !== 'group') {
-      // Einzeltermine folgen mit task-2-10.
-      throw new BadRequestException('Einzeltermine sind noch nicht buchbar');
-    }
-    const result = await this.bookings.bookGroup(body, settings);
+    const result =
+      body.type === 'group'
+        ? await this.bookings.bookGroup(body, settings)
+        : await this.bookings.bookSingle(body, settings);
     res.status(result.replayed ? 200 : 201);
     res.setHeader('Cache-Control', 'no-store');
     return assertPublic(bookingConfirmationSchema, {

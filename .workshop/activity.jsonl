@@ -84,3 +84,12 @@
 {"timestamp": "2026-10-08T08:23:21Z", "type": "verification_passed", "taskId": "task-2-16", "summary": "Slot-Tests für 5-Minuten-Raster ohne Puffer inkl. Zeitumstellung grün; Bartrasur-Beispiel manuell bestätigt."}
 {"timestamp": "2026-10-08T08:23:21Z", "type": "task_completed", "taskId": "task-2-16", "summary": "Startzeiten im 5-Minuten-Raster ohne Puffer umgesetzt; slotGridMinutes und bufferMinutes entfernt (Migration 006)."}
 {"timestamp": "2026-10-08T08:23:21Z", "type": "task_ready", "taskId": "task-2-10", "summary": "Task bereit: Atomare Einzeltermin-Buchung."}
+{"timestamp": "2026-10-08T08:36:25Z", "type": "task_started", "taskId": "task-2-10", "summary": "Einzeltermin-Buchung begonnen: nur berechnete Startzeiten, Belegung der Dauer in einer Transaktion, unbegrenzt je E-Mail."}
+{"timestamp": "2026-10-08T08:43:14Z", "type": "verification_passed", "taskId": "task-2-10", "summary": "Einzeltermin-Buchungstests inkl. Gleichzeitigkeit grün; 20 protokollierte Wiederholungsläufe fehlerfrei."}
+{"timestamp": "2026-10-08T08:43:14Z", "type": "task_completed", "taskId": "task-2-10", "summary": "Atomare Einzeltermin-Buchung mit Ressourcenbelegung umgesetzt; gemeinsamer Abschluss für Kurs- und Einzelbuchung."}
+{"timestamp": "2026-10-08T08:43:14Z", "type": "decision_recorded", "summary": "Ursache des sporadischen Testfehlschlags aus task-2-9 geklärt (Prüfmuster traf Ziffern in Hex-IDs) und Tests korrigiert."}
+{"timestamp": "2026-10-08T08:43:14Z", "type": "task_ready", "taskId": "task-2-11", "summary": "Task bereit: Nebenläufigkeitstests."}
+{"timestamp": "2026-10-08T08:43:14Z", "type": "task_ready", "taskId": "task-2-12", "summary": "Task bereit: Action-Tokens und Storno."}
+{"timestamp": "2026-10-08T08:43:14Z", "type": "task_ready", "taskId": "task-2-14", "summary": "Task bereit: Teilnehmerliste und Owner-Absage."}
+{"timestamp": "2026-10-08T08:43:14Z", "type": "task_ready", "taskId": "task-2-15", "summary": "Task bereit: Missbrauchsschutz und CORS."}
+{"timestamp": "2026-10-08T08:43:14Z", "type": "task_ready", "taskId": "task-3-1", "summary": "Task bereit: Worker mit Job-Leases."}

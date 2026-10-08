@@ -486,7 +486,7 @@
           "description": "Buchung eines Einzeltermins mit Sperrung der Ressource über Belegungseinheiten mit eindeutigem Index, übergreifend zwischen Angeboten und Kursen.",
           "order": 10,
           "weight": 3,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-9",
             "task-2-16"
@@ -497,13 +497,21 @@
             "Kurstermine blockieren Einzeltermine derselben Ressource",
             "Idempotenz und Outbox-Eintrag funktionieren wie bei Kursbuchungen"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T08:36:25Z",
+          "completedAt": "2026-10-08T08:43:14Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "14 neue API-Tests (241 in der API): Buchung belegt genau die Dauer (6 Einheiten für 30 Min) mit Buchung, Auftrag und Audit ohne Teilnehmerdaten; gebuchte Zeit verschwindet aus den Startzeiten (11 überlappende entfallen); mehrere Einzeltermine je E-Mail; Idempotenz (Wiederholung 200, andere Startzeit 409); slot_taken bei belegter Zeit ohne Schreibzugriffe, bei Überschneidung mit anderem Angebot und mit Kursbelegung; 20 gleichzeitige Anfragen auf dieselbe Zeit → 1 Buchung, gleichzeitige überlappende Anfragen verschiedener Angebote → 1 Buchung; not_bookable außerhalb der Öffnungszeit, außerhalb des 5-Minuten-Rasters, innerhalb des Mindestvorlaufs; 404 für unbekannte, deaktivierte und Kurs-Angebote; Datenschutzbestätigung. Buchungstests 20× wiederholt mit gesicherten Logs: 20/20 grün. Dabei die Ursache des sporadischen Fehlschlags aus task-2-9 gefunden (Prüfmuster /030/ traf Ziffernfolgen in Hex-IDs) und behoben. Manuell gegen Docker-MongoDB: 31 Startzeiten, Buchung 10:00 201, Doppelklick 200, 10:15 slot_taken, 13:00 not_bookable, danach 20 Startzeiten, 6 Einheiten belegt; Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api test",
+              "pnpm exec vitest run src/bookings (20× mit Logs)",
+              "curl POST /api/public/calendars/:id/bookings (type single)",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T08:43:14Z"
           }
         },
         {
@@ -512,7 +520,7 @@
           "description": "Integrationstests mit vielen gleichzeitigen Buchungsanfragen für beide Terminarten.",
           "order": 11,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-10"
           ],
@@ -536,7 +544,7 @@
           "description": "Zufällige, gehashte, begrenzt gültige Tokens zum Abrufen der eigenen Buchung; Storno erst nach bewusster Bestätigung.",
           "order": 12,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-10"
           ],
@@ -585,7 +593,7 @@
           "description": "Owner sieht Buchungen und Teilnehmer je Termin und kann Termine nachvollziehbar absagen.",
           "order": 14,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-10"
           ],
@@ -610,7 +618,7 @@
           "description": "Rate Limiting für öffentliche Endpunkte, konsequente Eingabevalidierung und Domainfreigabe per CORS.",
           "order": 15,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-10"
           ],
@@ -671,7 +679,7 @@
       "description": "Separater Worker verarbeitet die Outbox mit Leases und Wiederholungen und versendet transaktionale E-Mails.",
       "order": 3,
       "weight": 8,
-      "status": "planned",
+      "status": "ready",
       "tasks": [
         {
           "id": "task-3-1",
@@ -679,7 +687,7 @@
           "description": "Node.js-Worker beansprucht Outbox-Jobs mit zeitlich begrenzten Leases und Wiederholungsregeln.",
           "order": 1,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-10"
           ],

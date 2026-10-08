@@ -265,3 +265,17 @@ Es gibt keinen Puffer, weder für Einzeltermine noch für Kurse. Die angegebene 
 ### Begründung
 
 Einfacher für Owner und Kunden: Eine einzige Angabe bestimmt, wie lange ein Termin den Kalender belegt.
+
+## 2026-10-08 – Einzeltermin-Buchung und Ursache des sporadischen Testfehlschlags
+
+### Kontext
+
+Einzeltermine müssen gleichzeitig gebucht werden können, ohne dass sich Termine überschneiden. Außerdem war in task-2-9 einmal ein nicht reproduzierbarer Testfehlschlag aufgetreten.
+
+### Entscheidung
+
+Einzelbuchung nur zu berechneten Startzeiten; die Transaktion belegt die Einheiten der Dauer, der eindeutige Index auf `resourceOccupancy` ist die harte Garantie (`slot_taken` bei Überschneidung, `not_bookable` ohne berechnete Startzeit). Kurs- und Einzelbuchung teilen einen gemeinsamen Abschluss (Idempotenz, Outbox, Audit, Fehlerbehandlung). Tests, die das Fehlen von Telefonnummern prüfen, vergleichen mit den vollständigen Testwerten statt mit kurzen Ziffernfolgen.
+
+### Begründung
+
+Der sporadische Fehlschlag aus task-2-9 ist geklärt: Das Prüfmuster `/030/` traf gelegentlich zufällige Ziffernfolgen in Hex-IDs der Antwort. Es handelte sich um einen Testfehler, nicht um einen Fehler der Buchungslogik. Nach der Korrektur liefen die Buchungstests 20 von 20 Mal fehlerfrei.
