@@ -57,7 +57,6 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Bestätigungsmail mit Absender und 
 - PHP ist auf dem Entwicklungsrechner nicht installiert; wird für task-4-7 benötigt.
 - In der lokalen Datenbank existiert kein Owner-Konto; bei Bedarf mit `pnpm --filter @fw-booking/api owner:create --email …` anlegen.
 - `availableDates` berechnet jeden Tag einzeln (mehrere Abfragen pro Tag); bei Bedarf später optimieren.
-- `progress.json` wird von einem strikten Validator (ajv ohne Toleranz) bei manchen korrekt gerundeten Werten abgelehnt, z. B. `overall: 34.69`, weil `multipleOf: 0.01` im Schema an Gleitkomma-Rundung scheitert (34.69 / 0.01 = 3468.9999999999995). Mit Toleranz (`--multiple-of-precision=2`) gültig. Betrifft das Schema der Workshop-Vorlage bzw. das Dashboard; nicht eigenmächtig geändert.
 - Geklärt: Der sporadische Testfehlschlag aus task-2-9 war ein Testfehler (Prüfmuster `/030/` traf Ziffern in Hex-IDs), behoben in task-2-10.
 
 ## Hinweise zur Arbeitsumgebung
@@ -68,7 +67,7 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Bestätigungsmail mit Absender und 
 - **Worker:** `pnpm --filter @fw-booking/worker dev` (gleiche `.env`). Benötigt zusätzlich `MAIL_FROM_ADDRESS`, `BUSINESS_NAME` und `MANAGE_PAGE_URL` (siehe `.env.example`); die lokale `.env` enthält sie noch nicht und wurde bewusst nicht verändert. Mails landen lokal in Mailpit (http://127.0.0.1:8025). Registriert ist bisher nur `booking_confirmation`. Migrationen liegen jetzt in `packages/db/src/migrations/`, ausgeführt weiterhin über `pnpm --filter @fw-booking/api db:migrate`.
 - **CORS lokal:** Für Widget-Tests im Browser den Origin des Entwicklungsservers in `.env` unter `CORS_ALLOWED_ORIGINS` eintragen; ohne Eintrag lehnt die API Browser-Anfragen anderer Origins mit 403 ab. Für manuelle Lasttests die Grenzen per `RATE_LIMIT_*=0` abschalten.
 - **Manuelle Tests:** Bisheriges Vorgehen je Task: temporären Owner mit zufälligem Passwort per `owner:create` anlegen, API mit `pnpm --filter @fw-booking/api dev` starten, Endpunkte per `curl` prüfen, danach Testdaten und Owner in der Docker-MongoDB wieder entfernen. Verwaltungslinks für Tests entstehen bis task-3-2 durch direktes Einfügen eines SHA-256-Token-Hashes in `actionTokens`.
-- **Prüfung der Zustandsdateien:** `roadmap.json` und `project.json` mit `ajv` gegen die Schemas; `progress.json` mit `--multiple-of-precision=2` (siehe Bekannte Probleme).
+- **Prüfung der Zustandsdateien:** `roadmap.json`, `project.json` und `progress.json` mit `ajv` gegen die Schemas unter `.workshop/schemas/`.
 - **Tests:** Bei Änderungen am Buchungskern zusätzlich `pnpm --filter @fw-booking/api test:concurrency` (7 Szenarien) und mehrere protokollierte Läufe von `pnpm exec vitest run src/bookings` (in `apps/api`). Prüfungen auf fehlende personenbezogene Daten immer mit vollständigen Testwerten, nicht mit kurzen Ziffernfolgen (Hex-IDs).
 - **Arbeitsweise mit dem Teilnehmer:** Pro Task wird gemeinsam geplant (offene Entscheidungen als Auswahlfragen mit Empfehlung), dann umgesetzt; nach Abschluss pusht der Agent auf Wunsch („push zu github“) direkt auf `main`.
 
