@@ -6,6 +6,7 @@ import { publicCalendarMigration } from './004-public-calendar.js';
 import { bookingPrivacyMigration } from './005-booking-privacy.js';
 import { removeBufferAndGridMigration } from './006-remove-buffer-and-grid.js';
 import { bookingEmailIndexMigration } from './007-booking-email-index.js';
+import { outboxLeasesMigration } from './008-outbox-leases.js';
 import type { Migration } from './migration.js';
 
 /** Alle Migrationen in Ausführungsreihenfolge. Neue Schritte nur anhängen. */
@@ -17,6 +18,7 @@ export const MIGRATIONS: readonly Migration[] = [
   bookingPrivacyMigration,
   removeBufferAndGridMigration,
   bookingEmailIndexMigration,
+  outboxLeasesMigration,
 ];
 
 export const MIGRATIONS_COLLECTION = '_migrations';

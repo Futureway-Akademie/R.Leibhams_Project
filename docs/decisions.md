@@ -349,3 +349,17 @@ Freigegebene Origins per Umgebungsvariable `CORS_ALLOWED_ORIGINS` (je Installati
 ### Begründung
 
 Je Installation läuft eine API-Instanz; Zähler im Speicher vermeiden einen Datenbank-Schreibzugriff bei jedem Slot-Abruf, ein Neustart setzt sie lediglich zurück. Das /64-Netz verhindert das einfache Umgehen über wechselnde IPv6-Adressen. Das Limit je E-Mail ergänzt die IP-Grenzen gegen verteilte Massenbuchungen, ohne die Entscheidung „beliebig viele Einzeltermine je E-Mail“ im Alltag einzuschränken. Origins in der Konfiguration halten die Freigabe beim Betreiber und brauchen keinen zusätzlichen Owner-Endpunkt.
+
+## 2026-10-08 – Worker mit Job-Leases
+
+### Kontext
+
+Bestätigungen, Erinnerungen und weitere Mails müssen unabhängig von Seitenaufrufen zuverlässig versendet werden. Mehrere Worker dürfen einen Auftrag nicht gleichzeitig bearbeiten, abgestürzte Worker dürfen keine Aufträge dauerhaft blockieren, und Versandfehler dürfen weder Buchungen beeinflussen noch Zugangsdaten preisgeben.
+
+### Entscheidung
+
+Eigenständiger Node.js-Worker ohne NestJS. Datenmodell und Migrationen liegen im neuen Paket `@fw-booking/db`, das API und Worker gemeinsam nutzen. Atomare Beanspruchung per `findOneAndUpdate` mit Lease von 5 Minuten ohne Verlängerung und zufälligem Lease-Token; Ergebnisse werden nur mit passendem Token geschrieben. Handler-Zeitlimit 4 Minuten mit `AbortSignal`. 6 Versuche mit Abständen 1, 5, 15, 60, 180 Minuten (±10 %), dauerhafte Fehler sofort `failed`; gespeichert wird nur eine Fehlerkategorie. Nur Jobtypen mit registriertem Handler werden beansprucht. Versendete Jobs werden 30 Tage nach dem Versand per TTL-Index gelöscht, fehlgeschlagene bleiben. Zustellung „mindestens einmal“: Nach einem Absturz zwischen Versand und Abschluss kann ein Job erneut ausgeführt werden.
+
+### Begründung
+
+Ein gemeinsames Datenmodell verhindert auseinanderlaufende Typen zwischen API und Worker. Eine kurze Lease ohne Heartbeat genügt für Mailversand im Sekundenbereich und hält den Code einfach; das Token schützt vor verspäteten Ergebnissen. Die Backoff-Folge überbrückt Mailserver-Ausfälle von einigen Stunden, bevor ein Auftrag im Portal als fehlgeschlagen erscheint. Liegenlassen statt Fehlschlagen nicht registrierter Typen erlaubt es, Mail-Arten schrittweise einzuführen. Die Löschfrist begrenzt das Wachstum der Outbox, ohne die Fehleranzeige zu verlieren.

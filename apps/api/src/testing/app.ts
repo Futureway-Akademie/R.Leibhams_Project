@@ -5,7 +5,7 @@ import request from 'supertest';
 import { createApp } from '../app.factory.js';
 import { createOwner } from '../auth/owners.js';
 import type { AppConfig } from '../config/config.js';
-import { runMigrations } from '../database/migrations/runner.js';
+import { runMigrations } from '@fw-booking/db';
 import { testConfig } from './mongo.js';
 
 let dbCounter = 0;

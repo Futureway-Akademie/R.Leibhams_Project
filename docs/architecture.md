@@ -21,6 +21,7 @@ flowchart TD
 apps/api          Buchungsregeln, Auth, REST
 apps/worker       Outbox, Leases, E-Mail
 apps/portal       Owner-Portal und PWA
+packages/db       Datenmodell, Collections, Migrationen (API und Worker)
 packages/shared   Domänentypen, Validierung, Zeitzonen
 packages/widget   Öffentliches Widget
 plugins/wordpress PHP-Plugin
@@ -42,7 +43,7 @@ Kurse blockieren die Ressource ebenfalls, sodass Einzeltermine sich nicht mit Ku
 
 `settings`, `owners`, `services`, `openingHours`, `availabilityExceptions`, `courseRules`, `sessions`, `bookings`, `resourceOccupancy`, `actionTokens`, `outboxJobs`, `auditEvents` sowie `_migrations` für angewendete Migrationen.
 
-Dokumenttypen: `apps/api/src/database/documents.ts`. Zeitpunkte sind BSON-Dates in UTC. Struktur, Validatoren und Indizes entstehen über versionierte Migrationen in `apps/api/src/database/migrations/` und werden mit `pnpm --filter @fw-booking/api db:migrate` angewendet (nicht beim API-Start).
+Dokumenttypen und Collection-Zugriffe: `packages/db/src/documents.ts` (Paket `@fw-booking/db`, von API und Worker genutzt; `apps/api/src/database/documents.ts` re-exportiert es). Zeitpunkte sind BSON-Dates in UTC. Struktur, Validatoren und Indizes entstehen über versionierte Migrationen in `packages/db/src/migrations/` und werden mit `pnpm --filter @fw-booking/api db:migrate` angewendet (nicht beim API- oder Worker-Start).
 
 | Schutz | Umsetzung |
 |---|---|
@@ -169,6 +170,19 @@ Unbekannte Kalender sowie unbekannte oder deaktivierte Angebote ergeben 404. Jed
 | `POST /api/public/manage/cancel` `{ confirm: true }` | Storno in einer Transaktion: Status, Freigabe von Kursplatz bzw. Belegungseinheiten, Entwertung aller Links, Outbox-Auftrag `booking_cancellation`, Audit |
 
 `ActionTokenService.issue` erzeugt Links (für den Mail-Worker ab task-3-2); unbekannte Tokens ergeben 404, abgelaufene 410 (`link_expired`), überschrittene Frist 409 (`change_deadline_passed`). Antworten tragen `Cache-Control: no-store` und `Referrer-Policy: no-referrer`.
+
+## Hintergrund-Worker
+
+`apps/worker` ist ein eigener Node.js-Prozess (ohne NestJS) und arbeitet `outboxJobs` ab. Start: `pnpm --filter @fw-booking/worker dev` bzw. nach `pnpm build` `start`; Konfiguration aus derselben `.env` (`MONGODB_URI`, `LOG_LEVEL`, `WORKER_CONCURRENCY` Standard 4, `WORKER_POLL_INTERVAL_MS` Standard 5000).
+
+- **Beanspruchen:** `JobQueue.claim` holt per `findOneAndUpdate` den ältesten fälligen Job eines Typs mit registriertem Handler – `pending` mit `dueAt ≤ jetzt` oder `processing` mit abgelaufener Lease – und setzt `processing`, `leaseUntil` (+5 Minuten), ein zufälliges `leaseToken` und `attempts + 1`. Mehrere Worker erhalten so nie denselben Job gleichzeitig.
+- **Ergebnis:** `complete` (`sent`, `completedAt`) und `fail` schreiben nur, wenn `leaseToken` noch passt; ein Worker mit abgelaufener, neu vergebener Lease kann nichts überschreiben.
+- **Wiederholungen:** Handler werfen `temporaryFailure(kategorie)` (Wiederholung) oder `permanentFailure(kategorie)` (sofort `failed`); unbekannte Fehler gelten als vorübergehend (`unexpected`). Abstände nach Versuch 1–5: 1, 5, 15, 60, 180 Minuten (±10 %), nach 6 Versuchen `failed` mit `failedAt`. Gespeichert wird nur `lastErrorCategory`, nie die Fehlermeldung. Ein Job, dessen Lease nach dem letzten Versuch abgelaufen ist, wird ohne erneute Ausführung `failed` (`lease_expired`).
+- **Zeitlimit:** Handler laufen höchstens 4 Minuten (unter der Lease) und erhalten ein `AbortSignal`; Überschreitung zählt als vorübergehender Fehler `timeout`.
+- **Zustellung mindestens einmal:** Stürzt ein Worker nach dem Versand, aber vor `complete` ab, wird der Job nach Ablauf der Lease erneut ausgeführt. Mail-Handler (ab task-3-2) sollen deshalb eine stabile Message-ID je Job verwenden.
+- **Handler:** `src/handlers.ts` ordnet Jobtypen Handler zu. Nur registrierte Typen werden beansprucht; bis task-3-2 ist die Liste leer und vorhandene Aufträge bleiben unverändert `pending`.
+- **Herunterfahren:** SIGTERM/SIGINT beenden das Abfragen; laufende Jobs werden abgeschlossen, danach endet der Prozess.
+- **Aufbewahrung:** Versendete Jobs löscht ein TTL-Index 30 Tage nach `completedAt` (Migration `008`, nur `status: 'sent'`); `failed` bleibt für die Anzeige im Portal. Index `status_leaseUntil` für abgelaufene Leases.
 
 ## Nebenläufigkeitstests
 

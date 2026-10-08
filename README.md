@@ -19,11 +19,12 @@ pnpm infra:up
 pnpm --filter @fw-booking/api db:migrate   # Collections, Validatoren, Indizes
 pnpm --filter @fw-booking/api owner:create --email du@example.de   # Passwort wird verdeckt abgefragt
 pnpm --filter @fw-booking/api dev   # API auf http://127.0.0.1:3000, Healthcheck unter /health
+pnpm --filter @fw-booking/worker dev   # Hintergrund-Worker (Outbox-Jobs)
 ```
 
 | Befehl | Zweck |
 |---|---|
-| `pnpm build` | Shared-Paket und API bauen (`dist/`) |
+| `pnpm build` | Pakete, API und Worker bauen (`dist/`) |
 | `pnpm lint` | ESLint (typbasiert) über das gesamte Repository |
 | `pnpm typecheck` | `tsc --noEmit` in allen Workspace-Paketen |
 | `pnpm test` | Vitest in allen Workspace-Paketen |
@@ -37,6 +38,7 @@ pnpm --filter @fw-booking/api dev   # API auf http://127.0.0.1:3000, Healthcheck
 apps/api          Buchungs-API
 apps/worker       Hintergrund-Worker (Outbox, E-Mail)
 apps/portal       Owner-Portal und PWA
+packages/db       Datenmodell, Collections und Migrationen
 packages/shared   Domänentypen, Validierung, Zeitzonen
 packages/widget   Öffentliches Buchungs-Widget
 plugins/wordpress PHP-Plugin (nicht Teil des pnpm-Workspaces)

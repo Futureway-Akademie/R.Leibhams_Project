@@ -4,7 +4,7 @@ import type { MongoMemoryReplSet } from 'mongodb-memory-server';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { DEFAULT_RESOURCE_ID, collections } from '../database/documents.js';
 import type { BookingDocument, SessionDocument } from '../database/documents.js';
-import { runMigrations } from '../database/migrations/runner.js';
+import { runMigrations } from '@fw-booking/db';
 import { checkConsistency } from './consistency.js';
 import { groupBooking } from './fixtures.js';
 import { startReplSet } from './mongo.js';

@@ -724,7 +724,7 @@
       "description": "Separater Worker verarbeitet die Outbox mit Leases und Wiederholungen und versendet transaktionale E-Mails.",
       "order": 3,
       "weight": 8,
-      "status": "ready",
+      "status": "in_progress",
       "tasks": [
         {
           "id": "task-3-1",
@@ -732,7 +732,7 @@
           "description": "Node.js-Worker beansprucht Outbox-Jobs mit zeitlich begrenzten Leases und Wiederholungsregeln.",
           "order": 1,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-10"
           ],
@@ -741,13 +741,25 @@
             "Abgelaufene Leases werden erneut vergeben",
             "Fehlgeschlagene Jobs werden mit Backoff wiederholt und nach Maximalversuchen als fehlgeschlagen markiert"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T11:49:59Z",
+          "completedAt": "2026-10-08T11:59:21Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "Neues Paket @fw-booking/db (Datenmodell, Collections, Migrationen; 36 Tests inkl. Migration 008 mit TTL- und Lease-Index), API unverändert grün (306 Tests). Worker: 30 Tests gegen Replica Set. Beanspruchen nur fälliger Jobs registrierter Typen in Fälligkeitsreihenfolge; 20 gleichzeitige Claims → genau einer; 5 Worker × 4 parallel auf 120 Jobs → jeder Handler genau einmal, alle sent. Abgelaufene Leases werden neu vergeben, laufende nicht; verspäteter Worker kann weder Erfolg noch Fehler schreiben (Lease-Token); nach zu vielen abgelaufenen Leases failed (lease_expired) ohne Ausführung. Vorübergehende Fehler: pending mit Backoff 1 Min ±10 %, vorher nicht erneut beansprucht; nach 6 Versuchen failed mit failedAt; dauerhafte Fehler sofort failed; unerwartete Fehler nur als Kategorie 'unexpected', Meldung mit Zugangsdaten nicht gespeichert; Zeitlimit mit AbortSignal → timeout (dabei Reihenfolgefehler gefunden und behoben). Stoppen wartet auf laufende Jobs und nimmt keine neuen an; Abfragen im Leerlauf. Backoff-Tabelle, Fehlerklassifizierung, Konfiguration. Manuell gegen Docker-MongoDB: Migration 008 angewendet, gebauter Worker (dist) startet, meldet fehlende Handler, beendet sich bei SIGTERM sauber; Absturztest mit 3 Prozessen auf 300 Jobs, Prozess A per SIGKILL beendet: alle 300 sent, nur die 4 Jobs von A nach Lease-Ablauf erneut ausgeführt (mindestens einmal), Testdatenbank entfernt. Build aller Pakete, Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/worker test (3×)",
+              "pnpm --filter @fw-booking/db test",
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/api db:migrate",
+              "node apps/worker/dist/main.js mit SIGTERM",
+              "Absturztest: 3 Worker-Prozesse, SIGKILL auf einen",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T11:59:21Z"
           }
         },
         {
@@ -756,7 +768,7 @@
           "description": "Bestätigungsmail per SMTP mit sicherem Verwaltungslink für Storno und Umbuchung.",
           "order": 2,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-3-1",
             "task-2-12"
@@ -830,7 +842,7 @@
           "description": "Owner-Endpunkt listet endgültig fehlgeschlagene Benachrichtigungen.",
           "order": 5,
           "weight": 1,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-3-1"
           ],

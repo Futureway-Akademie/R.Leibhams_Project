@@ -2,7 +2,7 @@ import { MongoClient } from 'mongodb';
 import type { MongoMemoryReplSet } from 'mongodb-memory-server';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { collections } from '../database/documents.js';
-import { runMigrations } from '../database/migrations/runner.js';
+import { runMigrations } from '@fw-booking/db';
 import { startReplSet } from '../testing/mongo.js';
 import { hashPassword, verifyPassword } from './crypto.js';
 import { OwnerCreationError, createOwner } from './owners.js';

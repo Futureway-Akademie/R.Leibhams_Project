@@ -1,0 +1,37 @@
+{
+  "name": "@fw-booking/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Datenmodell, Collection-Zugriffe und Migrationen für API und Worker.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./src/testing.ts",
+      "development": "./src/testing.ts",
+      "default": "./dist/testing.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fw-booking/shared": "workspace:*",
+    "mongodb": "^7.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "mongodb-memory-server": "^11.3.0"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src"
+  ]
+}

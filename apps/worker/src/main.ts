@@ -1,0 +1,49 @@
+// Einstieg des Worker-Prozesses: pnpm --filter @fw-booking/worker dev bzw. start
+import { MongoClient } from 'mongodb';
+import { ConfigError, loadConfig } from './config.js';
+import { handlers } from './handlers.js';
+import { createLogger } from './logger.js';
+import { Worker } from './worker.js';
+
+async function main(): Promise<void> {
+  let config;
+  try {
+    config = loadConfig();
+  } catch (error) {
+    if (error instanceof ConfigError) {
+      console.error(error.message);
+      process.exit(1);
+    }
+    throw error;
+  }
+
+  const logger = createLogger(config);
+  const client = new MongoClient(config.mongodb.uri, { appName: 'fw-booking-worker' });
+  await client.connect();
+  const worker = new Worker(
+    client.db(config.mongodb.dbName),
+    handlers,
+    { concurrency: config.concurrency, pollIntervalMs: config.pollIntervalMs },
+    logger,
+  );
+  worker.start();
+
+  let shuttingDown = false;
+  const shutdown = (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info({ signal }, 'Beende Worker nach laufenden Jobs');
+    void worker
+      .stop()
+      .then(() => client.close())
+      .then(() => process.exit(0));
+  };
+  process.on('SIGTERM', () => {
+    shutdown('SIGTERM');
+  });
+  process.on('SIGINT', () => {
+    shutdown('SIGINT');
+  });
+}
+
+void main();

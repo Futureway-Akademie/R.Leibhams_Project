@@ -2,7 +2,7 @@ import { MongoClient, MongoServerError, ObjectId } from 'mongodb';
 import type { Db } from 'mongodb';
 import type { MongoMemoryReplSet } from 'mongodb-memory-server';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { startReplSet } from '../../testing/mongo.js';
+import { startReplSet } from '../testing.js';
 import { COLLECTIONS, SETTINGS_ID, collections } from '../documents.js';
 import type { BookingDocument, SessionDocument } from '../documents.js';
 import { MIGRATIONS_COLLECTION, MigrationError, runMigrations } from './runner.js';
@@ -53,6 +53,7 @@ describe('runMigrations', () => {
         '005-booking-privacy',
         '006-remove-buffer-and-grid',
         '007-booking-email-index',
+        '008-outbox-leases',
       ],
       alreadyApplied: [],
     });
@@ -65,6 +66,7 @@ describe('runMigrations', () => {
       '005-booking-privacy',
       '006-remove-buffer-and-grid',
       '007-booking-email-index',
+      '008-outbox-leases',
     ]);
   });
 
@@ -83,6 +85,7 @@ describe('runMigrations', () => {
         '005-booking-privacy',
         '006-remove-buffer-and-grid',
         '007-booking-email-index',
+        '008-outbox-leases',
       ],
     });
     expect(await indexNames(db, COLLECTIONS.bookings)).toEqual(before);
@@ -157,7 +160,7 @@ describe('001-initial', () => {
       ['startsAt', 'serviceId_startsAt', 'sessionId_status', 'participantEmailKey_createdAt'],
     ],
     [COLLECTIONS.resourceOccupancy, ['ref']],
-    [COLLECTIONS.outboxJobs, ['status_dueAt', 'bookingId']],
+    [COLLECTIONS.outboxJobs, ['status_dueAt', 'bookingId', 'status_leaseUntil']],
     [COLLECTIONS.auditEvents, ['at', 'object']],
   ])('%s hat Abfrage-Indizes', async (collection, names) => {
     const indexes = await indexNames(db, collection);
@@ -392,5 +395,20 @@ describe('006-remove-buffer-and-grid', () => {
     const [info] = await db.listCollections({ name: COLLECTIONS.services }).toArray();
     expect(JSON.stringify(info)).not.toContain('bufferMinutes');
     expect(JSON.stringify(info)).toContain('sortOrder');
+  });
+});
+
+describe('008-outbox-leases', () => {
+  it('löscht nur versendete Jobs 30 Tage nach dem Versand', async () => {
+    const db = freshDb();
+    await runMigrations(db);
+    const ttl = (await db.collection(COLLECTIONS.outboxJobs).indexes()).find(
+      (index) => index.name === 'completedAt_ttl_sent',
+    );
+    expect(ttl).toMatchObject({
+      key: { completedAt: 1 },
+      expireAfterSeconds: 30 * 24 * 60 * 60,
+      partialFilterExpression: { status: 'sent' },
+    });
   });
 });

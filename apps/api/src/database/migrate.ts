@@ -1,7 +1,7 @@
 // Kommandozeilen-Einstieg für die Provisionierung: pnpm --filter @fw-booking/api db:migrate
 import { MongoClient } from 'mongodb';
 import { ConfigError, loadConfig } from '../config/config.js';
-import { MigrationError, runMigrations } from './migrations/runner.js';
+import { MigrationError, runMigrations } from '@fw-booking/db';
 
 async function main(): Promise<number> {
   let config;

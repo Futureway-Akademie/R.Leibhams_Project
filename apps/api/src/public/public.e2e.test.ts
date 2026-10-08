@@ -12,7 +12,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { SETTINGS_ID, collections } from '../database/documents.js';
 import type { SessionDocument } from '../database/documents.js';
-import { runMigrations } from '../database/migrations/runner.js';
+import { runMigrations } from '@fw-booking/db';
 import { createTestApp, loginAsOwner } from '../testing/app.js';
 import type { OwnerSession, TestApp } from '../testing/app.js';
 import { groupService, singleService } from '../testing/fixtures.js';

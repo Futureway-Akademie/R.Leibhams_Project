@@ -196,6 +196,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@fw-booking/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@fw-booking/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -275,7 +278,52 @@ importers:
 
   apps/portal: {}
 
-  apps/worker: {}
+  apps/worker:
+    dependencies:
+      '@fw-booking/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      mongodb:
+        specifier: ^7.7.0
+        version: 7.7.0
+      pino:
+        specifier: ^10.4.0
+        version: 10.4.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@swc-node/register':
+        specifier: ^1.12.1
+        version: 1.12.1(@swc/core@1.16.13)(@swc/types@0.1.28)(supports-color@7.2.0)(typescript@6.0.3)
+      '@swc/core':
+        specifier: ^1.16.13
+        version: 1.16.13
+      '@types/node':
+        specifier: ^26.6.4
+        version: 26.6.4
+      mongodb-memory-server:
+        specifier: ^11.3.0
+        version: 11.3.0(supports-color@7.2.0)
+      pino-pretty:
+        specifier: ^13.2.0
+        version: 13.2.0
+
+  packages/db:
+    dependencies:
+      '@fw-booking/shared':
+        specifier: workspace:*
+        version: link:../shared
+      mongodb:
+        specifier: ^7.7.0
+        version: 7.7.0
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.4
+        version: 26.6.4
+      mongodb-memory-server:
+        specifier: ^11.3.0
+        version: 11.3.0(supports-color@7.2.0)
 
   packages/shared:
     dependencies:
