@@ -143,6 +143,16 @@ Alle Antworten enthalten Teilnehmerdaten und tragen `Cache-Control: no-store`.
 
 `OwnerBookingsService` führt jede Absage in einer Transaktion aus: Status `cancelled_by_owner` (Termin `cancelled`, `bookedCount` 0), Freigabe von Kursplatz, Zeit bzw. Ressourcenbelegung, Entwertung aller Links (`revoked`), je Buchung ein Outbox-Auftrag `owner_cancellation` und Audit (`booking.cancelled_by_owner`, `session.cancelled`, ohne Begründung). Die optionale Begründung steht in `ownerCancellationReason` bzw. `cancellationReason`. Wiederholte Absagen liefern `alreadyCancelled: true`; nicht aktive Buchungen 409 `not_cancellable`, beendete Termine 409 `appointment_ended`.
 
+## Owner-API: Fehlgeschlagene Benachrichtigungen
+
+| Endpunkt | Wirkung |
+|---|---|
+| `GET /api/owner/notifications/failed[?from&to&type]` | Endgültig fehlgeschlagene, nicht ausgeblendete Jobs, neueste zuerst (höchstens 200, dazu `total`), sowie `retryingCount` (Jobs, die gerade wegen eines vorübergehenden Fehlers wiederholt werden) |
+| `POST /api/owner/notifications/failed/:id/retry` | Job erneut einreihen: `pending`, Versuche ab 0, sofort fällig; Audit `notification.retried`. Der Handler prüft den Buchungsstand erneut. |
+| `POST /api/owner/notifications/failed/:id/dismiss` | Job ausblenden (`dismissedAt`), bleibt gespeichert und wird nicht mehr erneut versendet; Audit `notification.dismissed` |
+
+Jeder Eintrag enthält `id`, `type`, `category`, `failedAt`, `attempts` und eine Kurzübersicht der Buchung (Angebot, Beginn, Status, Name, E-Mail, Telefon) oder `null`, wenn sie nicht mehr existiert. Antworten tragen `Cache-Control: no-store` und werden gegen strikte Schemas aus `@fw-booking/shared` geprüft (`failedNotificationsResponseSchema`); interne Felder wie `leaseToken` oder `dedupeKey` verhindern die Auslieferung. Kategorien sind eine feste Aufzählung (`notificationErrorCategorySchema`), unbekannte Werte erscheinen als `unknown`. Deutsche Beschreibungen und der Hinweis, ob ein erneuter Versuch sinnvoll ist, stehen in `NOTIFICATION_ERROR_INFO`, Typbezeichnungen in `NOTIFICATION_TYPE_LABELS`. Index `status_failedAt` (Migration `009`).
+
 ## Öffentliche API (Widget)
 
 Ohne Anmeldung, je öffentlicher Kalenderkennung (`cal_…`, eine je Installation, Migration `004`; für den Owner über `GET /api/owner/calendar`).

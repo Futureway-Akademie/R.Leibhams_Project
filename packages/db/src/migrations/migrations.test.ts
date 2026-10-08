@@ -54,6 +54,7 @@ describe('runMigrations', () => {
         '006-remove-buffer-and-grid',
         '007-booking-email-index',
         '008-outbox-leases',
+        '009-failed-jobs-index',
       ],
       alreadyApplied: [],
     });
@@ -67,6 +68,7 @@ describe('runMigrations', () => {
       '006-remove-buffer-and-grid',
       '007-booking-email-index',
       '008-outbox-leases',
+      '009-failed-jobs-index',
     ]);
   });
 
@@ -86,6 +88,7 @@ describe('runMigrations', () => {
         '006-remove-buffer-and-grid',
         '007-booking-email-index',
         '008-outbox-leases',
+        '009-failed-jobs-index',
       ],
     });
     expect(await indexNames(db, COLLECTIONS.bookings)).toEqual(before);
@@ -160,7 +163,7 @@ describe('001-initial', () => {
       ['startsAt', 'serviceId_startsAt', 'sessionId_status', 'participantEmailKey_createdAt'],
     ],
     [COLLECTIONS.resourceOccupancy, ['ref']],
-    [COLLECTIONS.outboxJobs, ['status_dueAt', 'bookingId', 'status_leaseUntil']],
+    [COLLECTIONS.outboxJobs, ['status_dueAt', 'bookingId', 'status_leaseUntil', 'status_failedAt']],
     [COLLECTIONS.auditEvents, ['at', 'object']],
   ])('%s hat Abfrage-Indizes', async (collection, names) => {
     const indexes = await indexNames(db, collection);

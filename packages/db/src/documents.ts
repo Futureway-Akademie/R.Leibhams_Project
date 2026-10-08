@@ -6,6 +6,7 @@ import type {
   BookingRules,
   BookingStatus,
   IsoWeekday,
+  NotificationType,
   SessionStatus,
 } from '@fw-booking/shared';
 import type { Db, ObjectId } from 'mongodb';
@@ -174,12 +175,7 @@ export interface ActionTokenDocument {
   createdAt: Date;
 }
 
-export type OutboxJobType =
-  | 'booking_confirmation'
-  | 'booking_reminder'
-  | 'booking_cancellation'
-  | 'booking_rebooked'
-  | 'owner_cancellation';
+export type OutboxJobType = NotificationType;
 export type OutboxJobStatus = 'pending' | 'processing' | 'sent' | 'failed';
 
 export interface OutboxJobDocument {
@@ -202,6 +198,8 @@ export interface OutboxJobDocument {
   completedAt?: Date | null;
   /** Bei Erinnerungen: Terminbeginn, für den sie geplant wurde (Prüfung vor dem Versand). */
   scheduledFor?: Date | null;
+  /** Vom Owner als erledigt ausgeblendeter fehlgeschlagener Job (bleibt gespeichert). */
+  dismissedAt?: Date | null;
   /** Bei `sent`: versendet oder bewusst übersprungen (z. B. Buchung inzwischen storniert). */
   result?: 'sent' | 'skipped' | null;
   /** Zeitpunkt, zu dem der Job endgültig als fehlgeschlagen markiert wurde. */

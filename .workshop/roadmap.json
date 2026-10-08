@@ -724,7 +724,7 @@
       "description": "Separater Worker verarbeitet die Outbox mit Leases und Wiederholungen und versendet transaktionale E-Mails.",
       "order": 3,
       "weight": 8,
-      "status": "in_progress",
+      "status": "completed",
       "tasks": [
         {
           "id": "task-3-1",
@@ -867,7 +867,7 @@
           "description": "Owner-Endpunkt listet endgültig fehlgeschlagene Benachrichtigungen.",
           "order": 5,
           "weight": 1,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-3-1"
           ],
@@ -875,13 +875,24 @@
             "Endpunkt liefert fehlgeschlagene Jobs mit Typ, Zeitpunkt und Fehlerkategorie",
             "Keine Secrets oder vollständigen Treiberfehler in der Antwort"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T13:35:44Z",
+          "completedAt": "2026-10-08T13:40:53Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "9 neue API-Tests (315 in der API), 3 neue Shared-Tests (147), Migrationstest um Index 009 erweitert (DB 36), Worker 98 unverändert grün. Zugriff: ohne Sitzung 401, ohne CSRF 403. Liste: Typ, Zeitpunkt, Kategorie, Versuche und Buchungsübersicht mit Kontakt, no-store; nur failed und nicht ausgeblendet, neueste zuerst, retryingCount für pending/processing mit Fehler; Filter nach Zeitraum und Typ, ungültige Filter 400; Höchstzahl 200 mit total. Keine internen Felder oder Fehlertexte: Kategorie mit Zugangsdaten-Text → unknown, leaseToken und dedupeKey nicht in der Antwort, strikte Schemas lehnen Zusatzfelder ab. Aktionen: erneut versuchen setzt pending mit 0 Versuchen und Audit, wiederholt folgenlos; ausblenden behält den Job, danach kein erneuter Versand (409); versendete Jobs 409, unbekannte 404, ungültige ID 400. Ende-zu-Ende gegen Docker-MongoDB mit gebautem Worker (dist, NODE_ENV=production): Konfigurationsprüfung lehnt http-Link ab; fehlende Buchung → failed booking_missing, unerreichbarer Mailserver → Wiederholung; Owner sieht 1 Eintrag und retryingCount 1, Antwort nur mit freigegebenen Feldern; erneuter Versuch wird vom Worker verarbeitet und scheitert erneut; Ausblenden leert die Liste. Testdaten und Owner entfernt. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm --filter @fw-booking/db test",
+              "pnpm --filter @fw-booking/api db:migrate",
+              "Ende-zu-Ende: API (dev) + Worker (dist) gegen Docker-MongoDB, GET/POST /api/owner/notifications/failed",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T13:40:53Z"
           }
         }
       ]

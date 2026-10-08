@@ -405,3 +405,17 @@ Ein Planer im Worker legt jede Minute Erinnerungsaufträge für bestätigte Buch
 ### Begründung
 
 Der Planer leitet die Aufträge aus dem aktuellen Stand ab und berücksichtigt damit Umbuchungen, Stornos und geänderte Vorläufe automatisch; der eindeutige `dedupeKey` macht parallele Planer unbedenklich. Eine Genauigkeit von etwa einer Minute genügt für Erinnerungen. Ohne Kalenderanhang entsteht in keiner Kalender-App ein zweiter Eintrag.
+
+## 2026-10-08 – API für fehlgeschlagene Benachrichtigungen
+
+### Kontext
+
+Endgültig fehlgeschlagene Mails müssen für den Owner sichtbar sein, damit er Teilnehmer auf anderem Weg erreichen oder nach einer Korrektur (z. B. SMTP-Zugangsdaten) erneut versenden kann. Fehlermeldungen von Mailservern dürfen dabei nicht nach außen gelangen.
+
+### Entscheidung
+
+Owner-Endpunkt mit endgültig fehlgeschlagenen, nicht ausgeblendeten Jobs (neueste zuerst, höchstens 200) und einem Zähler für laufende Wiederholungen. Jeder Eintrag enthält eine Kurzübersicht der Buchung mit Kontaktdaten. Aktionen „erneut versuchen“ (Versuche ab 0) und „als erledigt ausblenden“ (bleibt gespeichert), jeweils mit Audit. Kategorien als feste Aufzählung mit deutschen Texten in `@fw-booking/shared`; unbekannte Werte als `unknown`. Antworten werden gegen strikte Schemas geprüft. Der Jobtyp im Datenmodell stammt nun aus derselben Aufzählung.
+
+### Begründung
+
+Mit Kontaktdaten kann der Owner ohne weiteren Abruf reagieren; die Daten sind ohnehin nur für ihn sichtbar. Erneutes Versenden behebt Ausfälle nach einer Korrektur, Ausblenden hält die Liste übersichtlich, ohne Historie zu löschen. Die feste Aufzählung und strikte Schemas garantieren, dass auch künftige Worker-Änderungen keine Fehlertexte oder internen Felder offenlegen.
