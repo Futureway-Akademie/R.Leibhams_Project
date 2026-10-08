@@ -10,7 +10,7 @@ import { permanentFailure, temporaryFailure } from './errors.js';
 import { JobQueue } from './queue.js';
 import { MAX_ATTEMPTS } from './retry.js';
 import { Worker } from './worker.js';
-import type { JobHandler, JobHandlers, WorkerOptions } from './worker.js';
+import type { JobHandler, JobHandlers, JobResult, WorkerOptions } from './worker.js';
 
 let replSet: MongoMemoryReplSet;
 let client: MongoClient;
@@ -122,6 +122,7 @@ describe('Mehrere Worker', () => {
       const id = j._id.toHexString();
       calls.set(id, (calls.get(id) ?? 0) + 1);
       await sleep(Math.random() * 5);
+      return 'sent';
     };
     const workers = Array.from({ length: 5 }, () =>
       worker({ booking_confirmation: handler }, { concurrency: 4 }),
@@ -169,7 +170,7 @@ describe('Abgelaufene Leases', () => {
     const w = worker({
       booking_confirmation: (j) => {
         handled.push(j._id.toHexString());
-        return Promise.resolve();
+        return Promise.resolve('sent' as const);
       },
     });
     expect(await w.processNext()).toBe(true);
@@ -216,7 +217,7 @@ describe('Abgelaufene Leases', () => {
     const w = worker({
       booking_confirmation: () => {
         called = true;
-        return Promise.resolve();
+        return Promise.resolve('sent' as const);
       },
     });
     await w.processNext();
@@ -319,7 +320,7 @@ describe('Fehler und Wiederholungen', () => {
           new Promise((resolve) => {
             signal.addEventListener('abort', () => {
               aborted = true;
-              resolve();
+              resolve('sent');
             });
           }),
       },
@@ -336,14 +337,14 @@ describe('Lebenszyklus', () => {
     const first = job({ dueAt: new Date(Date.now() - 2000) });
     const second = job();
     await insert(first, second);
-    let release: () => void = () => undefined;
+    let release: (result: JobResult) => void = () => undefined;
     let markStarted: () => void = () => undefined;
     const started = new Promise<void>((resolve) => {
       markStarted = resolve;
     });
     const w = worker({
       booking_confirmation: () =>
-        new Promise<void>((resolve) => {
+        new Promise<JobResult>((resolve) => {
           release = resolve;
           markStarted();
         }),
@@ -354,7 +355,7 @@ describe('Lebenszyklus', () => {
     await sleep(50);
     // Solange der Job läuft, ist der Worker nicht beendet.
     expect((await reload(first))?.status).toBe('processing');
-    release();
+    release('sent');
     await stopped;
     expect((await reload(first))?.status).toBe('sent');
     expect(await reload(second)).toMatchObject({ status: 'pending', attempts: 0 });
@@ -365,7 +366,7 @@ describe('Lebenszyklus', () => {
     const w = worker({
       booking_reminder: (j) => {
         handled.push(j._id.toHexString());
-        return Promise.resolve();
+        return Promise.resolve('sent' as const);
       },
     });
     w.start();

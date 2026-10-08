@@ -121,3 +121,9 @@
 {"timestamp": "2026-10-08T11:59:21Z", "type": "decision_recorded", "summary": "Paket @fw-booking/db für API und Worker; Lease 5 Minuten ohne Verlängerung, Handler-Zeitlimit 4 Minuten; 6 Versuche (1, 5, 15, 60, 180 Minuten); versendete Jobs nach 30 Tagen gelöscht; Zustellung mindestens einmal."}
 {"timestamp": "2026-10-08T11:59:21Z", "type": "task_ready", "taskId": "task-3-2", "summary": "Abhängigkeiten erfüllt."}
 {"timestamp": "2026-10-08T11:59:21Z", "type": "task_ready", "taskId": "task-3-5", "summary": "Abhängigkeiten erfüllt."}
+{"timestamp": "2026-10-08T12:59:59Z", "type": "task_started", "taskId": "task-3-2", "summary": "Bestätigungsmail begonnen: Absender per Umgebungsvariablen, Link auf konfigurierte WordPress-Seite, Text + HTML + Kalenderdatei, inaktive Buchungen werden übersprungen."}
+{"timestamp": "2026-10-08T13:08:09Z", "type": "verification_passed", "taskId": "task-3-2", "summary": "Quality Gate grün: 65 Worker-Tests mit SMTP-Testserver, Ende-zu-Ende-Lauf mit API, Worker und Mailpit."}
+{"timestamp": "2026-10-08T13:08:09Z", "type": "task_completed", "taskId": "task-3-2", "summary": "Bestätigungsmail mit Verwaltungslink, HTML und Kalenderdatei per SMTP; Token-Ausgabe gemeinsam in packages/db."}
+{"timestamp": "2026-10-08T13:08:09Z", "type": "decision_recorded", "summary": "Absender und Link-Ziel per Umgebungsvariablen, Mail als Text + HTML + ICS ohne Link, inaktive Buchungen übersprungen, Token bei Versandfehler gelöscht, abgelehnte Empfänger sofort failed."}
+{"timestamp": "2026-10-08T13:08:09Z", "type": "task_ready", "taskId": "task-3-3", "summary": "Abhängigkeiten erfüllt."}
+{"timestamp": "2026-10-08T13:08:09Z", "type": "task_ready", "taskId": "task-3-4", "summary": "Abhängigkeiten erfüllt."}

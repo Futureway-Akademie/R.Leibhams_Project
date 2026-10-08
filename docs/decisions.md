@@ -363,3 +363,17 @@ Eigenständiger Node.js-Worker ohne NestJS. Datenmodell und Migrationen liegen i
 ### Begründung
 
 Ein gemeinsames Datenmodell verhindert auseinanderlaufende Typen zwischen API und Worker. Eine kurze Lease ohne Heartbeat genügt für Mailversand im Sekundenbereich und hält den Code einfach; das Token schützt vor verspäteten Ergebnissen. Die Backoff-Folge überbrückt Mailserver-Ausfälle von einigen Stunden, bevor ein Auftrag im Portal als fehlgeschlagen erscheint. Liegenlassen statt Fehlschlagen nicht registrierter Typen erlaubt es, Mail-Arten schrittweise einzuführen. Die Löschfrist begrenzt das Wachstum der Outbox, ohne die Fehleranzeige zu verlieren.
+
+## 2026-10-08 – Bestätigungsmail
+
+### Kontext
+
+Nach jeder Buchung erhält der Teilnehmer eine Bestätigung mit dem einzigen Zugang zur Selbstverwaltung. Absender und Kontaktdaten unterscheiden sich je Installation; die Seite für die Selbstverwaltung liegt auf der WordPress-Seite des Kunden.
+
+### Entscheidung
+
+Versand im Worker per SMTP (`nodemailer`, feste Versionen, Pakete mindestens zwei Wochen alt). Absender, Antwortadresse, Betriebsname, Telefon und `MANAGE_PAGE_URL` aus Umgebungsvariablen je Installation. Mail mit Text, HTML und Kalenderdatei (`termin.ics`, ohne Verwaltungslink), Anrede mit „du“ wie in Widget-Meldungen. Der Token entsteht beim Versand über die gemeinsame Funktion `issueActionToken` in `@fw-booking/db` und wird bei einem Versandfehler wieder gelöscht. Nicht mehr aktive Buchungen werden ohne Mail mit `result: 'skipped'` abgeschlossen. SMTP-Fehler werden nach Art eingeordnet; abgelehnte Empfänger enden sofort als `failed`, alles Übrige wird wiederholt. Stabile Message-ID je Job.
+
+### Begründung
+
+Umgebungsvariablen passen zur Einrichtung je Kunde und vermeiden einen Owner-Endpunkt vor dem Portal. Die Kalenderdatei erleichtert die Übernahme des Termins; ohne Link bleibt sie unbedenklich, wenn Kalender geteilt oder synchronisiert werden. Das Löschen nicht zugestellter Tokens verhindert verwaiste gültige Links. Überholte Bestätigungen würden Teilnehmer verwirren; Storno-, Umbuchungs- und Absagemails übernehmen die Information.

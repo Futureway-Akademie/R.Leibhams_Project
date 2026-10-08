@@ -1,8 +1,9 @@
 // Einstieg des Worker-Prozesses: pnpm --filter @fw-booking/worker dev bzw. start
 import { MongoClient } from 'mongodb';
 import { ConfigError, loadConfig } from './config.js';
-import { handlers } from './handlers.js';
+import { createHandlers } from './handlers/index.js';
 import { createLogger } from './logger.js';
+import { SmtpMailer } from './mail/mailer.js';
 import { Worker } from './worker.js';
 
 async function main(): Promise<void> {
@@ -20,9 +21,10 @@ async function main(): Promise<void> {
   const logger = createLogger(config);
   const client = new MongoClient(config.mongodb.uri, { appName: 'fw-booking-worker' });
   await client.connect();
+  const mailer = new SmtpMailer(config);
   const worker = new Worker(
     client.db(config.mongodb.dbName),
-    handlers,
+    createHandlers({ mailer, mail: config.mail }),
     { concurrency: config.concurrency, pollIntervalMs: config.pollIntervalMs },
     logger,
   );
@@ -35,7 +37,10 @@ async function main(): Promise<void> {
     logger.info({ signal }, 'Beende Worker nach laufenden Jobs');
     void worker
       .stop()
-      .then(() => client.close())
+      .then(() => {
+        mailer.close();
+        return client.close();
+      })
       .then(() => process.exit(0));
   };
   process.on('SIGTERM', () => {

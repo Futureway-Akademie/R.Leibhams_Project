@@ -179,8 +179,22 @@ Unbekannte Kalender sowie unbekannte oder deaktivierte Angebote ergeben 404. Jed
 - **Ergebnis:** `complete` (`sent`, `completedAt`) und `fail` schreiben nur, wenn `leaseToken` noch passt; ein Worker mit abgelaufener, neu vergebener Lease kann nichts überschreiben.
 - **Wiederholungen:** Handler werfen `temporaryFailure(kategorie)` (Wiederholung) oder `permanentFailure(kategorie)` (sofort `failed`); unbekannte Fehler gelten als vorübergehend (`unexpected`). Abstände nach Versuch 1–5: 1, 5, 15, 60, 180 Minuten (±10 %), nach 6 Versuchen `failed` mit `failedAt`. Gespeichert wird nur `lastErrorCategory`, nie die Fehlermeldung. Ein Job, dessen Lease nach dem letzten Versuch abgelaufen ist, wird ohne erneute Ausführung `failed` (`lease_expired`).
 - **Zeitlimit:** Handler laufen höchstens 4 Minuten (unter der Lease) und erhalten ein `AbortSignal`; Überschreitung zählt als vorübergehender Fehler `timeout`.
-- **Zustellung mindestens einmal:** Stürzt ein Worker nach dem Versand, aber vor `complete` ab, wird der Job nach Ablauf der Lease erneut ausgeführt. Mail-Handler (ab task-3-2) sollen deshalb eine stabile Message-ID je Job verwenden.
-- **Handler:** `src/handlers.ts` ordnet Jobtypen Handler zu. Nur registrierte Typen werden beansprucht; bis task-3-2 ist die Liste leer und vorhandene Aufträge bleiben unverändert `pending`.
+- **Zustellung mindestens einmal:** Stürzt ein Worker nach dem Versand, aber vor `complete` ab, wird der Job nach Ablauf der Lease erneut ausgeführt. Mails tragen deshalb eine stabile Message-ID je Job (`<jobId.typ@absenderdomain>`).
+- **Handler:** `src/handlers/index.ts` ordnet Jobtypen Handler zu; Handler liefern `sent` oder `skipped` (gespeichert in `result`). Nur registrierte Typen werden beansprucht, andere bleiben unverändert `pending` (derzeit `booking_cancellation`, `booking_rebooked`, `owner_cancellation`, `booking_reminder` bis task-3-3/3-4).
+
+## E-Mail-Versand
+
+SMTP über `nodemailer` (`src/mail/mailer.ts`); lokal Mailpit (`SMTP_HOST=127.0.0.1`, `SMTP_PORT=1025`, Oberfläche http://127.0.0.1:8025). In Produktion ist eine verschlüsselte Verbindung Pflicht (STARTTLS oder `SMTP_SECURE=true`). Absender und Kontakt je Installation aus Umgebungsvariablen: `MAIL_FROM_ADDRESS` (Anzeigename `BUSINESS_NAME`), optional `MAIL_REPLY_TO`, `BUSINESS_PHONE`, `SMTP_USER`/`SMTP_PASSWORD`. Der Verwaltungslink lautet `MANAGE_PAGE_URL#t=TOKEN` (WordPress-Seite mit Widget, in Produktion nur https).
+
+| SMTP-Fehler | Kategorie | Folge |
+|---|---|---|
+| Verbindung, DNS, Zeitüberschreitung | `smtp_unavailable` | Wiederholung |
+| Anmeldung fehlgeschlagen | `smtp_auth` | Wiederholung (Betreiber kann Zugangsdaten korrigieren) |
+| 4xx | `smtp_deferred` | Wiederholung |
+| 5xx beim Empfänger (`RCPT TO`) | `recipient_rejected` | sofort `failed` |
+| 5xx sonst | `message_rejected` | sofort `failed` |
+
+**Bestätigungsmail** (`booking_confirmation`, `src/handlers/booking-confirmation.ts`): lädt Buchung, Angebot, Kurstermin (Ort) und Einstellungen; ist die Buchung nicht mehr `confirmed`, wird der Job ohne Mail mit `result: 'skipped'` abgeschlossen, fehlt sie, endet er als `booking_missing`. Sonst stellt der Handler über `issueActionToken` (`@fw-booking/db`, gemeinsam mit der API) einen neuen Link aus und versendet Text, HTML und `termin.ics`: Angebot, Datum und Uhrzeit in der Zeitzone der Installation, Ort, Änderungsfrist (Angebot bzw. Installation), Link sowie Kontakt. Nach Ablauf der Frist weist die Mail auf den direkten Kontakt hin. Scheitert der Versand, wird der eben ausgestellte Token wieder gelöscht. Alle Werte werden im HTML maskiert; die Kalenderdatei enthält keinen Verwaltungslink. Logs enthalten nur Job-ID, Typ, Versuch und Kategorie.
 - **Herunterfahren:** SIGTERM/SIGINT beenden das Abfragen; laufende Jobs werden abgeschlossen, danach endet der Prozess.
 - **Aufbewahrung:** Versendete Jobs löscht ein TTL-Index 30 Tage nach `completedAt` (Migration `008`, nur `status: 'sent'`); `failed` bleibt für die Anzeige im Portal. Index `status_leaseUntil` für abgelaufene Leases.
 

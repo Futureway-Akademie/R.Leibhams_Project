@@ -768,7 +768,7 @@
           "description": "Bestätigungsmail per SMTP mit sicherem Verwaltungslink für Storno und Umbuchung.",
           "order": 2,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-3-1",
             "task-2-12"
@@ -779,13 +779,22 @@
             "Ein Versandfehler macht die Buchung nicht rückgängig",
             "Versand ist lokal in Mailpit überprüfbar"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T12:59:59Z",
+          "completedAt": "2026-10-08T13:08:09Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "35 neue Worker-Tests (65 im Worker), API 306 und DB 36 unverändert grün. Integration gegen Replica Set und SMTP-Testserver: Mail an Teilnehmer mit Absendername, Antwortadresse, stabiler Message-ID, Betreff, Anrede, Uhrzeit, Ort des Kurstermins, Änderungsfrist des Angebots, HTML und termin.ics; Link-Token als Hash gespeichert, gültig bis Terminende, Klartext nirgends in der DB. Stornierte, umgebuchte und abgesagte Buchungen: keine Mail, kein Link, result skipped; fehlende Buchung → failed booking_missing. Mailserver nicht erreichbar → Wiederholung (smtp_unavailable), Buchung unverändert, kein verwaister Token; 451 → smtp_deferred; 550 beim Empfänger → sofort failed recipient_rejected ohne Adresse im Job; Logs ohne E-Mail, Name, Telefon und Link. Unit: Mailinhalt, Frist abgelaufen, optionale Angaben, HTML-Maskierung, Betreff ohne Zeilenumbrüche, iCalendar (Maskierung, 75-Byte-Umbruch, kein Link), SMTP-Fehlereinordnung, Konfiguration ohne Werte in Fehlern. Ende-zu-Ende gegen Docker-MongoDB und Mailpit: Buchung über die API, Worker versendet, Mail mit Anhang in Mailpit, Link aus der Mail öffnet die Buchung über /api/public/manage (canCancel, canRebook); Testdaten und Testmail entfernt. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/worker test",
+              "pnpm --filter @fw-booking/api test",
+              "Ende-zu-Ende: API + Worker (dev) gegen Docker-MongoDB, Mailpit-API, GET /api/public/manage",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T13:08:09Z"
           }
         },
         {
@@ -794,7 +803,7 @@
           "description": "Transaktionale Mails für Storno, Umbuchung und Owner-Absage.",
           "order": 3,
           "weight": 1,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-3-2",
             "task-2-13",
@@ -819,7 +828,7 @@
           "description": "Erinnerungsmails mit konfigurierbarem Vorlauf; vor Versand wird geprüft, ob Buchung und Termin noch aktuell sind.",
           "order": 4,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-3-2"
           ],

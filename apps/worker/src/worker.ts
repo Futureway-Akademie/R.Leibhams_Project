@@ -14,7 +14,10 @@ export interface JobContext {
   signal: AbortSignal;
 }
 
-export type JobHandler = (job: OutboxJobDocument, context: JobContext) => Promise<void>;
+/** `skipped`: Job ist erledigt, aber bewusst ohne Versand (z. B. Buchung nicht mehr aktiv). */
+export type JobResult = 'sent' | 'skipped';
+
+export type JobHandler = (job: OutboxJobDocument, context: JobContext) => Promise<JobResult>;
 
 /** Handler je Jobtyp. Typen ohne Handler werden nicht beansprucht und bleiben liegen. */
 export type JobHandlers = Partial<Record<OutboxJobType, JobHandler>>;
@@ -108,8 +111,9 @@ export class Worker {
     // Nicht erreichbar: beansprucht werden nur Typen mit Handler.
     if (!handler) return;
 
+    let result: JobResult;
     try {
-      await this.withTimeout((signal) => handler(job, { db: this.db, signal }));
+      result = await this.withTimeout((signal) => handler(job, { db: this.db, signal }));
     } catch (error) {
       const { category, retryable } =
         error instanceof HandlerTimeout
@@ -126,14 +130,14 @@ export class Worker {
       return;
     }
 
-    if (await this.queue.complete(job)) {
-      log.info('Job erledigt');
+    if (await this.queue.complete(job, new Date(), result)) {
+      log.info({ result }, 'Job erledigt');
     } else {
       log.warn('Lease verloren; Ergebnis verworfen');
     }
   }
 
-  private async withTimeout(run: (signal: AbortSignal) => Promise<void>): Promise<void> {
+  private async withTimeout<T>(run: (signal: AbortSignal) => Promise<T>): Promise<T> {
     const controller = new AbortController();
     let timer: NodeJS.Timeout | undefined;
     const timeout = new Promise<never>((_, reject) => {
@@ -145,7 +149,7 @@ export class Worker {
       }, this.handlerTimeoutMs);
     });
     try {
-      await Promise.race([run(controller.signal), timeout]);
+      return await Promise.race([run(controller.signal), timeout]);
     } finally {
       clearTimeout(timer);
     }

@@ -57,13 +57,21 @@ export class JobQueue {
     return job ? { ...job, leaseToken, leaseUntil } : null;
   }
 
-  /** Markiert den Job als versendet. `false`, wenn die Lease nicht mehr diesem Worker gehört. */
-  async complete(job: ClaimedJob, now = new Date()): Promise<boolean> {
-    const result = await this.c.outboxJobs.updateOne(
+  /**
+   * Schließt den Job ab (versendet oder bewusst übersprungen). `false`, wenn die Lease nicht mehr
+   * diesem Worker gehört.
+   */
+  async complete(
+    job: ClaimedJob,
+    now = new Date(),
+    outcome: 'sent' | 'skipped' = 'sent',
+  ): Promise<boolean> {
+    const update = await this.c.outboxJobs.updateOne(
       { _id: job._id, status: 'processing', leaseToken: job.leaseToken },
       {
         $set: {
           status: 'sent',
+          result: outcome,
           completedAt: now,
           leaseUntil: null,
           leaseToken: null,
@@ -72,7 +80,7 @@ export class JobQueue {
         },
       },
     );
-    return result.modifiedCount === 1;
+    return update.modifiedCount === 1;
   }
 
   /**
