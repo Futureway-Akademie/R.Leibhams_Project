@@ -132,6 +132,8 @@ Unbekannte Kalender sowie unbekannte oder deaktivierte Angebote ergeben 404. Jed
 | Endpunkt | Wirkung |
 |---|---|
 | `GET /api/public/manage` (Header `X-Booking-Token`) | Ansicht der eigenen Buchung (ohne E-Mail und Telefon), Frist und erlaubte Aktionen |
+| `GET /api/public/manage/slots?date=` bzw. `/sessions?from=&to=` | Mögliche neue Termine desselben Angebots (eigene Zeit gilt als frei) |
+| `POST /api/public/manage/rebook` `{ type, startsAt \| sessionId, confirm: true }` | Umbuchung in einer Transaktion: alte Buchung `rebooked`, neue Buchung, Platz/Zeit verschieben, Links übertragen, Auftrag `booking_rebooked`, Audit; höchstens einmal |
 | `POST /api/public/manage/cancel` `{ confirm: true }` | Storno in einer Transaktion: Status, Freigabe von Kursplatz bzw. Belegungseinheiten, Entwertung aller Links, Outbox-Auftrag `booking_cancellation`, Audit |
 
 `ActionTokenService.issue` erzeugt Links (für den Mail-Worker ab task-3-2); unbekannte Tokens ergeben 404, abgelaufene 410 (`link_expired`), überschrittene Frist 409 (`change_deadline_passed`). Antworten tragen `Cache-Control: no-store` und `Referrer-Policy: no-referrer`.

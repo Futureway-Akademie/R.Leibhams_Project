@@ -102,3 +102,7 @@
 {"timestamp": "2026-10-08T10:11:59Z", "type": "task_completed", "taskId": "task-2-12", "summary": "Verwaltungs-Tokens, Selbstverwaltung und Storno mit genau einmaliger Freigabe umgesetzt."}
 {"timestamp": "2026-10-08T10:11:59Z", "type": "decision_recorded", "summary": "Token im Link-Fragment und Header, mehrere gültige Links je Buchung, Anzeige ohne E-Mail und Telefon."}
 {"timestamp": "2026-10-08T10:11:59Z", "type": "task_ready", "taskId": "task-2-13", "summary": "Task bereit: Umbuchung."}
+{"timestamp": "2026-10-08T10:17:29Z", "type": "task_started", "taskId": "task-2-13", "summary": "Umbuchung begonnen: alte Links gelten für die neue Buchung weiter, Verschieben mit Überschneidung erlaubt, höchstens eine Umbuchung je Buchung."}
+{"timestamp": "2026-10-08T10:29:24Z", "type": "verification_passed", "taskId": "task-2-13", "summary": "Umbuchungstests inkl. Gleichzeitigkeit grün; 20 protokollierte Wiederholungen fehlerfrei; Lastlauf ohne Abweichung."}
+{"timestamp": "2026-10-08T10:29:24Z", "type": "task_completed", "taskId": "task-2-13", "summary": "Umbuchung für Einzeltermine und Kurse mit Linkübertragung und höchstens einer Umbuchung umgesetzt."}
+{"timestamp": "2026-10-08T10:29:24Z", "type": "decision_recorded", "summary": "Links gelten nach Umbuchung weiter, Verschieben mit Überschneidung erlaubt, höchstens eine Umbuchung je Buchung."}

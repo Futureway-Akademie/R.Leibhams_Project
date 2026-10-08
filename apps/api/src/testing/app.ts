@@ -35,6 +35,9 @@ export async function createTestApp(
 
   const app = await createApp(config);
   await app.init();
+  // supertest hängt je Anfrage einen Listener an den Server; bei parallelen Anfragen in Tests
+  // sonst Warnungen („MaxListenersExceeded“).
+  (app.getHttpServer() as { setMaxListeners(n: number): void }).setMaxListeners(500);
   return {
     app,
     db,

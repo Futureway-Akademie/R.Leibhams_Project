@@ -13,7 +13,11 @@ export async function checkConsistency(db: Db): Promise<string[]> {
   const sessions = await c.sessions.find().toArray();
   const bookings = await c.bookings.find().toArray();
   const units = await c.resourceOccupancy.find().toArray();
-  const jobs = await c.outboxJobs.find({ type: 'booking_confirmation' }).toArray();
+  // Jede Buchung wird genau einmal bestätigt: neu gebuchte per Bestätigungsmail,
+  // durch Umbuchung entstandene per Umbuchungsmail.
+  const jobs = await c.outboxJobs
+    .find({ type: { $in: ['booking_confirmation', 'booking_rebooked'] } })
+    .toArray();
 
   // 1. Kursbelegung: bookedCount = bestätigte Buchungen, nie über der Kapazität.
   for (const session of sessions) {

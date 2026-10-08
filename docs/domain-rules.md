@@ -149,7 +149,7 @@ Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einma
 
 - Jede Mail zur Buchung enthält einen Verwaltungslink mit zufälligem Token (256 Bit). Gespeichert wird nur dessen Hash.
 - Das Token steht im **Fragment** des Links (`…#t=TOKEN`) und wird von der Self-Service-Seite im Header `X-Booking-Token` an die API gesendet. Es erscheint dadurch nicht in URLs, Server-Logs oder Referrern.
-- Mehrere Links einer Buchung (z. B. aus Bestätigungs- und Erinnerungsmail) sind gleichzeitig gültig, jeweils bis zum Terminende. Nach Storno, Umbuchung oder Owner-Absage sind mit ihnen keine Aktionen mehr möglich; sie zeigen den Status bis zum Ablauf weiter an. Abgelaufene Links liefern „Link abgelaufen“. Eine Umbuchung erzeugt einen neuen Link.
+- Mehrere Links einer Buchung (z. B. aus Bestätigungs- und Erinnerungsmail) sind gleichzeitig gültig, jeweils bis zum Terminende. Nach Storno oder Owner-Absage sind mit ihnen keine Aktionen mehr möglich; sie zeigen den Status bis zum Ablauf weiter an. Nach einer **Umbuchung gelten die bisherigen Links für die neue Buchung weiter** (bis zu deren Ende); zusätzlich enthält die Umbuchungsmail einen neuen Link. Abgelaufene Links liefern „Link abgelaufen“.
 - Die Selbstverwaltung zeigt Angebot, Zeit, Ort, Status, Namen und die Änderungsfrist an, **nicht** E-Mail-Adresse und Telefonnummer.
 - Das Öffnen des Links zeigt nur die Buchung an. Storno und Umbuchung erfordern eine **bewusste Bestätigung** auf der Seite.
 - Ein wiederholter Storno ändert nichts und meldet „bereits storniert“; Platz bzw. Zeit werden genau einmal freigegeben.
@@ -159,6 +159,9 @@ Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einma
   - bis 24 Stunden (Standard) vor Beginn des **ursprünglichen** Termins;
   - der neue Termin muss die Regeln einer Neubuchung erfüllen (Mindestvorlauf, Horizont, Verfügbarkeit);
   - neuer Termin wird reserviert und alter freigegeben in derselben Transaktion; ist der neue Termin nicht verfügbar, bleibt die ursprüngliche Buchung unverändert.
+  - **höchstens einmal** je Buchung; danach ist nur noch Storno möglich;
+  - bei Einzelterminen darf sich die neue Zeit mit der bisherigen überschneiden (z. B. 10:00 → 10:15); die eigene Zeit gilt bei der Auswahl als frei;
+  - es entsteht eine neue Buchung; die bisherige erhält den Status `umgebucht` mit Verweis auf die neue (Historie bleibt erhalten).
 - **Nach Ablauf der Frist** ist keine Online-Änderung mehr möglich. Die Self-Service-Seite zeigt die Kontaktdaten des Owners.
 
 ## 7. Owner-Aktionen

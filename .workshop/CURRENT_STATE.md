@@ -2,7 +2,7 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 38,78 % (38 von 98 Gewichtspunkten, 18 von 49 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 40,82 % (40 von 98 Gewichtspunkten, 19 von 49 Tasks).
 
 ## Aktive Phase
 
@@ -14,6 +14,7 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
+- task-2-13 – Umbuchung (`/api/public/manage/rebook`, Links übertragen, höchstens einmal; 280 API-Tests)
 - task-2-12 – Action-Tokens und Storno (`/api/public/manage`, Token im Link-Fragment und Header; 265 API-Tests)
 - task-2-11 – Nebenläufigkeitstests (6 Szenarien, Konsistenz-Check, Lastlauf `test:concurrency` 200 × 20 ohne Abweichung)
 - task-2-10 – Atomare Einzeltermin-Buchung (Belegung der Dauer in einer Transaktion, gemeinsamer Abschluss mit Kursbuchung; 241 API-Tests)
@@ -31,7 +32,6 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-2-13 – Umbuchung
 - task-2-14 – Teilnehmerliste und Owner-Absage
 - task-2-15 – Missbrauchsschutz und CORS
 - task-3-1 – Worker mit Job-Leases
@@ -57,4 +57,4 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Einzeltermine bieten jede passende 
 
 ## Empfohlener nächster Schritt
 
-task-2-13 (Umbuchung), die direkt auf Verwaltungslink und Storno aufbaut.
+task-2-14 (Teilnehmerliste und Owner-Absage), danach ist der Buchungskern bis auf Missbrauchsschutz (task-2-15) vollständig.

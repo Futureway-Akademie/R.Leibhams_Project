@@ -25,7 +25,7 @@ export class SelfServiceService {
   }
 
   /** Buchung zum Token; unbekannte Tokens ergeben 404, abgelaufene 410. */
-  private async bookingFor(token: string | undefined, now: Date): Promise<BookingDocument> {
+  async bookingFor(token: string | undefined, now: Date): Promise<BookingDocument> {
     const resolved = await this.tokens.resolve(token, now);
     if (resolved.state === 'expired') {
       throw new GoneException({
@@ -47,7 +47,14 @@ export class SelfServiceService {
     return new Date(booking.startsAt.getTime() - minutes * MINUTE_MS);
   }
 
-  private async toView(booking: BookingDocument, now: Date): Promise<SelfServiceBooking> {
+  /** Ob diese Buchung selbst durch eine Umbuchung entstanden ist (höchstens eine Umbuchung). */
+  async isRebookResult(booking: BookingDocument): Promise<boolean> {
+    return (
+      (await this.c.bookings.countDocuments({ rebookedToBookingId: booking._id }, { limit: 1 })) > 0
+    );
+  }
+
+  async toView(booking: BookingDocument, now: Date): Promise<SelfServiceBooking> {
     const service = await this.c.services.findOne({ _id: booking.serviceId });
     const session = booking.sessionId
       ? await this.c.sessions.findOne({ _id: booking.sessionId })
@@ -65,7 +72,7 @@ export class SelfServiceService {
       status: booking.status,
       changeDeadline: iso(deadline),
       canCancel: changeable,
-      canRebook: changeable,
+      canRebook: changeable && !(await this.isRebookResult(booking)),
     };
   }
 

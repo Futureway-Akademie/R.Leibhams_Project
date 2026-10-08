@@ -586,7 +586,7 @@
           "description": "Umbuchung auf einen anderen Slot oder Kurstermin in einer Transaktion.",
           "order": 13,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-12"
           ],
@@ -595,13 +595,22 @@
             "Ist der neue Termin belegt, bleibt die ursprüngliche Buchung unverändert",
             "Umbuchungsfristen werden serverseitig geprüft"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T10:17:29Z",
+          "completedAt": "2026-10-08T10:29:24Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "15 neue API-Tests (280 in der API). Einzeltermin: Optionen inkl. überschneidender Zeiten ohne eigene Startzeit; Umbuchung mit neuer Buchung, alter Status rebooked, Belegung, Umbuchungsauftrag, Audit, Links übertragen; Verschieben mit Überschneidung; belegtes Ziel → slot_taken, Original unverändert; Zeit ohne berechnete Startzeit → not_bookable; höchstens eine Umbuchung, Storno bleibt möglich; Doppelklick → bereits umgebucht; 5 gleichzeitige Doppelklicks → genau eine Umbuchung; Frist, Terminart, eigener Termin, Bestätigung. Kurs: Optionen (andere Termine, auch volle), Platz verschieben, volles Ziel → session_full, Original unverändert; 4 gleichzeitige Umbuchungen auf letzten Platz → genau 1; anderer Kurs → not_bookable. Konsistenz-Check nach allen schreibenden Fällen. Buchungstests 20× wiederholt mit Logs: 20/20 grün, nachdem ein dabei gefundener Randfall (gleichzeitiger Doppelklick lieferte einmal 409 statt 'bereits umgebucht') behoben wurde. Lastlauf test:concurrency 200 × 20 × 6 ohne Abweichung. Manuell gegen Docker-MongoDB: 09:00 → 09:15 mit Überschneidung, Doppelklick 'bereits', zweite Umbuchung rebook_not_allowed, 6 Einheiten belegt; Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api test",
+              "pnpm exec vitest run src/bookings (20× mit Logs)",
+              "pnpm --filter @fw-booking/api test:concurrency",
+              "curl GET /api/public/manage/slots, POST /api/public/manage/rebook",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T10:29:24Z"
           }
         },
         {

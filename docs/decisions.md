@@ -307,3 +307,17 @@ Token (256 Bit) im Link-Fragment, Übergabe an die API im Header `X-Booking-Toke
 ### Begründung
 
 Das Fragment wird nie an Server oder Dritte übertragen. Mehrere gültige Links vermeiden, dass ein Klick in einer älteren Mail ins Leere läuft. Weniger angezeigte Daten begrenzen den Schaden bei weitergeleiteten Links.
+
+## 2026-10-08 – Umbuchung
+
+### Kontext
+
+Interessenten sollen über den Verwaltungslink auf einen anderen Termin desselben Angebots wechseln können, ohne die ursprüngliche Buchung zu verlieren, falls das Ziel belegt ist.
+
+### Entscheidung
+
+Umbuchung in einer Transaktion; die alte Buchung wird `rebooked` mit Verweis auf eine neue Buchung. Bisherige Links werden auf die neue Buchung übertragen. Höchstens eine Umbuchung je Buchung (erkennbar am Verweis, ohne neues Feld). Bei Einzelterminen ist ein Verschieben mit Überschneidung der eigenen Zeit erlaubt; die alte Belegung wird in derselben Transaktion ersetzt. Gleichzeitige Doppelklicks liefern „bereits umgebucht“ statt eines Fehlers; dafür wird nach jedem Fehlschlag geprüft, ob bereits auf dasselbe Ziel umgebucht wurde. Der Konsistenz-Check akzeptiert je Buchung entweder einen Bestätigungs- oder einen Umbuchungsauftrag.
+
+### Begründung
+
+Eine neue Buchung statt einer Änderung erhält die Historie. Übertragene Links sind für Kunden am einfachsten. Die Begrenzung auf eine Umbuchung verhindert ständiges Hin- und Herbuchen.

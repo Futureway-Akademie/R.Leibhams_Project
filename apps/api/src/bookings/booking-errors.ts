@@ -11,6 +11,8 @@ const MESSAGES: Record<BookingErrorCode, string> = {
     'Die Frist für Änderungen über den Link ist abgelaufen; bitte wende dich direkt an uns',
   not_cancellable: 'Diese Buchung kann nicht mehr storniert werden',
   link_expired: 'Der Link ist abgelaufen',
+  rebook_not_allowed:
+    'Diese Buchung kann nicht mehr umgebucht werden; eine Stornierung ist weiterhin möglich',
 };
 
 /** 409 mit fachlichem Code, damit das Widget eine passende Meldung zeigen kann. */

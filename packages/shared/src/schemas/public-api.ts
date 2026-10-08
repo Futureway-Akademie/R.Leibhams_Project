@@ -122,6 +122,7 @@ export const bookingErrorCodeSchema = z.enum([
   'change_deadline_passed',
   'not_cancellable',
   'link_expired',
+  'rebook_not_allowed',
 ]);
 export type BookingErrorCode = z.infer<typeof bookingErrorCodeSchema>;
 

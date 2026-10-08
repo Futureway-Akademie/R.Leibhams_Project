@@ -12,10 +12,16 @@ import {
   utcToLocal,
 } from '@fw-booking/shared';
 import { Db } from 'mongodb';
+import type { ObjectId } from 'mongodb';
 import { MONGO_DB } from '../database/database.module.js';
 import { DEFAULT_RESOURCE_ID, SETTINGS_ID, collections } from '../database/documents.js';
 import type { ServiceDocument, SingleServiceDocument } from '../database/documents.js';
 import { AvailabilityService } from './availability.service.js';
+
+export interface SlotOptions {
+  /** Belegung dieser Buchung als frei behandeln (Umbuchung mit Überschneidung der eigenen Zeit). */
+  ignoreBookingId?: ObjectId;
+}
 
 export interface Slot {
   startsAt: Date;
@@ -59,7 +65,12 @@ export class SlotService {
    * Freie Slots eines lokalen Tages. Liefert nichts für Gruppenkurse und deaktivierte Angebote.
    * Die Liste ist unverbindlich; verbindlich ist erst die atomare Prüfung beim Buchen.
    */
-  async slotsForDate(service: ServiceDocument, date: string, now = new Date()): Promise<Slot[]> {
+  async slotsForDate(
+    service: ServiceDocument,
+    date: string,
+    now = new Date(),
+    options: SlotOptions = {},
+  ): Promise<Slot[]> {
     if (service.type !== 'single' || !service.active) return [];
 
     const timeZone = await this.availability.timeZone();
@@ -73,7 +84,11 @@ export class SlotService {
 
     // Die Dauer enthält einen eventuellen Puffer bereits; ein Termin belegt genau seine Dauer.
     const durationMs = service.durationMinutes * MINUTE_MS;
-    const occupied = await this.occupiedUnits(dayStart, dayEnd + durationMs);
+    const occupied = await this.occupiedUnits(
+      dayStart,
+      dayEnd + durationMs,
+      options.ignoreBookingId,
+    );
 
     const slots = new Map<number, Slot>();
     for (const window of windows) {
@@ -119,12 +134,19 @@ export class SlotService {
     return dates;
   }
 
-  private async occupiedUnits(from: number, to: number): Promise<Set<number>> {
+  private async occupiedUnits(
+    from: number,
+    to: number,
+    ignoreBookingId?: ObjectId,
+  ): Promise<Set<number>> {
     const units = await this.c.resourceOccupancy
       .find(
         {
           resourceId: DEFAULT_RESOURCE_ID,
           unitStart: { $gte: new Date(from - UNIT_MS), $lt: new Date(to) },
+          ...(ignoreBookingId
+            ? { $nor: [{ refType: 'booking' as const, refId: ignoreBookingId }] }
+            : {}),
         },
         { projection: { unitStart: 1 } },
       )
