@@ -7,7 +7,6 @@ import type {
   BookingStatus,
   IsoWeekday,
   SessionStatus,
-  SlotGridMinutes,
 } from '@fw-booking/shared';
 import type { Db, ObjectId } from 'mongodb';
 
@@ -72,8 +71,6 @@ interface ServiceBaseDocument {
 
 export interface SingleServiceDocument extends ServiceBaseDocument {
   type: 'single';
-  bufferMinutes: number;
-  slotGridMinutes: SlotGridMinutes;
 }
 
 export interface GroupServiceDocument extends ServiceBaseDocument {

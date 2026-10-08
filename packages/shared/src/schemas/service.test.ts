@@ -3,50 +3,38 @@ import { serviceCreateSchema, serviceOrderUpdateSchema, serviceUpdateSchema } fr
 import { serviceSchema } from './service.js';
 
 describe('serviceCreateSchema – Einzeltermin', () => {
-  it('setzt Standardwerte für Puffer, Raster und Fristen', () => {
+  it('setzt Standardwerte für Status und Fristen', () => {
     const result = serviceCreateSchema.parse({
       type: 'single',
       title: 'Herrenhaarschnitt',
       durationMinutes: 30,
     });
-    expect(result).toMatchObject({
+    expect(result).toEqual({
       type: 'single',
-      bufferMinutes: 0,
-      slotGridMinutes: 30,
+      title: 'Herrenhaarschnitt',
+      durationMinutes: 30,
       active: true,
       description: null,
       bookingRules: { minLeadMinutes: null, horizonDays: null, changeDeadlineMinutes: null },
     });
   });
 
-  it.each([20, 30, 45, 60, 90])('akzeptiert Raster %i', (slotGridMinutes) => {
-    expect(
-      serviceCreateSchema.safeParse({
-        type: 'single',
-        title: 'X',
-        durationMinutes: 30,
-        slotGridMinutes,
-      }).success,
-    ).toBe(true);
-  });
-
-  it.each([15, 25, 120])('lehnt Raster %i ab', (slotGridMinutes) => {
-    expect(
-      serviceCreateSchema.safeParse({
-        type: 'single',
-        title: 'X',
-        durationMinutes: 30,
-        slotGridMinutes,
-      }).success,
-    ).toBe(false);
+  it('kennt weder Puffer noch Slot-Raster (die Dauer enthält einen Puffer bereits)', () => {
+    const result = serviceCreateSchema.parse({
+      type: 'single',
+      title: 'X',
+      durationMinutes: 30,
+      bufferMinutes: 10,
+      slotGridMinutes: 30,
+    });
+    expect(result).not.toHaveProperty('bufferMinutes');
+    expect(result).not.toHaveProperty('slotGridMinutes');
   });
 
   it.each([
     ['Dauer kein Vielfaches von 5', { durationMinutes: 32 }],
     ['Dauer zu lang', { durationMinutes: 485 }],
     ['Dauer 0', { durationMinutes: 0 }],
-    ['Puffer zu groß', { durationMinutes: 30, bufferMinutes: 65 }],
-    ['Puffer kein Vielfaches von 5', { durationMinutes: 30, bufferMinutes: 7 }],
   ])('lehnt ab: %s', (_label, fields) => {
     expect(serviceCreateSchema.safeParse({ type: 'single', title: 'X', ...fields }).success).toBe(
       false,

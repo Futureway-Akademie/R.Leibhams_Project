@@ -25,8 +25,8 @@ export interface Slot {
 const MINUTE_MS = 60_000;
 const UNIT_MS = OCCUPANCY_UNIT_MINUTES * MINUTE_MS;
 const DAY_MS = 24 * 60 * MINUTE_MS;
-/** Schutz vor Endlosschleifen; ein Tag hat höchstens 1500 Minuten / 20-Minuten-Raster. */
-const MAX_CANDIDATES_PER_WINDOW = 200;
+/** Schutz vor Endlosschleifen: ein Tag hat höchstens 25 Stunden = 300 Fünf-Minuten-Schritte. */
+const MAX_CANDIDATES_PER_WINDOW = 300;
 
 @Injectable()
 export class SlotService {
@@ -71,9 +71,9 @@ export class SlotService {
     const windows = await this.availability.openWindowsForDate(date);
     if (windows.length === 0) return [];
 
+    // Die Dauer enthält einen eventuellen Puffer bereits; ein Termin belegt genau seine Dauer.
     const durationMs = service.durationMinutes * MINUTE_MS;
-    const blockMs = (service.durationMinutes + service.bufferMinutes) * MINUTE_MS;
-    const occupied = await this.occupiedUnits(dayStart, dayEnd + blockMs);
+    const occupied = await this.occupiedUnits(dayStart, dayEnd + durationMs);
 
     const slots = new Map<number, Slot>();
     for (const window of windows) {
@@ -83,9 +83,9 @@ export class SlotService {
       const localEnd = utcToLocal(window.end.toISOString(), timeZone).dateTime;
 
       for (let k = 0; k < MAX_CANDIDATES_PER_WINDOW; k++) {
-        // Raster in lokaler Zeit ab Fensterbeginn; übersprungene Zeiten entfallen,
-        // doppelte ergeben das erste Vorkommen (und damit keine doppelten Slots).
-        const local = addLocalMinutes(localStart, k * service.slotGridMinutes);
+        // Jede Startzeit im 5-Minuten-Raster (lokale Zeit) ab Fensterbeginn; übersprungene
+        // Zeiten entfallen, doppelte ergeben das erste Vorkommen (keine doppelten Slots).
+        const local = addLocalMinutes(localStart, k * OCCUPANCY_UNIT_MINUTES);
         if (local >= localEnd && k > 0) break;
         const converted = localToUtc(local, timeZone);
         if (!converted.ok) continue;
@@ -97,7 +97,7 @@ export class SlotService {
           continue;
         }
         if (start < earliest || start > latest) continue;
-        if (this.overlaps(occupied, start, start + blockMs)) continue;
+        if (this.overlaps(occupied, start, start + durationMs)) continue;
         slots.set(start, { startsAt: new Date(start), endsAt: new Date(start + durationMs) });
       }
     }

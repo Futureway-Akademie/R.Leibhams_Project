@@ -75,3 +75,12 @@
 {"timestamp": "2026-10-07T14:04:33Z", "type": "task_completed", "taskId": "task-2-9", "summary": "Atomare Kursbuchung mit Transaktion, Idempotenz, Outbox-Auftrag und Pflicht-Datenschutzbestätigung umgesetzt."}
 {"timestamp": "2026-10-07T14:04:33Z", "type": "decision_recorded", "summary": "Eine aktive Buchung je E-Mail, Link nur per E-Mail, Pflicht-Checkbox Datenschutz, 409 bei Idempotenzkonflikt."}
 {"timestamp": "2026-10-07T14:04:33Z", "type": "task_ready", "taskId": "task-2-10", "summary": "Task bereit: Atomare Einzeltermin-Buchung."}
+{"timestamp": "2026-10-08T07:20:56Z", "type": "decision_recorded", "summary": "Einzeltermine: jede passende Startzeit im 5-Minuten-Raster statt Slot-Raster je Angebot; nur berechnete Slots buchbar; unbegrenzt viele Einzeltermine je E-Mail."}
+{"timestamp": "2026-10-08T07:20:56Z", "type": "roadmap_updated", "summary": "Roadmap v2: neuer task-2-16 (Slot-Startzeiten im 5-Minuten-Raster, Gewicht 1); task-2-10 hängt zusätzlich davon ab und ist dadurch von ready auf planned zurückgestuft (dokumentierte Roadmap-Korrektur)."}
+{"timestamp": "2026-10-08T07:20:56Z", "type": "task_ready", "taskId": "task-2-16", "summary": "Task bereit: Slot-Startzeiten im 5-Minuten-Raster."}
+{"timestamp": "2026-10-08T08:19:04Z", "type": "decision_recorded", "summary": "Kein Puffer für Einzeltermine und Kurse; die angebotene Dauer enthält ihn bereits."}
+{"timestamp": "2026-10-08T08:19:04Z", "type": "roadmap_updated", "summary": "task-2-16 um das Entfernen des Puffers erweitert (Titel, Beschreibung, Definition of Done)."}
+{"timestamp": "2026-10-08T08:19:04Z", "type": "task_started", "taskId": "task-2-16", "summary": "Umstellung auf Startzeiten im 5-Minuten-Raster ohne Puffer begonnen."}
+{"timestamp": "2026-10-08T08:23:21Z", "type": "verification_passed", "taskId": "task-2-16", "summary": "Slot-Tests für 5-Minuten-Raster ohne Puffer inkl. Zeitumstellung grün; Bartrasur-Beispiel manuell bestätigt."}
+{"timestamp": "2026-10-08T08:23:21Z", "type": "task_completed", "taskId": "task-2-16", "summary": "Startzeiten im 5-Minuten-Raster ohne Puffer umgesetzt; slotGridMinutes und bufferMinutes entfernt (Migration 006)."}
+{"timestamp": "2026-10-08T08:23:21Z", "type": "task_ready", "taskId": "task-2-10", "summary": "Task bereit: Atomare Einzeltermin-Buchung."}

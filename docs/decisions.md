@@ -237,3 +237,31 @@ Kursbuchung in einer MongoDB-Transaktion mit bedingtem `$inc` (`bookedCount < ca
 ### Begründung
 
 Die Prüfung der Kapazität in der Schreibbedingung ist auch bei gleichzeitigen Anfragen verlässlich. Ein Link nur per E-Mail stellt sicher, dass nur Inhaber der Adresse die Buchung ändern können.
+
+## 2026-10-08 – Startzeiten von Einzelterminen
+
+### Kontext
+
+Bei der Planung der Einzeltermin-Buchung (task-2-10) wurde klar, dass die Auswahl „20, 30, 45, 60, 90“ aus task-1-1 als Slot-Raster umgesetzt wurde. Gewünscht ist dagegen: Ein Kunde kann jede Startzeit wählen, die in eine freie Lücke passt, z. B. eine Bartrasur (20 Minuten) in einer freien Stunde 12–13 Uhr um 12:00, 12:05, … bis 12:40. Der Kalender soll die Tagesplanung nicht optimieren.
+
+### Entscheidung
+
+Einzeltermine bieten jede Startzeit im 5-Minuten-Raster an, bei der Dauer und Puffer in eine freie Lücke passen. Das Slot-Raster je Angebot entfällt (neuer task-2-16, Roadmap v2). Gebucht werden kann nur zu berechneten Startzeiten. Eine E-Mail-Adresse darf unbegrenzt viele Einzeltermine buchen; Missbrauchsschutz über Rate Limiting (task-2-15).
+
+### Begründung
+
+Kunden erhalten die größtmögliche Auswahl; die Prüfung gegen berechnete Startzeiten verhindert trotzdem manipulierte Anfragen außerhalb von Öffnungszeiten und Fristen. Der abgeschlossene task-2-6 bleibt historisch erhalten; die Änderung ist als eigener Task nachvollziehbar.
+
+## 2026-10-08 – Kein Puffer
+
+### Kontext
+
+Bisher hatten Einzeltermin-Angebote einen Puffer nach dem Termin (0–60 Minuten).
+
+### Entscheidung
+
+Es gibt keinen Puffer, weder für Einzeltermine noch für Kurse. Die angegebene Dauer eines Angebots enthält einen eventuellen Puffer bereits. Ein Termin belegt die Ressource genau für seine Dauer. Umsetzung in task-2-16 zusammen mit dem Wegfall des Slot-Rasters (Migration `006`).
+
+### Begründung
+
+Einfacher für Owner und Kunden: Eine einzige Angabe bestimmt, wie lange ein Termin den Kalender belegt.

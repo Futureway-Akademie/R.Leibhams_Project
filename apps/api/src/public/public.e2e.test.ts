@@ -109,7 +109,7 @@ describe('Öffentliche Angebote', () => {
   it('liefert aktive Angebote in Reihenfolge ohne Anmeldung und ohne interne Felder', async () => {
     await collections(t.db).services.insertMany([
       groupService({ title: 'Yoga', sortOrder: 1 }),
-      singleService({ title: 'Haarschnitt', sortOrder: 0, bufferMinutes: 10 }),
+      singleService({ title: 'Haarschnitt', sortOrder: 0 }),
       singleService({ title: 'Alt', sortOrder: 2, active: false }),
     ]);
     const response = await http().get(`${base}/services`).expect(200);
@@ -122,7 +122,6 @@ describe('Öffentliche Angebote', () => {
       title: 'Haarschnitt',
       description: null,
       durationMinutes: 30,
-      slotGridMinutes: 30,
     });
     expect(JSON.stringify(response.body)).not.toMatch(
       /bufferMinutes|bookingRules|sortOrder|active/,
@@ -153,7 +152,7 @@ describe('Öffentliche Slots und freie Tage', () => {
       (await http().get(`${base}/services/${svc._id.toHexString()}/slots?date=${date}`).expect(200))
         .body,
     );
-    expect(before.slots).toHaveLength(6);
+    expect(before.slots).toHaveLength(31);
 
     const first = before.slots[0];
     if (!first) throw new Error('kein Slot');
@@ -170,7 +169,8 @@ describe('Öffentliche Slots und freie Tage', () => {
       .get(`${base}/services/${svc._id.toHexString()}/slots?date=${date}`)
       .expect(200);
     const after = publicSlotsResponseSchema.parse(response.body);
-    expect(after.slots).toHaveLength(5);
+    // Belegung 30 Minuten ab dem ersten Slot: 6 Startzeiten entfallen.
+    expect(after.slots).toHaveLength(25);
     expect(after.slots.map((s) => s.startsAt)).not.toContain(first.startsAt);
     expect(response.headers['cache-control']).toBe('public, max-age=30');
   });

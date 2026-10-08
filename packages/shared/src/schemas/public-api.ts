@@ -10,7 +10,7 @@ import {
   utcDateTimeSchema,
 } from '../primitives.js';
 import { participantSchema } from './booking.js';
-import { durationMinutesSchema, slotGridMinutesSchema } from './service.js';
+import { durationMinutesSchema } from './service.js';
 
 const publicServiceBase = {
   id: objectIdSchema,
@@ -20,11 +20,7 @@ const publicServiceBase = {
 };
 
 export const publicServiceSchema = z.discriminatedUnion('type', [
-  z.strictObject({
-    ...publicServiceBase,
-    type: z.literal('single'),
-    slotGridMinutes: slotGridMinutesSchema,
-  }),
+  z.strictObject({ ...publicServiceBase, type: z.literal('single') }),
   z.strictObject({ ...publicServiceBase, type: z.literal('group') }),
 ]);
 export type PublicService = z.infer<typeof publicServiceSchema>;

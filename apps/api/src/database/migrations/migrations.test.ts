@@ -51,6 +51,7 @@ describe('runMigrations', () => {
         '003-service-order',
         '004-public-calendar',
         '005-booking-privacy',
+        '006-remove-buffer-and-grid',
       ],
       alreadyApplied: [],
     });
@@ -61,6 +62,7 @@ describe('runMigrations', () => {
       '003-service-order',
       '004-public-calendar',
       '005-booking-privacy',
+      '006-remove-buffer-and-grid',
     ]);
   });
 
@@ -77,6 +79,7 @@ describe('runMigrations', () => {
         '003-service-order',
         '004-public-calendar',
         '005-booking-privacy',
+        '006-remove-buffer-and-grid',
       ],
     });
     expect(await indexNames(db, COLLECTIONS.bookings)).toEqual(before);
@@ -354,5 +357,34 @@ describe('Validatoren und eindeutige Indizes', () => {
       }),
       VALIDATION_FAILED,
     );
+  });
+});
+
+describe('006-remove-buffer-and-grid', () => {
+  it('entfernt Puffer und Raster aus bestehenden Angeboten und aus dem Validator', async () => {
+    const db = freshDb();
+    const { MIGRATIONS } = await import('./runner.js');
+    const upTo005 = MIGRATIONS.filter((m) => m.id < '006');
+    await runMigrations(db, upTo005);
+    await db.collection(COLLECTIONS.services).insertOne({
+      type: 'single',
+      title: 'Alt',
+      description: null,
+      active: true,
+      durationMinutes: 30,
+      bufferMinutes: 10,
+      slotGridMinutes: 30,
+      bookingRules: { minLeadMinutes: null, horizonDays: null, changeDeadlineMinutes: null },
+      sortOrder: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    await runMigrations(db);
+    const stored = await db.collection(COLLECTIONS.services).findOne({ title: 'Alt' });
+    expect(stored).not.toHaveProperty('bufferMinutes');
+    expect(stored).not.toHaveProperty('slotGridMinutes');
+    const [info] = await db.listCollections({ name: COLLECTIONS.services }).toArray();
+    expect(JSON.stringify(info)).not.toContain('bufferMinutes');
+    expect(JSON.stringify(info)).toContain('sortOrder');
   });
 });

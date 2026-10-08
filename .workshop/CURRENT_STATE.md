@@ -2,7 +2,7 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v1 mit 7 Phasen und 48 Tasks (Gesamtgewicht 97). Fortschritt: 30,93 % (30 von 97 Gewichtspunkten, 14 von 48 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 31,63 % (31 von 98 Gewichtspunkten, 15 von 49 Tasks).
 
 ## Aktive Phase
 
@@ -14,6 +14,7 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
+- task-2-16 – Slot-Startzeiten im 5-Minuten-Raster, ohne Puffer (Migration 006; Bartrasur 20 Min in 12–13 Uhr → 12:00–12:40)
 - task-2-9 – Atomare Kursbuchung (`POST /api/public/calendars/:calendarId/bookings`, Transaktion mit bedingtem `$inc`, Idempotenz, Outbox, Pflicht-Datenschutzbestätigung, Migration 005; 227 API-Tests)
 - task-2-8 – Öffentliche Verfügbarkeits-API
 - task-2-7 – Kurstermine und Kursregeln
@@ -27,7 +28,7 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-2-10 – Atomare Einzeltermin-Buchung
+- task-2-10 – Atomare Einzeltermin-Buchung (Planung abgestimmt: nur berechnete Startzeiten, unbegrenzt je E-Mail, Fehler `slot_taken`/`not_bookable`)
 - task-4-1 – Widget-Build
 - task-5-1 – Portal-Gerüst und Login
 - task-7-1 – Geschützter Entwicklerzugang
@@ -38,7 +39,7 @@ Nichts.
 
 ## Wichtige Entscheidungen
 
-Siehe `docs/decisions.md`. Zuletzt: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
+Siehe `docs/decisions.md`. Neu (2026-10-08): Einzeltermine bieten jede passende Startzeit im 5-Minuten-Raster an, Slot-Raster und Puffer entfallen (Dauer enthält Puffer); nur berechnete Startzeiten buchbar; unbegrenzt viele Einzeltermine je E-Mail. Davor: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
 
 ## Bekannte Probleme
 
@@ -49,4 +50,4 @@ Siehe `docs/decisions.md`. Zuletzt: Kursbuchung in einer Transaktion mit Kapazit
 
 ## Empfohlener nächster Schritt
 
-task-2-10 (Atomare Einzeltermin-Buchung), danach task-2-11 (Nebenläufigkeitstests inkl. Prüfung des einmaligen Testfehlschlags).
+task-2-10 (Atomare Einzeltermin-Buchung, Planung bereits abgestimmt), danach task-2-11 (Nebenläufigkeitstests inkl. Prüfung des einmaligen Testfehlschlags).

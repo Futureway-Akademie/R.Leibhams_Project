@@ -4,6 +4,7 @@ import { authMigration } from './002-auth.js';
 import { serviceOrderMigration } from './003-service-order.js';
 import { publicCalendarMigration } from './004-public-calendar.js';
 import { bookingPrivacyMigration } from './005-booking-privacy.js';
+import { removeBufferAndGridMigration } from './006-remove-buffer-and-grid.js';
 import type { Migration } from './migration.js';
 
 /** Alle Migrationen in Ausführungsreihenfolge. Neue Schritte nur anhängen. */
@@ -13,6 +14,7 @@ export const MIGRATIONS: readonly Migration[] = [
   serviceOrderMigration,
   publicCalendarMigration,
   bookingPrivacyMigration,
+  removeBufferAndGridMigration,
 ];
 
 export const MIGRATIONS_COLLECTION = '_migrations';

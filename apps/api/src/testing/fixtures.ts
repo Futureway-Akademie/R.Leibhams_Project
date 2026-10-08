@@ -36,8 +36,6 @@ export function singleService(
     description: null,
     active: true,
     durationMinutes: 30,
-    bufferMinutes: 0,
-    slotGridMinutes: 30,
     bookingRules: RULES,
     sortOrder: 0,
     createdAt: NOW,

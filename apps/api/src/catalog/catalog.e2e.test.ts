@@ -72,14 +72,23 @@ describe('Angebote anlegen', () => {
       type: 'single',
       title: 'Herrenhaarschnitt',
       durationMinutes: 30,
-      bufferMinutes: 0,
-      slotGridMinutes: 30,
       active: true,
       description: null,
       sortOrder: 0,
       bookingRules: { minLeadMinutes: null, horizonDays: null, changeDeadlineMinutes: null },
     });
     expect(service).not.toHaveProperty('defaultCapacity');
+    expect(service).not.toHaveProperty('bufferMinutes');
+    expect(service).not.toHaveProperty('slotGridMinutes');
+  });
+
+  it('ignoriert früher vorhandene Felder für Puffer und Raster', async () => {
+    const service = await create({ ...haircut, bufferMinutes: 10, slotGridMinutes: 15 });
+    expect(service).not.toHaveProperty('bufferMinutes');
+    expect(service).not.toHaveProperty('slotGridMinutes');
+    const stored = await collections(t.db).services.findOne({ _id: new ObjectId(service.id) });
+    expect(stored).not.toHaveProperty('bufferMinutes');
+    expect(stored).not.toHaveProperty('slotGridMinutes');
   });
 
   it('legt einen Gruppenkurs an und hängt ihn ans Ende', async () => {
@@ -91,7 +100,6 @@ describe('Angebote anlegen', () => {
 
   it.each([
     ['Gruppenkurs mit Kapazität 1', { ...yoga, defaultCapacity: 1 }],
-    ['Einzeltermin mit Raster 15', { ...haircut, slotGridMinutes: 15 }],
     ['Dauer 32 Minuten', { ...haircut, durationMinutes: 32 }],
     ['unbekannte Terminart', { ...haircut, type: 'event' }],
   ])('lehnt ab: %s', async (_label, body) => {
@@ -137,15 +145,13 @@ describe('Angebote ändern', () => {
       .patch(`${BASE}/${service.id}`, {
         type: 'single',
         title: 'Haarschnitt kurz',
-        bufferMinutes: 10,
+        durationMinutes: 40,
       })
       .expect(200);
     const updated = serviceSchema.parse(response.body);
     expect(updated).toMatchObject({
       title: 'Haarschnitt kurz',
-      bufferMinutes: 10,
-      durationMinutes: 30,
-      slotGridMinutes: 30,
+      durationMinutes: 40,
       active: true,
       bookingRules: { minLeadMinutes: 120, horizonDays: null, changeDeadlineMinutes: null },
     });
@@ -244,8 +250,6 @@ describe('Datenbank', () => {
         description: null,
         active: true,
         durationMinutes: 30,
-        bufferMinutes: 0,
-        slotGridMinutes: 30,
         bookingRules: { minLeadMinutes: null, horizonDays: null, changeDeadlineMinutes: null },
         createdAt: new Date(),
         updatedAt: new Date(),

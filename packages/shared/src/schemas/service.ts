@@ -1,23 +1,11 @@
 import { z } from 'zod';
-import {
-  DEFAULT_BUFFER_MINUTES,
-  DEFAULT_SLOT_GRID_MINUTES,
-  MAX_BUFFER_MINUTES,
-  MAX_DURATION_MINUTES,
-  MIN_DURATION_MINUTES,
-  MIN_GROUP_CAPACITY,
-  SLOT_GRID_MINUTES,
-} from '../constants.js';
+import { MAX_DURATION_MINUTES, MIN_DURATION_MINUTES, MIN_GROUP_CAPACITY } from '../constants.js';
 import { objectIdSchema, unitMinutesSchema, utcDateTimeSchema } from '../primitives.js';
 
+/** Dauer eines Termins; enthält einen eventuellen Puffer bereits (es gibt keinen eigenen Puffer). */
 export const durationMinutesSchema = unitMinutesSchema
   .min(MIN_DURATION_MINUTES)
   .max(MAX_DURATION_MINUTES);
-
-export const bufferMinutesSchema = unitMinutesSchema.max(MAX_BUFFER_MINUTES);
-
-export const slotGridMinutesSchema = z.union(SLOT_GRID_MINUTES.map((m) => z.literal(m)));
-export type SlotGridMinutes = z.infer<typeof slotGridMinutesSchema>;
 
 export const groupCapacitySchema = z.int().min(MIN_GROUP_CAPACITY);
 
@@ -47,8 +35,6 @@ const serviceBaseShape = {
 const singleServiceShape = {
   ...serviceBaseShape,
   type: z.literal('single'),
-  bufferMinutes: bufferMinutesSchema,
-  slotGridMinutes: slotGridMinutesSchema,
 };
 
 const groupServiceShape = {
@@ -64,12 +50,7 @@ const baseDefaults = {
 };
 
 /** Felder eines Einzeltermin-Angebots inklusive Standardwerten (für Neuanlage). */
-export const singleServiceFields = z.object({
-  ...singleServiceShape,
-  ...baseDefaults,
-  bufferMinutes: singleServiceShape.bufferMinutes.default(DEFAULT_BUFFER_MINUTES),
-  slotGridMinutes: singleServiceShape.slotGridMinutes.default(DEFAULT_SLOT_GRID_MINUTES),
-});
+export const singleServiceFields = z.object({ ...singleServiceShape, ...baseDefaults });
 
 /** Felder eines Gruppenkurs-Angebots inklusive Standardwerten (für Neuanlage). */
 export const groupServiceFields = z.object({ ...groupServiceShape, ...baseDefaults });

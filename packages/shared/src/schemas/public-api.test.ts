@@ -55,13 +55,13 @@ describe('öffentliche Antworten enthalten keine personenbezogenen Daten', () =>
     ).toBe(false);
   });
 
-  it('liefert Raster nur bei Einzelterminen', () => {
+  it('liefert Angebote beider Terminarten ohne Raster oder Puffer', () => {
     const base = { id, title: 'X', description: null, durationMinutes: 30 };
     expect(
       publicServicesResponseSchema.safeParse({
         timeZone: 'Europe/Berlin',
         services: [
-          { ...base, type: 'single', slotGridMinutes: 30 },
+          { ...base, type: 'single' },
           { ...base, type: 'group' },
         ],
       }).success,
@@ -69,7 +69,7 @@ describe('öffentliche Antworten enthalten keine personenbezogenen Daten', () =>
     expect(
       publicServicesResponseSchema.safeParse({
         timeZone: 'Europe/Berlin',
-        services: [{ ...base, type: 'group', slotGridMinutes: 30 }],
+        services: [{ ...base, type: 'single', slotGridMinutes: 30 }],
       }).success,
     ).toBe(false);
   });

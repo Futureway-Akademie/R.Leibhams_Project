@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "roadmapVersion": 1,
+  "roadmapVersion": 2,
   "status": "active",
   "phases": [
     {
@@ -172,7 +172,7 @@
       "title": "Buchungskern (API)",
       "description": "NestJS-API mit Owner-Login, Angeboten beider Terminarten, Slot-Berechnung, Kursterminen sowie atomarer Buchung, Storno und Umbuchung.",
       "order": 2,
-      "weight": 35,
+      "weight": 36,
       "status": "in_progress",
       "tasks": [
         {
@@ -488,7 +488,8 @@
           "weight": 3,
           "status": "ready",
           "dependsOn": [
-            "task-2-9"
+            "task-2-9",
+            "task-2-16"
           ],
           "definitionOfDone": [
             "Ein Einzeltermin belegt alle betroffenen Belegungseinheiten der Ressource atomar",
@@ -625,6 +626,41 @@
             "summary": null,
             "commands": [],
             "checkedAt": null
+          }
+        },
+        {
+          "id": "task-2-16",
+          "title": "Slot-Startzeiten im 5-Minuten-Raster, ohne Puffer",
+          "description": "Einzeltermine bieten jede Startzeit im 5-Minuten-Raster an, bei der die Dauer in eine freie Lücke passt (z. B. 12:00–12:40 für 20 Minuten in einer freien Stunde 12–13 Uhr). Das Slot-Raster je Angebot und der Puffer entfallen; die angegebene Dauer enthält einen eventuellen Puffer bereits. Der Kalender optimiert die Tagesplanung nicht.",
+          "order": 16,
+          "weight": 1,
+          "status": "completed",
+          "dependsOn": [
+            "task-2-6"
+          ],
+          "definitionOfDone": [
+            "Slot-Berechnung liefert alle Startzeiten im 5-Minuten-Raster, bei denen die Dauer in eine freie Lücke passt",
+            "Felder slotGridMinutes und bufferMinutes sind aus Schemas, API, Datenbank (Migration) und öffentlicher Antwort entfernt",
+            "Termine belegen die Ressource genau für ihre Dauer",
+            "Zeitumstellung, Belegung und Fristen sind weiterhin durch Tests abgedeckt",
+            "docs/domain-rules.md ist angepasst"
+          ],
+          "startedAt": "2026-10-08T08:19:04Z",
+          "completedAt": "2026-10-08T08:23:21Z",
+          "verification": {
+            "status": "passed",
+            "summary": "Slot-Berechnung liefert jede Startzeit im 5-Minuten-Raster, bei der die Dauer in eine freie Lücke passt; Termine belegen genau ihre Dauer. Tests (227 API, 139 Shared): Fenster 09–12 → 09:00–11:30, Bartrasur 20 Min in 12–13 Uhr → 12:00–12:40, Dauer muss ins Fenster passen, Ende = Beginn + Dauer, Sperrzeiten, belegte Zeiten, Lücken, Kurse, lange Termine, Mindestvorlauf (Standard, Angebot, Einstellungen), Horizont, Sommerzeitbeginn (übersprungene Stunde entfällt), Winterzeitbeginn (erstes Vorkommen, keine Duplikate, 25 Startzeiten), Owner- und öffentliche Endpunkte; slotGridMinutes/bufferMinutes werden bei Anlage ignoriert und nicht gespeichert; Migration 006 entfernt beide Felder aus Bestandsdaten und bufferMinutes aus dem Validator (eigener Test). Manuell gegen Docker-MongoDB: Migration 006, Angebot Bartrasur 20 Min mit mitgesendetem Puffer/Raster (ignoriert), Vormittag belegt → Startzeiten 12:00–12:40 in 5-Minuten-Schritten; Testdaten entfernt. docs/domain-rules.md (2.1, 2.3, 4, 7, 10) und docs/architecture.md angepasst. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/api db:migrate",
+              "curl GET /api/owner/services/:id/slots?date=2026-10-12",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T08:23:21Z"
           }
         }
       ]

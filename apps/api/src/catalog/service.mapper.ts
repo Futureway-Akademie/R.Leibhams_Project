@@ -15,11 +15,6 @@ export function toServiceDto(doc: ServiceDocument): Service {
     updatedAt: doc.updatedAt.toISOString(),
   };
   return doc.type === 'single'
-    ? {
-        ...base,
-        type: 'single',
-        bufferMinutes: doc.bufferMinutes,
-        slotGridMinutes: doc.slotGridMinutes,
-      }
+    ? { ...base, type: 'single' }
     : { ...base, type: 'group', defaultCapacity: doc.defaultCapacity };
 }

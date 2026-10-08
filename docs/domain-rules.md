@@ -23,9 +23,7 @@ Verbindliche fachliche Regeln für WP Buchung Kalender plus PWA. Sie gelten für
 
 | Parameter | Regel |
 |---|---|
-| Dauer | Pflicht, Vielfaches von 5 Minuten, 5–480 Minuten. |
-| Puffer | Liegt **nach** dem Termin, 0–60 Minuten, Vielfaches von 5. Standard: 0. |
-| Slot-Raster | Einer der Werte **20, 30, 45, 60, 90** Minuten. Standard: 30. |
+| Dauer | Pflicht, Vielfaches von 5 Minuten, 5–480 Minuten. Enthält einen eventuellen Puffer bereits; es gibt **keinen eigenen Puffer**. |
 | Kapazität | Immer 1, nicht änderbar. |
 
 ### 2.2 Öffnungszeiten und Ausnahmen
@@ -45,9 +43,9 @@ Verbindliche fachliche Regeln für WP Buchung Kalender plus PWA. Sie gelten für
 
 Ein Slot mit Beginn `S` ist buchbar, wenn alle Bedingungen gelten:
 
-1. `S` liegt auf dem Raster, gezählt ab Beginn des jeweiligen Öffnungsfensters (Fenster 09:00, Raster 45 → 09:00, 09:45, 10:30, …).
-2. `S` bis `S + Dauer` liegt vollständig in einem geöffneten Zeitfenster. Der Puffer darf über das Fensterende hinausragen.
-3. `S + Dauer + Puffer` überschneidet sich nicht mit belegten Zeiten der Ressource (Einzeltermine inklusive Puffer und Kurstermine, siehe 4).
+1. `S` liegt im **5-Minuten-Raster**, gezählt ab Beginn des jeweiligen Öffnungsfensters. Es wird jede Startzeit angeboten, die passt; der Kalender optimiert die Tagesplanung nicht. Beispiel: Bartrasur (20 Minuten), freie Stunde 12–13 Uhr → 12:00, 12:05, … 12:40.
+2. `S` bis `S + Dauer` liegt vollständig in einem geöffneten Zeitfenster.
+3. `S` bis `S + Dauer` überschneidet sich nicht mit belegten Zeiten der Ressource (Einzeltermine und Kurstermine, siehe 4).
 4. `S` ≥ jetzt + Mindestvorlauf.
 5. `S` ≤ jetzt + Buchungshorizont.
 
@@ -92,7 +90,7 @@ Die angezeigte Slot-Liste ist unverbindlich. Verbindlich ist nur die atomare Pr�
 ## 4. Gemeinsame Ressource
 
 - Einzeltermine und Kurse einer Installation teilen sich die Ressource.
-- Ein Einzeltermin belegt die Ressource von `Beginn` bis `Ende + Puffer`.
+- Ein Einzeltermin belegt die Ressource von `Beginn` bis `Ende` (genau seine Dauer).
 - Ein Kurstermin belegt die Ressource von `Beginn` bis `Ende`, unabhängig von der Zahl der Buchungen – bereits ab seiner Anlage.
 - Gesperrte Kurstermine belegen die Ressource weiterhin; abgesagte geben sie frei.
 - Die Belegung wird in Belegungseinheiten zu 5 Minuten gespeichert. Ein eindeutiger Index auf (Ressource, Einheit) verhindert Überschneidungen auch bei gleichzeitigen Anfragen.
@@ -169,7 +167,7 @@ Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einma
 | Löschen | Nur für Kurstermine ohne Buchungshistorie. Manuell angelegte werden gelöscht, aus Regeln erzeugte als abgesagt markiert (damit sie nicht neu entstehen). Termine mit Buchungen werden abgesagt, nicht gelöscht. |
 | Terminart ändern | Nicht möglich. Für eine andere Terminart wird ein neues Angebot angelegt und das alte deaktiviert. |
 | Angebot deaktivieren | Keine neuen Buchungen, nicht im Widget sichtbar; bestehende Buchungen bleiben gültig. Jederzeit reaktivierbar. Angebote werden nicht gelöscht. |
-| Angebot ändern | Dauer, Puffer, Raster, Kapazität und Fristen wirken nur auf künftige Slots und Kurstermine; bestehende Buchungen und Kurstermine bleiben unverändert. |
+| Angebot ändern | Dauer, Kapazität und Fristen wirken nur auf künftige Slots und Kurstermine; bestehende Buchungen und Kurstermine bleiben unverändert. |
 | Reihenfolge der Angebote | Manuell festgelegt; neue Angebote stehen am Ende. |
 
 Alle Owner-Änderungen an Terminen und Buchungen werden in `auditEvents` protokolliert.
@@ -215,7 +213,6 @@ Fachbegriffe stehen in Dokumentation und Oberfläche auf Deutsch, im Code auf En
 | Status bestätigt / storniert / umgebucht / vom Owner abgesagt | `confirmed` / `cancelled` / `rebooked` / `cancelled_by_owner` |
 | Kurstermin geplant / gesperrt / abgesagt | `scheduled` / `blocked` / `cancelled` |
 | Mindestvorlauf / Buchungshorizont / Storno- und Umbuchungsfrist | `minLeadMinutes` / `horizonDays` / `changeDeadlineMinutes` |
-| Puffer / Slot-Raster | `bufferMinutes` / `slotGridMinutes` |
 
 IDs sind MongoDB-ObjectIds als 24-stellige Hex-Strings. Zeitpunkte werden in der API als ISO-8601 in UTC (`…Z`) übertragen, die Zeitzone der Installation separat als `timeZone`. Lokale Angaben (Öffnungszeiten, Ausnahmen, Kursregeln) verwenden `HH:MM`, `YYYY-MM-DD` bzw. `YYYY-MM-DDTHH:MM` ohne Zeitzone.
 

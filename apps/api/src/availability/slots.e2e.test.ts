@@ -59,8 +59,6 @@ function single(overrides: Partial<SingleServiceDocument> = {}): SingleServiceDo
     description: null,
     active: true,
     durationMinutes: 30,
-    bufferMinutes: 0,
-    slotGridMinutes: 30,
     bookingRules: { minLeadMinutes: null, horizonDays: null, changeDeadlineMinutes: null },
     sortOrder: 0,
     createdAt: NOW,
@@ -85,6 +83,18 @@ async function localStarts(
   );
 }
 
+/** Lokale Uhrzeiten von `from` bis einschließlich `to` in 5-Minuten-Schritten. */
+function times(from: string, to: string): string[] {
+  const toMinutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3));
+  const result: string[] = [];
+  for (let m = toMinutes(from); m <= toMinutes(to); m += 5) {
+    result.push(
+      `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`,
+    );
+  }
+  return result;
+}
+
 /** Belegt die Ressource von `from` bis `to` (UTC) in 5-Minuten-Einheiten. */
 async function occupy(from: string, to: string, refType: OccupancyRefType = 'booking') {
   const refId = new ObjectId();
@@ -101,43 +111,26 @@ async function occupy(from: string, to: string, refType: OccupancyRefType = 'boo
   await collections(t.db).resourceOccupancy.insertMany(units);
 }
 
-describe('Raster, Dauer und Puffer', () => {
-  it('erzeugt Slots im Raster ab Fensterbeginn', async () => {
-    expect(await localStarts(single())).toEqual([
-      '09:00',
-      '09:30',
-      '10:00',
-      '10:30',
-      '11:00',
-      '11:30',
-    ]);
+describe('Startzeiten im 5-Minuten-Raster', () => {
+  it('bietet jede Startzeit an, bei der die Dauer ins Fenster passt', async () => {
+    // Fenster 09:00–12:00, Dauer 30 Minuten → 09:00, 09:05, … 11:30
+    expect(await localStarts(single())).toEqual(times('09:00', '11:30'));
   });
 
-  it('nutzt das Raster des Angebots (45 Minuten)', async () => {
-    expect(await localStarts(single({ slotGridMinutes: 45 }))).toEqual([
-      '09:00',
-      '09:45',
-      '10:30',
-      '11:15',
-    ]);
+  it('Bartrasur (20 Minuten) in einer freien Stunde 12–13 Uhr: 12:00 bis 12:40', async () => {
+    await collections(t.db).openingHours.updateOne(
+      { weekday: 2 },
+      { $set: { windows: [{ start: '12:00', end: '13:00' }] } },
+    );
+    expect(await localStarts(single({ durationMinutes: 20 }))).toEqual(times('12:00', '12:40'));
   });
 
   it('verlangt, dass die Dauer ins Fenster passt', async () => {
-    expect(await localStarts(single({ durationMinutes: 60 }))).toEqual([
-      '09:00',
-      '09:30',
-      '10:00',
-      '10:30',
-      '11:00',
-    ]);
+    expect(await localStarts(single({ durationMinutes: 60 }))).toEqual(times('09:00', '11:00'));
   });
 
-  it('lässt den Puffer über das Fensterende hinausragen', async () => {
-    expect((await localStarts(single({ bufferMinutes: 15 }))).at(-1)).toBe('11:30');
-  });
-
-  it('setzt das Ende auf Beginn plus Dauer (ohne Puffer)', async () => {
-    const [first] = await slotService.slotsForDate(single({ bufferMinutes: 15 }), DAY, NOW);
+  it('setzt das Ende auf Beginn plus Dauer', async () => {
+    const [first] = await slotService.slotsForDate(single(), DAY, NOW);
     expect(first?.startsAt.toISOString()).toBe('2026-12-01T08:00:00.000Z');
     expect(first?.endsAt.toISOString()).toBe('2026-12-01T08:30:00.000Z');
   });
@@ -151,33 +144,39 @@ describe('Raster, Dauer und Puffer', () => {
       note: null,
       createdAt: NOW,
     });
-    expect(await localStarts(single())).toEqual(['09:00', '09:30', '11:00', '11:30']);
+    expect(await localStarts(single())).toEqual([
+      ...times('09:00', '09:30'),
+      ...times('11:00', '11:30'),
+    ]);
   });
 });
 
 describe('Belegung der Ressource', () => {
-  it('schließt belegte Zeiten aus', async () => {
+  it('schließt belegte Zeiten aus (Termin belegt genau seine Dauer, ohne Puffer)', async () => {
     await occupy('2026-12-01T09:00:00Z', '2026-12-01T09:30:00Z'); // 10:00–10:30 Ortszeit
-    expect(await localStarts(single())).toEqual(['09:00', '09:30', '10:30', '11:00', '11:30']);
+    expect(await localStarts(single())).toEqual([
+      ...times('09:00', '09:30'),
+      ...times('10:30', '11:30'),
+    ]);
   });
 
-  it('prüft Dauer plus Puffer gegen die Belegung', async () => {
-    await occupy('2026-12-01T09:00:00Z', '2026-12-01T09:30:00Z');
-    // 09:30 + 30 Min + 15 Min Puffer reicht bis 10:15 und kollidiert.
-    expect(await localStarts(single({ bufferMinutes: 15 }))).toEqual([
-      '09:00',
+  it('bietet in Lücken nur Startzeiten an, bei denen die Dauer hineinpasst', async () => {
+    await occupy('2026-12-01T09:00:00Z', '2026-12-01T09:30:00Z'); // 10:00–10:30
+    await occupy('2026-12-01T10:00:00Z', '2026-12-01T10:20:00Z'); // 11:00–11:20
+    // Lücke 10:30–11:00 passt genau einmal, 11:20–12:00 ab 11:20 bis 11:30.
+    expect(await localStarts(single())).toEqual([
+      ...times('09:00', '09:30'),
       '10:30',
-      '11:00',
-      '11:30',
+      ...times('11:20', '11:30'),
     ]);
   });
 
   it('blockiert auch durch Kurstermine (gemeinsame Ressource)', async () => {
     await occupy('2026-12-01T10:00:00Z', '2026-12-01T11:00:00Z', 'session'); // 11:00–12:00
-    expect(await localStarts(single())).toEqual(['09:00', '09:30', '10:00', '10:30']);
+    expect(await localStarts(single())).toEqual(times('09:00', '10:30'));
   });
 
-  it('blockiert bei langen Terminen alle überlappenden Slots', async () => {
+  it('blockiert bei langen Terminen alle überlappenden Startzeiten', async () => {
     await occupy('2026-12-01T09:25:00Z', '2026-12-01T09:30:00Z'); // nur 10:25–10:30
     expect(await localStarts(single({ durationMinutes: 90 }))).toEqual(['10:30']);
   });
@@ -187,7 +186,7 @@ describe('Fristen', () => {
   it('wendet den Standard-Mindestvorlauf von 24 Stunden an', async () => {
     // Jetzt: 30.11. 10:10 Ortszeit → frühester Beginn 01.12. 10:10.
     const now = new Date('2026-11-30T09:10:00Z');
-    expect(await localStarts(single(), DAY, now)).toEqual(['10:30', '11:00', '11:30']);
+    expect(await localStarts(single(), DAY, now)).toEqual(times('10:10', '11:30'));
   });
 
   it('nutzt den Mindestvorlauf des Angebots', async () => {
@@ -195,7 +194,7 @@ describe('Fristen', () => {
     const service = single({
       bookingRules: { minLeadMinutes: 0, horizonDays: null, changeDeadlineMinutes: null },
     });
-    expect(await localStarts(service, DAY, now)).toEqual(['10:30', '11:00', '11:30']);
+    expect(await localStarts(service, DAY, now)).toEqual(times('10:10', '11:30'));
   });
 
   it('nutzt den Standard-Mindestvorlauf aus den Einstellungen', async () => {
@@ -204,7 +203,7 @@ describe('Fristen', () => {
       { $set: { defaultMinLeadMinutes: 60 } },
     );
     const now = new Date('2026-12-01T08:10:00Z'); // 09:10 Ortszeit
-    expect(await localStarts(single(), DAY, now)).toEqual(['10:30', '11:00', '11:30']);
+    expect(await localStarts(single(), DAY, now)).toEqual(times('10:10', '11:30'));
     await collections(t.db).settings.updateOne(
       { _id: SETTINGS_ID },
       { $set: { defaultMinLeadMinutes: 1440 } },
@@ -238,29 +237,30 @@ describe('Nicht buchbare Angebote', () => {
 });
 
 describe('Zeitumstellung (Sonntag 01:00–04:00)', () => {
-  it('Sommerzeitbeginn 29.03.2026: Slots in der übersprungenen Stunde entfallen', async () => {
+  it('Sommerzeitbeginn 29.03.2026: Startzeiten in der übersprungenen Stunde entfallen', async () => {
     const now = new Date('2026-03-01T00:00:00Z');
     const slots = await slotService.slotsForDate(single(), '2026-03-29', now);
-    expect(slots.map((s) => s.startsAt.toISOString())).toEqual([
-      '2026-03-29T00:00:00.000Z', // 01:00 MEZ
-      '2026-03-29T00:30:00.000Z', // 01:30 MEZ
-      '2026-03-29T01:00:00.000Z', // 03:00 MESZ
-      '2026-03-29T01:30:00.000Z', // 03:30 MESZ
-    ]);
+    const starts = slots.map((s) => s.startsAt.toISOString().slice(11, 16));
+    // 01:00–01:55 MEZ (00:00Z–00:55Z), dann 03:00–03:30 MESZ (01:00Z–01:30Z).
+    expect(starts).toEqual([...times('00:00', '00:55'), ...times('01:00', '01:30')]);
   });
 
-  it('Winterzeitbeginn 25.10.2026: erstes Vorkommen, keine doppelten Slots', async () => {
+  it('Winterzeitbeginn 25.10.2026: erstes Vorkommen, keine doppelten Startzeiten', async () => {
     const now = new Date('2026-10-01T00:00:00Z');
     const slots = await slotService.slotsForDate(
-      single({ durationMinutes: 60, slotGridMinutes: 60 }),
+      single({ durationMinutes: 60 }),
       '2026-10-25',
       now,
     );
-    expect(slots.map((s) => s.startsAt.toISOString())).toEqual([
-      '2026-10-24T23:00:00.000Z', // 01:00 MESZ
-      '2026-10-25T00:00:00.000Z', // 02:00 MESZ (erstes Vorkommen)
-      '2026-10-25T02:00:00.000Z', // 03:00 MEZ
-    ]);
+    const utc = slots.map((s) => s.startsAt.toISOString());
+    // 01:00–01:55 MESZ, 02:00–02:55 MESZ (erstes Vorkommen), 03:00 MEZ
+    expect(utc[0]).toBe('2026-10-24T23:00:00.000Z');
+    expect(utc).toContain('2026-10-25T00:55:00.000Z');
+    expect(utc.at(-1)).toBe('2026-10-25T02:00:00.000Z');
+    expect(utc).toHaveLength(12 + 12 + 1);
+    // Das zweite Vorkommen der Stunde 02:00–02:55 (01:00Z–01:55Z) wird nicht angeboten.
+    expect(utc.some((u) => u >= '2026-10-25T01:00' && u < '2026-10-25T02:00')).toBe(false);
+    expect(new Set(utc).size).toBe(utc.length);
     expect(slots.every((s) => s.endsAt.getTime() - s.startsAt.getTime() === 3_600_000)).toBe(true);
   });
 });
@@ -304,7 +304,7 @@ describe('Owner-Endpunkte', () => {
     const response = await authed(`/api/owner/services/${id}/slots?date=${date}`).expect(200);
     const body = publicSlotsResponseSchema.parse(response.body);
     expect(body.timeZone).toBe('Europe/Berlin');
-    expect(body.slots).toHaveLength(6);
+    expect(body.slots).toHaveLength(31);
     const firstLocal = new Intl.DateTimeFormat('de-DE', {
       timeZone: 'Europe/Berlin',
       hour: '2-digit',

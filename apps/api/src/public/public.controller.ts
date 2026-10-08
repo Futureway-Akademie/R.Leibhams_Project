@@ -33,7 +33,7 @@ import { CACHE_AVAILABILITY, CACHE_SERVICES, assertPublic } from './public-respo
 
 const iso = (date: Date) => date.toISOString().replace('.000Z', 'Z');
 
-/** Nur die für Interessenten nötigen Felder; keine Fristen, Puffer oder internen Daten. */
+/** Nur die für Interessenten nötigen Felder; keine Fristen oder internen Daten. */
 function toPublicService(doc: ServiceDocument): PublicService {
   const base = {
     id: doc._id.toHexString(),
@@ -41,9 +41,7 @@ function toPublicService(doc: ServiceDocument): PublicService {
     description: doc.description,
     durationMinutes: doc.durationMinutes,
   };
-  return doc.type === 'single'
-    ? { ...base, type: 'single', slotGridMinutes: doc.slotGridMinutes }
-    : { ...base, type: 'group' };
+  return doc.type === 'single' ? { ...base, type: 'single' } : { ...base, type: 'group' };
 }
 
 /** Öffentliche Verfügbarkeiten für das Widget. Enthält keine personenbezogenen Daten. */
