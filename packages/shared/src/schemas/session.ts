@@ -16,6 +16,8 @@ export const sessionSchema = z
     bookedCount: z.int().nonnegative(),
     status: sessionStatusSchema,
     location: z.string().nullable(),
+    /** Optionale Begründung, wenn der Owner den Termin abgesagt hat. */
+    cancellationReason: z.string().nullable(),
   })
   .refine((s) => s.startsAt < s.endsAt, {
     message: 'Ende muss nach dem Beginn liegen',

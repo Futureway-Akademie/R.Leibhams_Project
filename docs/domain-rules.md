@@ -169,7 +169,7 @@ Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einma
 | Aktion | Regel |
 |---|---|
 | Kurstermin sperren | Keine neuen Buchungen; bestehende Buchungen bleiben gültig; Ressource bleibt belegt. Wieder entsperrbar. |
-| Termin absagen | Jederzeit möglich, mit Bestätigungsdialog. Alle aktiven Buchungen erhalten Status „vom Owner abgesagt“, jeder Teilnehmer bekommt eine Absagemail. Nicht umkehrbar. |
+| Termin absagen | Bis zum Terminende möglich, mit Bestätigungsdialog und optionaler Begründung (bis 500 Zeichen, erscheint in der Absagemail). Alle aktiven Buchungen erhalten Status „vom Owner abgesagt“, jeder Teilnehmer bekommt eine Absagemail. Die Zeit wird sofort wieder für Einzeltermine frei. Nicht umkehrbar. |
 | Einzelne Buchung absagen | Wie Termin absagen, aber nur für diese Buchung. |
 | Löschen | Nur für Kurstermine ohne Buchungshistorie. Manuell angelegte werden gelöscht, aus Regeln erzeugte als abgesagt markiert (damit sie nicht neu entstehen). Termine mit Buchungen werden abgesagt, nicht gelöscht. |
 | Terminart ändern | Nicht möglich. Für eine andere Terminart wird ein neues Angebot angelegt und das alte deaktiviert. |

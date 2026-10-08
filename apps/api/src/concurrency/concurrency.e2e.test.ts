@@ -9,6 +9,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { AuthenticatedOwner } from '../auth/auth.guard.js';
 import { CourseRulesService } from '../courses/course-rules.service.js';
+import { OwnerBookingsService } from '../bookings/owner-bookings.service.js';
 import { CourseSessionsService } from '../courses/course-sessions.service.js';
 import { SETTINGS_ID, collections } from '../database/documents.js';
 import type { SessionDocument } from '../database/documents.js';
@@ -235,6 +236,40 @@ describe('Nebenläufigkeit', () => {
         if ((await collections(t.db).bookings.countDocuments()) !== before) {
           issues.push('Buchungen nach dem Sperren gespeichert');
         }
+        return issues;
+      });
+    },
+  );
+
+  it(
+    'Kurstermin absagen während gebucht wird: danach keine bestätigte Buchung, je Absage ein Auftrag',
+    { timeout: TIMEOUT },
+    async () => {
+      const ownerBookings = t.app.get(OwnerBookingsService);
+      await runRounds('Absagen', async () => {
+        const session = await insertSession(LOAD * 2);
+        const [first, cancel] = await Promise.all([
+          Promise.all(Array.from({ length: LOAD }, (_, i) => groupRequest(session._id, i))),
+          new Promise((resolve) => setTimeout(resolve, 5)).then(() =>
+            ownerBookings.cancelSession(session._id, null, owner),
+          ),
+        ]);
+        const issues = unexpectedStatuses(first, [201, 409]);
+        const c = collections(t.db);
+        const created = first.filter((r) => r.status === 201).length;
+        const cancelled = await c.bookings.countDocuments({ status: 'cancelled_by_owner' });
+        if (cancel.cancelledBookings !== cancelled)
+          issues.push(
+            `${String(cancel.cancelledBookings)} gemeldet, ${String(cancelled)} abgesagt`,
+          );
+        if (cancelled !== created)
+          issues.push(`${String(created)} Buchungen angenommen, ${String(cancelled)} abgesagt`);
+        if ((await c.bookings.countDocuments({ status: 'confirmed' })) !== 0)
+          issues.push('bestätigte Buchung nach der Absage');
+        const second = await Promise.all(
+          Array.from({ length: 10 }, (_, i) => groupRequest(session._id, 5000 + i)),
+        );
+        if (second.some((r) => r.status !== 409)) issues.push('Buchung nach der Absage angenommen');
         return issues;
       });
     },

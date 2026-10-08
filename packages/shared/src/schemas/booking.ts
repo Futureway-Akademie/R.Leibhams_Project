@@ -32,6 +32,8 @@ export const bookingSchema = z
     participant: participantSchema,
     /** Nachfolgebuchung bei Status `rebooked`. */
     rebookedToBookingId: objectIdSchema.nullable(),
+    /** Optionale Begründung einer Owner-Absage (für die Absagemail). */
+    ownerCancellationReason: z.string().nullable(),
     createdAt: utcDateTimeSchema,
   })
   .refine((b) => (b.type === 'group') === (b.sessionId !== null), {
@@ -41,5 +43,9 @@ export const bookingSchema = z
   .refine((b) => (b.status === 'rebooked') === (b.rebookedToBookingId !== null), {
     message: 'rebookedToBookingId ist genau bei umgebuchten Buchungen gesetzt',
     path: ['rebookedToBookingId'],
+  })
+  .refine((b) => b.status === 'cancelled_by_owner' || b.ownerCancellationReason === null, {
+    message: 'Eine Absagebegründung gibt es nur bei vom Owner abgesagten Buchungen',
+    path: ['ownerCancellationReason'],
   });
 export type Booking = z.infer<typeof bookingSchema>;

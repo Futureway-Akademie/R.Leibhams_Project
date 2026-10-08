@@ -107,3 +107,7 @@
 {"timestamp": "2026-10-08T10:29:24Z", "type": "task_completed", "taskId": "task-2-13", "summary": "Umbuchung für Einzeltermine und Kurse mit Linkübertragung und höchstens einer Umbuchung umgesetzt."}
 {"timestamp": "2026-10-08T10:29:24Z", "type": "decision_recorded", "summary": "Links gelten nach Umbuchung weiter, Verschieben mit Überschneidung erlaubt, höchstens eine Umbuchung je Buchung."}
 {"timestamp":"2026-10-08T10:42:09Z","type":"decision_recorded","summary":"Hinweise zur Arbeitsumgebung für einen Agentenwechsel in CURRENT_STATE.md ergänzt."}
+{"timestamp":"2026-10-08T10:47:12Z","type":"task_started","taskId":"task-2-14","summary":"Teilnehmerliste und Owner-Absage begonnen: optionale Begründung, Belegung sofort freigeben, Absage nur bis Terminende, Liste mit allen Status."}
+{"timestamp":"2026-10-08T10:57:43Z","type":"verification_passed","taskId":"task-2-14","summary":"Quality Gate grün: 303 API-Tests, 144 Shared-Tests, Lastlauf test:concurrency 200 × 20 × 7 ohne Abweichung, manuelle Prüfung gegen Docker-MongoDB."}
+{"timestamp":"2026-10-08T10:57:43Z","type":"task_completed","taskId":"task-2-14","summary":"Buchungsübersicht, Teilnehmerliste sowie Absage einzelner Buchungen und ganzer Kurstermine mit Absageaufträgen und Audit umgesetzt."}
+{"timestamp":"2026-10-08T10:57:43Z","type":"decision_recorded","summary":"Owner-Absage nur bis Terminende, optionale Begründung nicht im Audit-Log, Belegung abgesagter Kurstermine sofort frei, Teilnehmerliste mit allen Status."}

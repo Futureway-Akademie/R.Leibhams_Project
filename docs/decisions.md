@@ -321,3 +321,17 @@ Umbuchung in einer Transaktion; die alte Buchung wird `rebooked` mit Verweis auf
 ### Begründung
 
 Eine neue Buchung statt einer Änderung erhält die Historie. Übertragene Links sind für Kunden am einfachsten. Die Begrenzung auf eine Umbuchung verhindert ständiges Hin- und Herbuchen.
+
+## 2026-10-08 – Teilnehmerliste und Owner-Absage
+
+### Kontext
+
+Der Owner muss Buchungen und Teilnehmer je Termin sehen und Termine oder einzelne Buchungen nachvollziehbar absagen können, ohne dass Plätze doppelt freigegeben oder Benachrichtigungen verloren gehen.
+
+### Entscheidung
+
+Absage eines Kurstermins und einer einzelnen Buchung jeweils in einer Transaktion: Status `cancelled` bzw. `cancelled_by_owner`, Freigabe von Kursplatz, Einzeltermin-Zeit bzw. Ressourcenbelegung des Kurstermins (sofort wieder für Einzeltermine buchbar), Entwertung aller Links (`revoked`), je Buchung ein Outbox-Auftrag `owner_cancellation` (dedupliziert über die Buchungs-ID) und Audit-Einträge. Optionale Begründung (bis 500 Zeichen) wird an Termin und Buchungen gespeichert und später in der Absagemail genutzt, aber nicht ins Audit-Log geschrieben. Absagen sind nur bis zum Terminende möglich (`appointment_ended`); wiederholte Absagen sind folgenlos (`alreadyCancelled`). Die Teilnehmerliste zeigt alle Buchungen eines Termins mit Status; die Buchungsübersicht umfasst ohne Angabe 31 Tage ab heute, höchstens 92 Tage.
+
+### Begründung
+
+Die gemeinsame Transaktion verhindert halbe Absagen; Gleichzeitigkeit mit Buchungen und Stornos wird durch Schreibkonflikte auf demselben Dokument aufgelöst. Die Begründung kann personenbezogene Angaben enthalten und gehört deshalb nicht in das langlebige Audit-Log. Absagen vergangener Termine würden nur sinnlose Mails erzeugen. Die Historie in der Teilnehmerliste macht Stornos und Absagen für den Owner nachvollziehbar.

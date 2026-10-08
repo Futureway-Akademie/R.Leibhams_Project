@@ -47,6 +47,7 @@ const baseBooking = {
   status: 'confirmed',
   participant,
   rebookedToBookingId: null,
+  ownerCancellationReason: null,
   createdAt: '2026-10-07T08:00:00Z',
 };
 
@@ -77,6 +78,18 @@ describe('bookingSchema', () => {
       }).success,
     ).toBe(true);
   });
+  it('erlaubt eine Absagebegründung nur bei Owner-Absage', () => {
+    expect(
+      bookingSchema.safeParse({ ...baseBooking, ownerCancellationReason: 'Krankheit' }).success,
+    ).toBe(false);
+    expect(
+      bookingSchema.safeParse({
+        ...baseBooking,
+        status: 'cancelled_by_owner',
+        ownerCancellationReason: 'Krankheit',
+      }).success,
+    ).toBe(true);
+  });
   it('lehnt unbekannte Status ab', () => {
     expect(bookingSchema.safeParse({ ...baseBooking, status: 'bestätigt' }).success).toBe(false);
   });
@@ -93,6 +106,7 @@ const baseSession = {
   bookedCount: 12,
   status: 'scheduled',
   location: null,
+  cancellationReason: null,
 };
 
 describe('sessionSchema', () => {

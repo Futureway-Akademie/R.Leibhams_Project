@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bookingQuerySchema,
   loginRequestSchema,
   ownerCancellationSchema,
   sessionCreateSchema,
@@ -57,6 +58,42 @@ describe('ownerCancellationSchema', () => {
       confirm: true,
       reason: null,
     });
+  });
+  it('begrenzt die Begründung auf 500 Zeichen', () => {
+    expect(
+      ownerCancellationSchema.safeParse({ confirm: true, reason: 'x'.repeat(501) }).success,
+    ).toBe(false);
+    expect(ownerCancellationSchema.parse({ confirm: true, reason: '  Krankheit ' }).reason).toBe(
+      'Krankheit',
+    );
+  });
+});
+
+describe('bookingQuerySchema', () => {
+  it('akzeptiert Filter nach Zeitraum, Angebot, Kurstermin und Status', () => {
+    expect(
+      bookingQuerySchema.safeParse({
+        from: '2026-10-01',
+        to: '2026-10-31',
+        serviceId: id,
+        sessionId: id,
+        status: 'cancelled_by_owner',
+      }).success,
+    ).toBe(true);
+  });
+  it('lehnt umgekehrte und zu lange Zeiträume ab', () => {
+    expect(bookingQuerySchema.safeParse({ from: '2026-10-02', to: '2026-10-01' }).success).toBe(
+      false,
+    );
+    expect(bookingQuerySchema.safeParse({ from: '2026-01-01', to: '2026-04-03' }).success).toBe(
+      false,
+    );
+    expect(bookingQuerySchema.safeParse({ from: '2026-01-01', to: '2026-04-02' }).success).toBe(
+      true,
+    );
+  });
+  it('lehnt unbekannte Status ab', () => {
+    expect(bookingQuerySchema.safeParse({ status: 'abgesagt' }).success).toBe(false);
   });
 });
 

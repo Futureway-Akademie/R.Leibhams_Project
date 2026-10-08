@@ -110,6 +110,20 @@ Dokumenttypen: `apps/api/src/database/documents.ts`. Zeitpunkte sind BSON-Dates 
 
 `CourseRulesService.generateForRule` erzeugt fehlende Termine idempotent über den eindeutigen Index `sessions(ruleId, localStart)`. `localStart` ist bei Regelterminen der Wiederholungsschlüssel und bleibt beim Verschieben erhalten. `CourseGenerationScheduler` ruft die Erzeugung beim Start und alle 6 Stunden auf.
 
+## Owner-API: Buchungen, Teilnehmer und Absagen
+
+Alle Antworten enthalten Teilnehmerdaten und tragen `Cache-Control: no-store`.
+
+| Endpunkt | Wirkung |
+|---|---|
+| `GET /api/owner/bookings[?from&to&serviceId&sessionId&status]` | Buchungen beider Terminarten; ohne Zeitraum 31 Tage ab heute, höchstens 92 Tage |
+| `GET /api/owner/bookings/:id` | Einzelne Buchung |
+| `POST /api/owner/bookings/:id/cancel` `{ confirm: true, reason? }` | Einzelne Buchung absagen |
+| `GET /api/owner/sessions/:id/participants` | Kurstermin mit allen Buchungen (jeder Status), älteste zuerst |
+| `POST /api/owner/sessions/:id/cancel` `{ confirm: true, reason? }` | Kurstermin samt aller bestätigten Buchungen absagen |
+
+`OwnerBookingsService` führt jede Absage in einer Transaktion aus: Status `cancelled_by_owner` (Termin `cancelled`, `bookedCount` 0), Freigabe von Kursplatz, Zeit bzw. Ressourcenbelegung, Entwertung aller Links (`revoked`), je Buchung ein Outbox-Auftrag `owner_cancellation` und Audit (`booking.cancelled_by_owner`, `session.cancelled`, ohne Begründung). Die optionale Begründung steht in `ownerCancellationReason` bzw. `cancellationReason`. Wiederholte Absagen liefern `alreadyCancelled: true`; nicht aktive Buchungen 409 `not_cancellable`, beendete Termine 409 `appointment_ended`.
+
 ## Öffentliche API (Widget)
 
 Ohne Anmeldung, je öffentlicher Kalenderkennung (`cal_…`, eine je Installation, Migration `004`; für den Owner über `GET /api/owner/calendar`).
@@ -140,7 +154,7 @@ Unbekannte Kalender sowie unbekannte oder deaktivierte Angebote ergeben 404. Jed
 
 ## Nebenläufigkeitstests
 
-`apps/api/src/concurrency/` prüft gegen ein echtes Replica Set sechs Szenarien: Kurs mit N Plätzen (inkl. Doppelklicks), Kapazität senken während gebucht wird, Kurstermin sperren während gebucht wird, Kurstermin anlegen gegen Einzelbuchung zur selben Zeit, Erzeugung aus Kursregeln gegen Einzelbuchungen, überlappende Einzelbuchungen mehrerer Angebote. Nach jedem Durchlauf prüft `checkConsistency` die Invarianten (bookedCount = bestätigte Buchungen ≤ Kapazität, Einzelbuchungen belegen genau ihre Dauer, keine verwaisten oder doppelten Belegungen, genau ein Bestätigungsauftrag je Buchung). Normallauf: 50 Anfragen, ein Durchlauf; Lastlauf `test:concurrency`: 200 Anfragen, 20 Durchläufe, Log in `apps/api/logs/`. Der Testclient nutzt höchstens 64 Verbindungen (macOS begrenzt die Verbindungs-Warteschlange auf 128); alle Anfragen werden dennoch gleichzeitig abgeschickt.
+`apps/api/src/concurrency/` prüft gegen ein echtes Replica Set sieben Szenarien: Kurs mit N Plätzen (inkl. Doppelklicks), Kapazität senken während gebucht wird, Kurstermin sperren während gebucht wird, Kurstermin absagen während gebucht wird, Kurstermin anlegen gegen Einzelbuchung zur selben Zeit, Erzeugung aus Kursregeln gegen Einzelbuchungen, überlappende Einzelbuchungen mehrerer Angebote. Nach jedem Durchlauf prüft `checkConsistency` die Invarianten (bookedCount = bestätigte Buchungen ≤ Kapazität, Einzelbuchungen belegen genau ihre Dauer, keine verwaisten oder doppelten Belegungen, genau ein Bestätigungsauftrag je Buchung, genau ein Absageauftrag je vom Owner abgesagter Buchung). Normallauf: 50 Anfragen, ein Durchlauf; Lastlauf `test:concurrency`: 200 Anfragen, 20 Durchläufe, Log in `apps/api/logs/`. Der Testclient nutzt höchstens 64 Verbindungen (macOS begrenzt die Verbindungs-Warteschlange auf 128); alle Anfragen werden dennoch gleichzeitig abgeschickt.
 
 ## Zentrale Abnahmetests
 

@@ -1,6 +1,7 @@
 // Eingaben aus dem Owner-Portal. Regeln, die Datenbankzustand benötigen
 // (z. B. Kapazität nicht unter gebuchte Plätze), prüft die API zusätzlich.
 import { z } from 'zod';
+import { bookingStatusSchema } from '../enums.js';
 import { OCCUPANCY_UNIT_MINUTES } from '../constants.js';
 import { localDateSchema, objectIdSchema, utcDateTimeSchema } from '../primitives.js';
 import {
@@ -9,6 +10,8 @@ import {
   courseRulePatchSchema,
   weeklyOpeningHoursSchema,
 } from './availability.js';
+import { bookingSchema } from './booking.js';
+import { sessionSchema } from './session.js';
 import {
   groupCapacitySchema,
   groupServiceFields,
@@ -100,6 +103,53 @@ export const ownerCancellationSchema = z.strictObject({
   reason: z.string().trim().max(500).nullable().default(null),
 });
 export type OwnerCancellation = z.infer<typeof ownerCancellationSchema>;
+
+/** Höchstens so viele Tage umfasst eine Buchungsübersicht. */
+export const MAX_BOOKING_LIST_DAYS = 92;
+
+/** Filter der Buchungsübersicht; ohne Zeitraum ab heute für 31 Tage. */
+export const bookingQuerySchema = z
+  .object({
+    from: localDateSchema.optional(),
+    to: localDateSchema.optional(),
+    serviceId: objectIdSchema.optional(),
+    sessionId: objectIdSchema.optional(),
+    status: bookingStatusSchema.optional(),
+  })
+  .refine((q) => !q.from || !q.to || q.from <= q.to, {
+    message: 'to muss am oder nach from liegen',
+    path: ['to'],
+  })
+  .refine(
+    (q) =>
+      !q.from ||
+      !q.to ||
+      Date.parse(q.to) - Date.parse(q.from) < MAX_BOOKING_LIST_DAYS * 86_400_000,
+    { message: `Höchstens ${String(MAX_BOOKING_LIST_DAYS)} Tage`, path: ['to'] },
+  );
+export type BookingQuery = z.infer<typeof bookingQuerySchema>;
+
+/** Teilnehmerliste eines Kurstermins: alle Buchungen mit Status, älteste zuerst. */
+export const sessionParticipantsSchema = z.object({
+  session: sessionSchema,
+  bookings: z.array(bookingSchema),
+});
+export type SessionParticipants = z.infer<typeof sessionParticipantsSchema>;
+
+export const ownerBookingCancelResultSchema = z.object({
+  booking: bookingSchema,
+  /** Die Buchung war bereits vom Owner abgesagt; es wurde nichts geändert. */
+  alreadyCancelled: z.boolean(),
+});
+export type OwnerBookingCancelResult = z.infer<typeof ownerBookingCancelResultSchema>;
+
+export const sessionCancelResultSchema = z.object({
+  session: sessionSchema,
+  /** Anzahl der durch diese Absage abgesagten Buchungen. */
+  cancelledBookings: z.int().nonnegative(),
+  alreadyCancelled: z.boolean(),
+});
+export type SessionCancelResult = z.infer<typeof sessionCancelResultSchema>;
 
 /** Öffentliche Kalenderkennung für die Einbindung des Widgets. */
 export const ownerCalendarResponseSchema = z.object({

@@ -97,5 +97,15 @@ export async function checkConsistency(db: Db): Promise<string[]> {
     seen.set(time, owner);
   }
 
+  // 6. Jede vom Owner abgesagte Buchung hat genau einen Absageauftrag, andere keinen.
+  const ownerJobs = await c.outboxJobs.find({ type: 'owner_cancellation' }).toArray();
+  for (const booking of bookings) {
+    const count = ownerJobs.filter((j) => j.bookingId?.equals(booking._id)).length;
+    const expected = booking.status === 'cancelled_by_owner' ? 1 : 0;
+    if (count !== expected) {
+      issues.push(`Buchung ${booking._id.toHexString()}: ${String(count)} Absageaufträge`);
+    }
+  }
+
   return issues;
 }

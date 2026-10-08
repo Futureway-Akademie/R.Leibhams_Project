@@ -15,6 +15,7 @@ export function toSessionDto(doc: SessionDocument): Session {
     bookedCount: doc.bookedCount,
     status: doc.status,
     location: doc.location,
+    cancellationReason: doc.cancellationReason ?? null,
   };
 }
 

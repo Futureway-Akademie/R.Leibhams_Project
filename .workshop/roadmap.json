@@ -619,7 +619,7 @@
           "description": "Owner sieht Buchungen und Teilnehmer je Termin und kann Termine nachvollziehbar absagen.",
           "order": 14,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-10"
           ],
@@ -629,13 +629,23 @@
             "Kapazitätsänderungen unter bestätigte Plätze werden abgelehnt",
             "Absagen werden in auditEvents protokolliert"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T10:47:12Z",
+          "completedAt": "2026-10-08T10:57:43Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "22 neue API-Tests (303 in der API), 4 neue Schema-Tests (144 in shared). Zugriff: ohne Sitzung 401, ohne CSRF 403, nach Logout 401. Übersicht beider Terminarten mit Filtern (Zeitraum, Angebot, Kurstermin, Status), Standard 31 Tage, no-store; Teilnehmerliste mit allen Status. Einzelabsage: cancelled_by_owner mit Begründung, Platz bzw. Zeit frei, Links revoked, ein owner_cancellation-Auftrag, Audit ohne Begründung und E-Mail, Verwaltungslink zeigt Absage ohne Aktionen; Wiederholung und 10 gleichzeitige Absagen → genau eine Freigabe; gleichzeitiger Teilnehmer-Storno → genau ein Übergang; storniert/umgebucht 409 not_cancellable, vergangen 409 appointment_ended. Terminabsage: Termin cancelled, nur bestätigte Buchungen abgesagt, Ressource frei (Slot wieder angeboten), je Buchung ein Auftrag, Audit, Buchung danach not_bookable, nicht umkehrbar. Kapazität unter bestätigte Plätze 409. Konsistenz-Check um Absageaufträge erweitert, neues Szenario 'Kurstermin absagen während gebucht wird'; Lastlauf test:concurrency 200 × 20 × 7 ohne Abweichung; src/bookings 10× mit Log grün. Manuell gegen Docker-MongoDB mit temporärem Owner: Liste, Kapazität 409/200, Einzel- und Terminabsage, 3 Absageaufträge, Belegung 0, Grund und E-Mail nicht im API-Log; Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/shared test",
+              "pnpm exec vitest run src/bookings (10× mit Log)",
+              "pnpm --filter @fw-booking/api test:concurrency",
+              "Skript gegen lokale API: GET /api/owner/bookings, GET /api/owner/sessions/:id/participants, POST /api/owner/bookings/:id/cancel, POST /api/owner/sessions/:id/cancel, PATCH /api/owner/sessions/:id",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T10:57:43Z"
           }
         },
         {

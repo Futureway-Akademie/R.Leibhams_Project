@@ -25,7 +25,7 @@ import { CourseRulesService } from './course-rules.service.js';
 import { CourseSessionsService } from './course-sessions.service.js';
 import { toCourseRuleDto, toSessionDto } from './mappers.js';
 
-/** Einzelne Kurstermine. Absagen mit Benachrichtigung folgt in task-2-14. */
+/** Einzelne Kurstermine. Teilnehmerliste und Absage: `SessionParticipantsController`. */
 @Controller('owner/sessions')
 export class SessionsController {
   constructor(private readonly sessions: CourseSessionsService) {}

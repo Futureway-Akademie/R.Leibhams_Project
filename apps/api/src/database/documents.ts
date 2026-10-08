@@ -123,6 +123,8 @@ export interface SessionDocument {
   bookedCount: number;
   status: SessionStatus;
   location: string | null;
+  /** Optionale Begründung einer Owner-Absage; fehlt bei älteren Terminen. */
+  cancellationReason?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -143,6 +145,8 @@ export interface BookingDocument {
   /** Zeitpunkt, zu dem die Datenschutzhinweise ausdrücklich bestätigt wurden. */
   privacyAcceptedAt: Date;
   rebookedToBookingId: ObjectId | null;
+  /** Optionale Begründung einer Owner-Absage; fehlt bei älteren Buchungen. */
+  ownerCancellationReason?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
