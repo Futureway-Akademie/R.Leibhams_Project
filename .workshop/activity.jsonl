@@ -97,3 +97,8 @@
 {"timestamp": "2026-10-08T10:02:58Z", "type": "verification_passed", "taskId": "task-2-11", "summary": "Lastlauf 200 × 20 × 6 Szenarien ohne Abweichung; Konsistenz-Check verifiziert."}
 {"timestamp": "2026-10-08T10:02:58Z", "type": "task_completed", "taskId": "task-2-11", "summary": "Nebenläufigkeitstests mit gemischten Owner-/Buchungsszenarien, Konsistenz-Check und Lastlauf-Befehl umgesetzt."}
 {"timestamp": "2026-10-08T10:02:58Z", "type": "decision_recorded", "summary": "Nebenläufigkeitstests: Normallauf 50 Anfragen, Lastlauf 200 × 20 mit Logs; Client auf 64 Verbindungen begrenzt (macOS-Grenze)."}
+{"timestamp": "2026-10-08T10:06:51Z", "type": "task_started", "taskId": "task-2-12", "summary": "Action-Tokens und Storno begonnen: Token im Link-Fragment und Header, mehrere gültige Links je Buchung, Anzeige von Angebot, Zeit, Status und Name."}
+{"timestamp": "2026-10-08T10:11:59Z", "type": "verification_passed", "taskId": "task-2-12", "summary": "Tests für Verwaltungslinks und Storno inkl. Gleichzeitigkeit grün; Lastlauf ohne Abweichung."}
+{"timestamp": "2026-10-08T10:11:59Z", "type": "task_completed", "taskId": "task-2-12", "summary": "Verwaltungs-Tokens, Selbstverwaltung und Storno mit genau einmaliger Freigabe umgesetzt."}
+{"timestamp": "2026-10-08T10:11:59Z", "type": "decision_recorded", "summary": "Token im Link-Fragment und Header, mehrere gültige Links je Buchung, Anzeige ohne E-Mail und Telefon."}
+{"timestamp": "2026-10-08T10:11:59Z", "type": "task_ready", "taskId": "task-2-13", "summary": "Task bereit: Umbuchung."}

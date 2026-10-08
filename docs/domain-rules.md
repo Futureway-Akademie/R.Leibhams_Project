@@ -147,9 +147,12 @@ Nur `bestätigt` ist aktiv. Jeder Übergang aus `bestätigt` erfolgt genau einma
 
 ## 6. Storno und Umbuchung durch Teilnehmer
 
-- Die Bestätigungsmail enthält einen Verwaltungslink mit zufälligem Token. Gespeichert wird nur dessen Hash.
-- Der Token ist bis zum Terminende gültig und wird bei Storno, Umbuchung oder Owner-Absage für diese Buchung ungültig; eine Umbuchung erzeugt einen neuen Token.
+- Jede Mail zur Buchung enthält einen Verwaltungslink mit zufälligem Token (256 Bit). Gespeichert wird nur dessen Hash.
+- Das Token steht im **Fragment** des Links (`…#t=TOKEN`) und wird von der Self-Service-Seite im Header `X-Booking-Token` an die API gesendet. Es erscheint dadurch nicht in URLs, Server-Logs oder Referrern.
+- Mehrere Links einer Buchung (z. B. aus Bestätigungs- und Erinnerungsmail) sind gleichzeitig gültig, jeweils bis zum Terminende. Nach Storno, Umbuchung oder Owner-Absage sind mit ihnen keine Aktionen mehr möglich; sie zeigen den Status bis zum Ablauf weiter an. Abgelaufene Links liefern „Link abgelaufen“. Eine Umbuchung erzeugt einen neuen Link.
+- Die Selbstverwaltung zeigt Angebot, Zeit, Ort, Status, Namen und die Änderungsfrist an, **nicht** E-Mail-Adresse und Telefonnummer.
 - Das Öffnen des Links zeigt nur die Buchung an. Storno und Umbuchung erfordern eine **bewusste Bestätigung** auf der Seite.
+- Ein wiederholter Storno ändert nichts und meldet „bereits storniert“; Platz bzw. Zeit werden genau einmal freigegeben.
 - **Storno:** bis 24 Stunden (Standard) vor Beginn. Die Belegung wird sofort freigegeben.
 - **Umbuchung:**
   - nur auf einen anderen Termin **desselben Angebots**;

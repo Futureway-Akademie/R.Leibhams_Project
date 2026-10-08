@@ -119,6 +119,9 @@ export const bookingErrorCodeSchema = z.enum([
   'not_bookable',
   'already_booked',
   'idempotency_conflict',
+  'change_deadline_passed',
+  'not_cancellable',
+  'link_expired',
 ]);
 export type BookingErrorCode = z.infer<typeof bookingErrorCodeSchema>;
 
@@ -139,6 +142,32 @@ export const bookingConfirmationSchema = z.strictObject({
   timeZone: timeZoneSchema,
 });
 export type BookingConfirmation = z.infer<typeof bookingConfirmationSchema>;
+
+/**
+ * Header, in dem die Self-Service-Seite das Token aus dem Link-Fragment (`#t=…`) an die API
+ * sendet. So erscheint das Token weder in URLs noch in Server-Logs oder Referrern.
+ */
+export const BOOKING_TOKEN_HEADER = 'x-booking-token';
+
+/** Format eines Verwaltungs-Tokens (256 Bit, base64url). */
+export const bookingTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/);
+
+/** Ansicht der eigenen Buchung über den Verwaltungslink; ohne E-Mail und Telefon. */
+export const selfServiceBookingSchema = z.strictObject({
+  type: z.enum(['single', 'group']),
+  serviceTitle: z.string(),
+  participantName: z.string(),
+  startsAt: utcDateTimeSchema,
+  endsAt: utcDateTimeSchema,
+  timeZone: timeZoneSchema,
+  location: z.string().nullable(),
+  status: bookingStatusSchema,
+  /** Letzter Zeitpunkt für Storno und Umbuchung über den Link. */
+  changeDeadline: utcDateTimeSchema,
+  canCancel: z.boolean(),
+  canRebook: z.boolean(),
+});
+export type SelfServiceBooking = z.infer<typeof selfServiceBookingSchema>;
 
 /** Storno über den Verwaltungslink erfordert eine ausdrückliche Bestätigung. */
 export const selfServiceCancelRequestSchema = z.strictObject({ confirm: z.literal(true) });

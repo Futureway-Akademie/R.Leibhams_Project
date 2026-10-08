@@ -553,7 +553,7 @@
           "description": "Zufällige, gehashte, begrenzt gültige Tokens zum Abrufen der eigenen Buchung; Storno erst nach bewusster Bestätigung.",
           "order": 12,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-10"
           ],
@@ -563,13 +563,21 @@
             "Mehrfache Stornoaufrufe geben Plätze bzw. Belegungseinheiten genau einmal frei",
             "Storno-Fristen werden serverseitig geprüft"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T10:06:51Z",
+          "completedAt": "2026-10-08T10:11:59Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "14 neue API-Tests (265 in der API): Token nur als Hash, gültig bis Terminende, mehrere gültige Links; Ansicht mit Angebot, Zeit, Ort, Status, Name und Frist ohne E-Mail/Telefon, no-store und no-referrer, Öffnen ändert nichts; 404 ohne/mit falschem/ungültigem Token, 410 nach Ablauf, Token in URL wird nicht akzeptiert; Storno eines Kursplatzes (bookedCount −1, Tokens verbraucht, Storno-Auftrag, Audit ohne Daten, Wiederholung folgenlos), Storno eines Einzeltermins (Belegung frei, Startzeiten wieder angeboten), alle Links zeigen danach den Status, 10 gleichzeitige Stornos → genau eine Freigabe, Frist überschritten → 409, Owner-Absage → 409, Bestätigung Pflicht, Platz wieder buchbar; Konsistenz-Check nach Storno. Lastlauf test:concurrency 200 × 20 × 6 ohne Abweichung. Manuell gegen Docker-MongoDB: Buchung, Link wie Worker erzeugt, Ansicht, Storno ohne Bestätigung 400, Storno, Wiederholung 'bereits storniert', wieder 12 freie Plätze, Storno-Auftrag, Token nicht im Log; Testdaten entfernt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/api test:concurrency",
+              "curl GET /api/public/manage, POST /api/public/manage/cancel (Header X-Booking-Token)",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T10:11:59Z"
           }
         },
         {
@@ -578,7 +586,7 @@
           "description": "Umbuchung auf einen anderen Slot oder Kurstermin in einer Transaktion.",
           "order": 13,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-2-12"
           ],

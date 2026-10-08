@@ -11,6 +11,7 @@ export const REDACTED_PATHS = [
   'req.headers.cookie',
   'req.headers.authorization',
   'req.headers["x-csrf-token"]',
+  'req.headers["x-booking-token"]',
   'res.headers["set-cookie"]',
   '*.password',
   '*.token',

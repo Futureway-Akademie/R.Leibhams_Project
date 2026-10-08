@@ -293,3 +293,17 @@ Sechs Szenarien mit gemeinsamem Konsistenz-Check (`checkConsistency`). Im normal
 ### Begründung
 
 Ein gemeinsamer Konsistenz-Check deckt auch Fehler auf, die einzelne Statuscodes nicht zeigen. Die Begrenzung der Client-Verbindungen umgeht eine macOS-Grenze (`kern.ipc.somaxconn` = 128), ohne Systemeinstellungen zu ändern; die Anfragen konkurrieren weiterhin gleichzeitig um dieselben Plätze.
+
+## 2026-10-08 – Verwaltungslinks und Storno
+
+### Kontext
+
+Interessenten sollen ihre Buchung ohne Konto ansehen und stornieren können, ohne dass Links unbeabsichtigt Daten preisgeben oder Aktionen auslösen.
+
+### Entscheidung
+
+Token (256 Bit) im Link-Fragment, Übergabe an die API im Header `X-Booking-Token`; nur der Hash wird gespeichert. Mehrere Links je Buchung gleichzeitig gültig bis Terminende; nach Storno werden alle als verbraucht markiert, bleiben aber bis zum Ablauf zur Statusanzeige lesbar. Die Ansicht zeigt Angebot, Zeit, Ort, Status und Namen, nicht E-Mail und Telefon. Storno in einer Transaktion mit genau einmaliger Freigabe; wiederholte Aufrufe sind folgenlos.
+
+### Begründung
+
+Das Fragment wird nie an Server oder Dritte übertragen. Mehrere gültige Links vermeiden, dass ein Klick in einer älteren Mail ins Leere läuft. Weniger angezeigte Daten begrenzen den Schaden bei weitergeleiteten Links.
