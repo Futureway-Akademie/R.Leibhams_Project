@@ -26,7 +26,8 @@ export interface MailContent {
   subject: string;
   text: string;
   html: string;
-  ics: string;
+  /** Kalenderdatei; `null`, wenn die Mail keinen Anhang braucht (Erinnerung). */
+  ics: string | null;
 }
 
 export const LINK_NOTE: Block = {

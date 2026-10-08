@@ -391,3 +391,17 @@ Drei weitere Handler im Worker mit gemeinsamem Mail-Gerüst. Versand nur, solang
 ### Begründung
 
 Ein gemeinsames Gerüst hält alle Mails einheitlich und die Maskierung an einer Stelle. Die Statusprüfung verhindert widersprüchliche Mails bei schnell aufeinanderfolgenden Änderungen. Dieselbe UID erlaubt Kalender-Apps, den bestehenden Eintrag zu verschieben oder als abgesagt zu markieren, statt einen zweiten anzulegen; Apps, die das nicht unterstützen, zeigen die Datei als neuen Eintrag, der Mailtext bleibt maßgeblich.
+
+## 2026-10-08 – Erinnerungen
+
+### Kontext
+
+Teilnehmer sollen vor ihrem Termin erinnert werden, ohne dass stornierte, umgebuchte oder abgesagte Buchungen eine veraltete Erinnerung erhalten. Der Vorlauf soll konfigurierbar sein.
+
+### Entscheidung
+
+Ein Planer im Worker legt jede Minute Erinnerungsaufträge für bestätigte Buchungen an, deren Erinnerungszeitpunkt erreicht ist; der Vorlauf kommt aus `settings.reminderLeadMinutes` (Installation, später im Portal änderbar). Keine Änderung an den Buchungstransaktionen der API. Buchungen, die erst im Erinnerungsfenster entstanden sind, und begonnene Termine erhalten keine Erinnerung. Der Auftrag speichert den geplanten Terminbeginn; vor dem Versand werden Status, Beginn und Kurstermin erneut geprüft, sonst `skipped`. Erinnerung mit neuem Verwaltungslink, ohne Kalenderdatei.
+
+### Begründung
+
+Der Planer leitet die Aufträge aus dem aktuellen Stand ab und berücksichtigt damit Umbuchungen, Stornos und geänderte Vorläufe automatisch; der eindeutige `dedupeKey` macht parallele Planer unbedenklich. Eine Genauigkeit von etwa einer Minute genügt für Erinnerungen. Ohne Kalenderanhang entsteht in keiner Kalender-App ein zweiter Eintrag.

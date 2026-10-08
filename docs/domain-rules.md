@@ -196,7 +196,7 @@ Alle Owner-Änderungen an Terminen und Buchungen werden in `auditEvents` protoko
 | Anlass | Empfänger | Zeitpunkt |
 |---|---|---|
 | Buchung | Teilnehmer | Sofort nach erfolgreicher Buchung, mit Verwaltungslink. |
-| Erinnerung | Teilnehmer | **24 Stunden** vor Beginn. Entfällt, wenn die Buchung erst innerhalb dieses Fensters entsteht. Vor Versand wird geprüft, dass die Buchung noch `bestätigt` ist und der Termin unverändert. |
+| Erinnerung | Teilnehmer | **24 Stunden** (Standard, Einstellung der Installation) vor Beginn, auf etwa eine Minute genau. Entfällt, wenn die Buchung erst innerhalb dieses Fensters entsteht – auch eine Umbuchung in dieses Fenster. Vor Versand wird geprüft, dass die Buchung noch `bestätigt` ist, der Termin unverändert und noch nicht begonnen. Enthält einen Verwaltungslink, keine Kalenderdatei. |
 | Storno | Teilnehmer | Sofort nach Storno. |
 | Umbuchung | Teilnehmer | Sofort, mit neuem Verwaltungslink. |
 | Owner-Absage | Alle betroffenen Teilnehmer | Sofort nach Absage. |

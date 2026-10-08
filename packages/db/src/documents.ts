@@ -200,6 +200,8 @@ export interface OutboxJobDocument {
   lastErrorCategory: string | null;
   /** Zeitpunkt des Abschlusses; abgeschlossene Jobs werden 30 Tage danach gelöscht. */
   completedAt?: Date | null;
+  /** Bei Erinnerungen: Terminbeginn, für den sie geplant wurde (Prüfung vor dem Versand). */
+  scheduledFor?: Date | null;
   /** Bei `sent`: versendet oder bewusst übersprungen (z. B. Buchung inzwischen storniert). */
   result?: 'sent' | 'skipped' | null;
   /** Zeitpunkt, zu dem der Job endgültig als fehlgeschlagen markiert wurde. */

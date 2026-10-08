@@ -2,7 +2,7 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 50 % (49 von 98 Gewichtspunkten, 24 von 49 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 52,04 % (51 von 98 Gewichtspunkten, 25 von 49 Tasks).
 
 ## Aktive Phase
 
@@ -14,6 +14,7 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
+- task-3-4 – Erinnerungen (Planer im Worker, Vorlauf `settings.reminderLeadMinutes`, Prüfung vor Versand, ohne Kalenderdatei; 98 Worker-Tests, Ende-zu-Ende mit Mailpit)
 - task-3-3 – Storno-, Umbuchungs- und Absagemails (gemeinsames Mail-Gerüst, Kalender-Aktualisierung über UID/SEQUENCE, optional `BOOKING_PAGE_URL`; 84 Worker-Tests, Ende-zu-Ende mit Mailpit)
 - task-3-2 – Bestätigungsmail (SMTP mit nodemailer, Text + HTML + `termin.ics`, Link `MANAGE_PAGE_URL#t=TOKEN`, inaktive Buchungen `skipped`; 65 Worker-Tests, Ende-zu-Ende mit Mailpit)
 - task-3-1 – Worker mit Job-Leases (`apps/worker`, Lease-Token, Backoff 1/5/15/60/180 Min, 6 Versuche; Datenmodell und Migrationen nach `packages/db`, Migration 008; 30 Worker-Tests)
@@ -37,7 +38,6 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-3-4 – Erinnerungen
 - task-3-5 – API für fehlgeschlagene Jobs
 - task-4-1 – Widget-Build
 - task-5-1 – Portal-Gerüst und Login
@@ -49,7 +49,7 @@ Nichts.
 
 ## Wichtige Entscheidungen
 
-Siehe `docs/decisions.md`. Neu (2026-10-08): Storno-, Umbuchungs- und Absagemails mit Statusprüfung (sonst skipped), Kalenderdatei mit UID der ersten Buchung und steigender SEQUENCE, optionaler Link zum erneuten Buchen. Davor: Bestätigungsmail mit Absender und Link-Ziel aus Umgebungsvariablen, Kalenderdatei ohne Link, Token bei Versandfehler gelöscht, inaktive Buchungen übersprungen. Davor: Worker als eigener Node.js-Prozess mit Paket `@fw-booking/db` für Datenmodell und Migrationen, Lease 5 Min mit Token, 6 Versuche, versendete Jobs nach 30 Tagen gelöscht, Zustellung mindestens einmal (Mail-Handler brauchen stabile Message-ID je Job). Davor: Freigegebene Origins per `CORS_ALLOWED_ORIGINS` (fremde Origins 403), Ratenbegrenzung im Speicher je IP (IPv6 je /64) und 5 neue Buchungen je E-Mail und Stunde, JSON-Limit 16 KB. Zuvor: Owner-Absage nur bis Terminende, optionale Begründung (nicht im Audit-Log), Belegung abgesagter Kurstermine sofort frei, Teilnehmerliste mit allen Status. Ebenfalls 2026-10-08: Einzeltermine bieten jede passende Startzeit im 5-Minuten-Raster an, Slot-Raster und Puffer entfallen (Dauer enthält Puffer); nur berechnete Startzeiten buchbar; unbegrenzt viele Einzeltermine je E-Mail. Davor: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
+Siehe `docs/decisions.md`. Neu (2026-10-08): Erinnerungen über einen minütlichen Planer im Worker (Vorlauf aus den Installations-Einstellungen, Prüfung vor Versand). Davor: Storno-, Umbuchungs- und Absagemails mit Statusprüfung (sonst skipped), Kalenderdatei mit UID der ersten Buchung und steigender SEQUENCE, optionaler Link zum erneuten Buchen. Davor: Bestätigungsmail mit Absender und Link-Ziel aus Umgebungsvariablen, Kalenderdatei ohne Link, Token bei Versandfehler gelöscht, inaktive Buchungen übersprungen. Davor: Worker als eigener Node.js-Prozess mit Paket `@fw-booking/db` für Datenmodell und Migrationen, Lease 5 Min mit Token, 6 Versuche, versendete Jobs nach 30 Tagen gelöscht, Zustellung mindestens einmal (Mail-Handler brauchen stabile Message-ID je Job). Davor: Freigegebene Origins per `CORS_ALLOWED_ORIGINS` (fremde Origins 403), Ratenbegrenzung im Speicher je IP (IPv6 je /64) und 5 neue Buchungen je E-Mail und Stunde, JSON-Limit 16 KB. Zuvor: Owner-Absage nur bis Terminende, optionale Begründung (nicht im Audit-Log), Belegung abgesagter Kurstermine sofort frei, Teilnehmerliste mit allen Status. Ebenfalls 2026-10-08: Einzeltermine bieten jede passende Startzeit im 5-Minuten-Raster an, Slot-Raster und Puffer entfallen (Dauer enthält Puffer); nur berechnete Startzeiten buchbar; unbegrenzt viele Einzeltermine je E-Mail. Davor: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
 
 ## Bekannte Probleme
 
@@ -64,7 +64,7 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Storno-, Umbuchungs- und Absagemail
 - **Docker:** CLI liegt unter `~/.docker/bin` (in `~/.zprofile` eingetragen). In Shells, die vor der Docker-Installation gestartet wurden, `export PATH="$PATH:$HOME/.docker/bin"` setzen. Lokale Infrastruktur: `pnpm infra:up`, Prüfung `pnpm infra:verify`.
 - **pnpm:** Version 12 über Corepack; ein Shim liegt in `/opt/homebrew/bin/pnpm` (`corepack enable` nach `/usr/local/bin` war nicht möglich). Build-Skripte sind nur für `@swc/core`, `mongodb-memory-server` und `argon2` freigegeben (`allowBuilds` in `pnpm-workspace.yaml`).
 - **Lokale Datenbank:** Migrationen bis `008` sind auf der Docker-MongoDB angewendet (`pnpm --filter @fw-booking/api db:migrate`). Es existiert bewusst kein Owner-Konto.
-- **Worker:** `pnpm --filter @fw-booking/worker dev` (gleiche `.env`). Benötigt zusätzlich `MAIL_FROM_ADDRESS`, `BUSINESS_NAME` und `MANAGE_PAGE_URL` (siehe `.env.example`); die lokale `.env` enthält sie noch nicht und wurde bewusst nicht verändert. Mails landen lokal in Mailpit (http://127.0.0.1:8025). Registriert sind `booking_confirmation`, `booking_cancellation`, `booking_rebooked` und `owner_cancellation`; Erinnerungen folgen in task-3-4. Migrationen liegen jetzt in `packages/db/src/migrations/`, ausgeführt weiterhin über `pnpm --filter @fw-booking/api db:migrate`.
+- **Worker:** `pnpm --filter @fw-booking/worker dev` (gleiche `.env`). Benötigt zusätzlich `MAIL_FROM_ADDRESS`, `BUSINESS_NAME` und `MANAGE_PAGE_URL` (siehe `.env.example`); die lokale `.env` enthält sie noch nicht und wurde bewusst nicht verändert. Mails landen lokal in Mailpit (http://127.0.0.1:8025). Registriert sind alle fünf Jobtypen; der Erinnerungsplaner läuft im selben Prozess. Für manuelle Tests von Erinnerungen den Vorlauf `settings.reminderLeadMinutes` vorübergehend verkürzen und danach auf 1440 zurücksetzen. Migrationen liegen jetzt in `packages/db/src/migrations/`, ausgeführt weiterhin über `pnpm --filter @fw-booking/api db:migrate`.
 - **CORS lokal:** Für Widget-Tests im Browser den Origin des Entwicklungsservers in `.env` unter `CORS_ALLOWED_ORIGINS` eintragen; ohne Eintrag lehnt die API Browser-Anfragen anderer Origins mit 403 ab. Für manuelle Lasttests die Grenzen per `RATE_LIMIT_*=0` abschalten.
 - **Manuelle Tests:** Bisheriges Vorgehen je Task: temporären Owner mit zufälligem Passwort per `owner:create` anlegen, API mit `pnpm --filter @fw-booking/api dev` starten, Endpunkte per `curl` prüfen, danach Testdaten und Owner in der Docker-MongoDB wieder entfernen. Verwaltungslinks für Tests entstehen bis task-3-2 durch direktes Einfügen eines SHA-256-Token-Hashes in `actionTokens`.
 - **Prüfung der Zustandsdateien:** `roadmap.json`, `project.json` und `progress.json` mit `ajv` gegen die Schemas unter `.workshop/schemas/`.
@@ -73,4 +73,4 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Storno-, Umbuchungs- und Absagemail
 
 ## Empfohlener nächster Schritt
 
-task-3-4 (Erinnerungen): letzter Mail-Typ; Erinnerungsaufträge müssen noch erzeugt werden (Vorlauf `reminderLeadMinutes`, Prüfung vor Versand). Danach task-3-5 (API für fehlgeschlagene Jobs), womit Phase 3 abgeschlossen ist.
+task-3-5 (API für fehlgeschlagene Jobs) schließt Phase 3 ab. Danach Phase 4 (task-4-1 Widget-Build) oder Phase 5 (task-5-1 Portal-Gerüst und Login).

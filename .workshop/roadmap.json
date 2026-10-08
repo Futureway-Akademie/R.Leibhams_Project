@@ -836,7 +836,7 @@
           "description": "Erinnerungsmails mit konfigurierbarem Vorlauf; vor Versand wird geprüft, ob Buchung und Termin noch aktuell sind.",
           "order": 4,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-3-2"
           ],
@@ -844,13 +844,21 @@
             "Erinnerung wird zum konfigurierten Zeitpunkt versendet",
             "Stornierte oder umgebuchte Buchungen erhalten keine veraltete Erinnerung"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T13:24:59Z",
+          "completedAt": "2026-10-08T13:32:37Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "14 neue Worker-Tests (98 im Worker); API 306, DB 36 unverändert grün. Planer: Auftrag genau beim Erreichen des Vorlaufs (eine Minute vorher noch keiner), mit scheduledFor und dedupeKey; keine Erinnerung für Buchungen aus dem Fenster, stornierte, umgebuchte, abgesagte, begonnene oder zu ferne Termine; 5 gleichzeitige Planungsläufe → je Buchung genau ein Auftrag; geänderter Vorlauf (48 Std.) wirkt; Start plant sofort, Stopp sauber. Handler: Erinnerung mit Termindetails und neuem gültigem Link, ohne Anhang; nach abgelaufener Frist Hinweis auf Kontakt; nach Umbuchung nur noch Storno; nach Planung storniert/abgesagt/umgebucht → skipped ohne Mail und Link; verschobene und begonnene Termine sowie abgesagter Kurstermin → skipped. Ende-zu-Ende gegen Docker-MongoDB und Mailpit mit API und Worker (Vorlauf vorübergehend auf 130 Min. gesetzt): zwei Buchungen, eine vor Fälligkeit über den Link storniert; Erinnerung an die verbleibende Buchung 51 s nach Fälligkeit ohne Anhang, Link öffnet die Buchung; stornierte Buchung erhielt keine Erinnerung. Vorlauf auf 1440 zurückgesetzt, Testdaten und Mails entfernt. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/worker test (2×)",
+              "Ende-zu-Ende: API + Worker gegen Docker-MongoDB und Mailpit mit verkürztem Vorlauf",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T13:32:37Z"
           }
         },
         {

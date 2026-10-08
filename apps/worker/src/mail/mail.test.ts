@@ -84,7 +84,7 @@ describe('confirmationMail', () => {
     expect(ics).toContain('SUMMARY:Haarschnitt – Friseur Muster');
     expect(ics).toContain('LOCATION:Salon\\, 1. OG');
     expect(ics).not.toContain(TOKEN);
-    expect(ics.endsWith('\r\n')).toBe(true);
+    expect(ics?.endsWith('\r\n')).toBe(true);
   });
 });
 

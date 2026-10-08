@@ -116,13 +116,17 @@ export async function sendBookingMail(
       text: content.text,
       html: content.html,
       messageId: `<${job._id.toHexString()}.${job.type}@${mailDomain(deps.mail.fromAddress)}>`,
-      attachments: [
-        {
-          filename: 'termin.ics',
-          content: content.ics,
-          contentType: 'text/calendar; charset=utf-8; method=PUBLISH',
-        },
-      ],
+      ...(content.ics
+        ? {
+            attachments: [
+              {
+                filename: 'termin.ics',
+                content: content.ics,
+                contentType: 'text/calendar; charset=utf-8; method=PUBLISH',
+              },
+            ],
+          }
+        : {}),
     });
   } catch (error) {
     if (issuedToken) {

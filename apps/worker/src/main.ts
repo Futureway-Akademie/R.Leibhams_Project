@@ -4,6 +4,7 @@ import { ConfigError, loadConfig } from './config.js';
 import { createHandlers } from './handlers/index.js';
 import { createLogger } from './logger.js';
 import { SmtpMailer } from './mail/mailer.js';
+import { ReminderScheduler } from './reminders.js';
 import { Worker } from './worker.js';
 
 async function main(): Promise<void> {
@@ -29,14 +30,15 @@ async function main(): Promise<void> {
     logger,
   );
   worker.start();
+  const reminders = new ReminderScheduler(client.db(config.mongodb.dbName), logger);
+  reminders.start();
 
   let shuttingDown = false;
   const shutdown = (signal: string) => {
     if (shuttingDown) return;
     shuttingDown = true;
     logger.info({ signal }, 'Beende Worker nach laufenden Jobs');
-    void worker
-      .stop()
+    void Promise.all([reminders.stop(), worker.stop()])
       .then(() => {
         mailer.close();
         return client.close();

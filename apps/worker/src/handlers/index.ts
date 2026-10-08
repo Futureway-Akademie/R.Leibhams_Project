@@ -1,5 +1,4 @@
-// Registrierte Job-Handler. Erinnerungen folgen in task-3-4; bis dahin bleiben diese Aufträge
-// unbearbeitet in der Outbox.
+// Registrierte Job-Handler, je Jobtyp der Outbox einer.
 import type { JobHandlers } from '../worker.js';
 import {
   bookingCancellationHandler,
@@ -7,6 +6,7 @@ import {
   ownerCancellationHandler,
 } from './booking-changes.js';
 import { bookingConfirmationHandler } from './booking-confirmation.js';
+import { bookingReminderHandler } from './booking-reminder.js';
 import type { MailHandlerDeps } from './common.js';
 
 export type { MailHandlerDeps } from './common.js';
@@ -17,5 +17,6 @@ export function createHandlers(deps: MailHandlerDeps): JobHandlers {
     booking_cancellation: bookingCancellationHandler(deps),
     booking_rebooked: bookingRebookedHandler(deps),
     owner_cancellation: ownerCancellationHandler(deps),
+    booking_reminder: bookingReminderHandler(deps),
   };
 }
