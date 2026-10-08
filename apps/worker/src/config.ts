@@ -30,6 +30,8 @@ const envSchema = z.object({
   BUSINESS_PHONE: z.string().trim().min(1).max(40).optional(),
   /** Seite mit dem Widget, die die Selbstverwaltung anzeigt; Link: MANAGE_PAGE_URL#t=TOKEN. */
   MANAGE_PAGE_URL: z.url({ protocol: /^https?$/ }),
+  /** Optionale Seite zum erneuten Buchen; Storno- und Absagemails verlinken sie. */
+  BOOKING_PAGE_URL: z.url({ protocol: /^https?$/ }).optional(),
 });
 
 export interface WorkerConfig {
@@ -52,6 +54,7 @@ export interface WorkerConfig {
     businessName: string;
     businessPhone: string | null;
     managePageUrl: string;
+    bookingPageUrl: string | null;
   };
 }
 
@@ -77,6 +80,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): WorkerConfig {
   if (manageUrl.hash) problems.push('- MANAGE_PAGE_URL: ohne #-Anteil angeben');
   if (values.NODE_ENV === 'production' && manageUrl.protocol !== 'https:') {
     problems.push('- MANAGE_PAGE_URL: in Produktion nur https');
+  }
+  if (
+    values.NODE_ENV === 'production' &&
+    values.BOOKING_PAGE_URL &&
+    !values.BOOKING_PAGE_URL.startsWith('https:')
+  ) {
+    problems.push('- BOOKING_PAGE_URL: in Produktion nur https');
   }
   if (problems.length > 0) {
     throw new ConfigError(`Ungültige Konfiguration:\n${problems.join('\n')}`);
@@ -106,6 +116,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): WorkerConfig {
       businessName: values.BUSINESS_NAME,
       businessPhone: values.BUSINESS_PHONE ?? null,
       managePageUrl: values.MANAGE_PAGE_URL,
+      bookingPageUrl: values.BOOKING_PAGE_URL ?? null,
     },
   };
 }

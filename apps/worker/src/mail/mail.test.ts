@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { JobError } from '../errors.js';
-import { confirmationMail, escapeHtml } from './confirmation.js';
+import { cancellationMail, ownerCancellationMail, rebookedMail } from './changes.js';
+import { confirmationMail } from './confirmation.js';
 import type { ConfirmationData } from './confirmation.js';
 import { buildIcs, escapeText, foldLine } from './ics.js';
+import { escapeHtml } from './layout.js';
 import { classifySmtpError } from './mailer.js';
 
 const TOKEN = 'A'.repeat(43);
 
 const data: ConfirmationData = {
-  bookingId: '65f1a2b3c4d5e6f7a8b9c0d1',
+  calendarId: '65f1a2b3c4d5e6f7a8b9c0d1',
   participantName: 'Erika Mustermann',
   serviceTitle: 'Haarschnitt',
   // 14.10.2026, 10:00–10:30 Uhr in Berlin (Sommerzeit)
@@ -148,5 +150,37 @@ describe('classifySmtpError', () => {
       response: '535 Authentication failed for user geheim',
     });
     expect(result.message).not.toContain('geheim');
+  });
+});
+
+describe('Storno-, Absage- und Umbuchungsmail', () => {
+  const base = { ...data, bookingPageUrl: null, sequence: 0 };
+
+  it('lässt den Link zum erneuten Buchen ohne BOOKING_PAGE_URL weg', () => {
+    for (const mail of [cancellationMail(base), ownerCancellationMail({ ...base, reason: null })]) {
+      expect(mail.text).not.toContain('neuen Termin buchen');
+      expect(mail.text).not.toContain('#t=');
+      expect(mail.html).not.toContain('<a ');
+    }
+  });
+
+  it('übernimmt keine Zeilenumbrüche aus der Begründung', () => {
+    const mail = ownerCancellationMail({ ...base, reason: 'Krank\r\n\r\nBitte überweisen Sie …' });
+    expect(mail.text).toContain('Grund: Krank Bitte überweisen Sie …');
+  });
+
+  it('zählt die Kalenderversion bei Absagen hoch', () => {
+    expect(cancellationMail(base).ics).toContain('SEQUENCE:1');
+    expect(cancellationMail({ ...base, sequence: 1 }).ics).toContain('SEQUENCE:2');
+  });
+
+  it('kommt bei der Umbuchung ohne bisherigen Termin aus und erlaubt nur noch Storno', () => {
+    const mail = rebookedMail({ ...data, previous: null });
+    expect(mail.text).not.toContain('Bisheriger Termin');
+    expect(mail.text).toContain('Neuer Termin:');
+    expect(mail.text).toContain('über diesen Link stornieren:');
+    expect(mail.text).not.toContain('umbuchen:');
+    const late = rebookedMail({ ...data, previous: null, now: new Date('2026-10-13T09:00:00Z') });
+    expect(late.text).toContain('nicht mehr möglich');
   });
 });

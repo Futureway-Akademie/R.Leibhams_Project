@@ -10,6 +10,10 @@ export interface CalendarEvent {
   location: string | null;
   description: string;
   stamp: Date;
+  /** Abgesagte Termine markieren bzw. entfernen Kalender-Apps beim Import. */
+  status?: 'CONFIRMED' | 'CANCELLED';
+  /** Steigt mit jeder Änderung desselben Termins (Bestätigung 0, Umbuchung 1, Absage +1). */
+  sequence?: number;
 }
 
 /** z. B. 20261014T080000Z */
@@ -58,13 +62,14 @@ export function buildIcs(event: CalendarEvent): string {
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
     `UID:${event.uid}`,
+    `SEQUENCE:${String(event.sequence ?? 0)}`,
     `DTSTAMP:${utc(event.stamp)}`,
     `DTSTART:${utc(event.start)}`,
     `DTEND:${utc(event.end)}`,
     `SUMMARY:${escapeText(event.summary)}`,
     ...(event.location ? [`LOCATION:${escapeText(event.location)}`] : []),
     `DESCRIPTION:${escapeText(event.description)}`,
-    'STATUS:CONFIRMED',
+    `STATUS:${event.status ?? 'CONFIRMED'}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ];

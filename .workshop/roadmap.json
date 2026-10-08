@@ -803,7 +803,7 @@
           "description": "Transaktionale Mails für Storno, Umbuchung und Owner-Absage.",
           "order": 3,
           "weight": 1,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-3-2",
             "task-2-13",
@@ -813,13 +813,21 @@
             "Jede der drei Aktionen löst die passende Mail aus",
             "Mails sind dedupliziert"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T13:14:36Z",
+          "completedAt": "2026-10-08T13:21:42Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "19 neue Worker-Tests (84 im Worker); API 306, DB 36 unverändert grün. Gemeinsames Mail-Gerüst, Bestätigungsmail verhaltensgleich (bestehende Tests unverändert grün). Integration gegen Replica Set und SMTP-Testserver: Stornomail ohne Verwaltungslink, mit Link zum erneuten Buchen, ICS STATUS:CANCELLED SEQUENCE:1, nach Umbuchung UID der ersten Buchung und SEQUENCE:2; Absagemail mit Begründung (maskiert), Ort, Kontakt, je Teilnehmer einer Kursabsage eine eigene Mail; Umbuchungsmail mit bisherigem und neuem Termin (auch Ort bei Kursen), neuem gültigem Link für die neue Buchung, ICS mit gleicher UID und SEQUENCE:1; nicht passende Status → skipped ohne Mail und ohne Link; Versandfehler entfernt neuen Link. Deduplizierung: zweiter Auftrag mit gleichem dedupeKey abgelehnt, erledigter Auftrag nicht erneut versendet, Wiederholung nach Absturz mit identischer Message-ID. Logs ohne Teilnehmerdaten, Begründung und Links. Ende-zu-Ende gegen Docker-MongoDB und Mailpit mit API und Worker: drei Buchungen, Storno über Link, Umbuchung über Link auf anderen Kurstermin, Owner-Absage eines Kurstermins mit Begründung; jede Person erhielt genau Bestätigung plus passende Folgemail, Kalender-UIDs und Status korrekt, neuer Link öffnet die umgebuchte Buchung. Testdaten, Owner und Mails entfernt. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/worker test (2×)",
+              "Ende-zu-Ende: API + Worker gegen Docker-MongoDB und Mailpit (Storno, Umbuchung, Owner-Absage)",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T13:21:42Z"
           }
         },
         {

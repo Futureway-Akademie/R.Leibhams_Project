@@ -25,6 +25,7 @@ describe('loadConfig', () => {
         businessName: 'Friseur Muster',
         businessPhone: null,
         managePageUrl: 'https://friseur.test/termin-verwalten',
+        bookingPageUrl: null,
       },
     });
   });

@@ -377,3 +377,17 @@ Versand im Worker per SMTP (`nodemailer`, feste Versionen, Pakete mindestens zwe
 ### Begründung
 
 Umgebungsvariablen passen zur Einrichtung je Kunde und vermeiden einen Owner-Endpunkt vor dem Portal. Die Kalenderdatei erleichtert die Übernahme des Termins; ohne Link bleibt sie unbedenklich, wenn Kalender geteilt oder synchronisiert werden. Das Löschen nicht zugestellter Tokens verhindert verwaiste gültige Links. Überholte Bestätigungen würden Teilnehmer verwirren; Storno-, Umbuchungs- und Absagemails übernehmen die Information.
+
+## 2026-10-08 – Storno-, Umbuchungs- und Absagemails
+
+### Kontext
+
+Teilnehmer sollen jede Änderung ihrer Buchung per Mail erfahren: eigene Stornos, Umbuchungen mit neuem Link und Absagen durch den Owner. Mails dürfen weder doppelt noch überholt ankommen, und der Kalendereintrag aus der Bestätigung soll aktuell bleiben.
+
+### Entscheidung
+
+Drei weitere Handler im Worker mit gemeinsamem Mail-Gerüst. Versand nur, solange die Buchung den zum Auftrag passenden Status trägt, sonst `result: 'skipped'`; Storno und Absage melden Endzustände und werden deshalb immer versendet. Die Umbuchungsmail nennt bisherigen und neuen Termin und stellt einen neuen Link aus (bei Versandfehler wieder entfernt). Kalenderdateien verwenden die UID der ersten Buchung mit steigender `SEQUENCE`; Absagen setzen `STATUS:CANCELLED`. Optionaler Link zum erneuten Buchen über `BOOKING_PAGE_URL`. Die Begründung einer Owner-Absage erscheint einzeilig und maskiert in der Mail, aber nie in Logs.
+
+### Begründung
+
+Ein gemeinsames Gerüst hält alle Mails einheitlich und die Maskierung an einer Stelle. Die Statusprüfung verhindert widersprüchliche Mails bei schnell aufeinanderfolgenden Änderungen. Dieselbe UID erlaubt Kalender-Apps, den bestehenden Eintrag zu verschieben oder als abgesagt zu markieren, statt einen zweiten anzulegen; Apps, die das nicht unterstützen, zeigen die Datei als neuen Eintrag, der Mailtext bleibt maßgeblich.

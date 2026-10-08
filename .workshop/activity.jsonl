@@ -127,3 +127,7 @@
 {"timestamp": "2026-10-08T13:08:09Z", "type": "decision_recorded", "summary": "Absender und Link-Ziel per Umgebungsvariablen, Mail als Text + HTML + ICS ohne Link, inaktive Buchungen übersprungen, Token bei Versandfehler gelöscht, abgelehnte Empfänger sofort failed."}
 {"timestamp": "2026-10-08T13:08:09Z", "type": "task_ready", "taskId": "task-3-3", "summary": "Abhängigkeiten erfüllt."}
 {"timestamp": "2026-10-08T13:08:09Z", "type": "task_ready", "taskId": "task-3-4", "summary": "Abhängigkeiten erfüllt."}
+{"timestamp": "2026-10-08T13:14:36Z", "type": "task_started", "taskId": "task-3-3", "summary": "Storno-, Umbuchungs- und Absagemails begonnen: Kalender-Aktualisierung über dieselbe UID, optionaler Link zum erneuten Buchen (BOOKING_PAGE_URL), überholte Umbuchungsmails werden übersprungen."}
+{"timestamp": "2026-10-08T13:21:42Z", "type": "verification_passed", "taskId": "task-3-3", "summary": "Quality Gate grün: 84 Worker-Tests, Ende-zu-Ende-Lauf mit Storno, Umbuchung und Owner-Absage über API, Worker und Mailpit."}
+{"timestamp": "2026-10-08T13:21:42Z", "type": "task_completed", "taskId": "task-3-3", "summary": "Storno-, Umbuchungs- und Absagemails mit gemeinsamem Mail-Gerüst, Kalender-Aktualisierung und Deduplizierung umgesetzt."}
+{"timestamp": "2026-10-08T13:21:42Z", "type": "decision_recorded", "summary": "Kalenderdateien mit UID der ersten Buchung und steigender SEQUENCE, optionaler Link zum erneuten Buchen (BOOKING_PAGE_URL), überholte Umbuchungsmails übersprungen."}

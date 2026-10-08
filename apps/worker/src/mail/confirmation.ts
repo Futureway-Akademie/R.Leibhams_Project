@@ -1,26 +1,25 @@
 // Inhalt der Buchungsbestätigung (Text, HTML, Kalenderdatei). Reine Funktion ohne Datenbank,
 // damit sich Inhalt und Maskierung einzeln prüfen lassen.
-import { formatDate, formatDateTime, formatTimeRange } from '@fw-booking/shared';
+import { formatDateTime } from '@fw-booking/shared';
 import { buildIcs } from './ics.js';
+import { appointmentDate, appointmentRows, oneLine, renderMail } from './layout.js';
+import type { Appointment, Block, Contact } from './layout.js';
 
-export interface ConfirmationData {
-  bookingId: string;
+/** Gemeinsame Angaben aller Mails zu einer Buchung. */
+export interface BookingMailBase extends Appointment, Contact {
   participantName: string;
-  serviceTitle: string;
-  startsAt: Date;
-  endsAt: Date;
-  timeZone: string;
-  location: string | null;
+  /** Domain für die Kalender-UID. */
+  domain: string;
+  /** Erste Buchung der Umbuchungskette; bestimmt die Kalender-UID. */
+  calendarId: string;
+  now: Date;
+}
+
+export interface ConfirmationData extends BookingMailBase {
   /** Letzter Zeitpunkt für Storno und Umbuchung über den Link. */
   changeDeadline: Date;
   /** Vollständiger Verwaltungslink mit Token im Fragment. */
   manageUrl: string;
-  businessName: string;
-  businessPhone: string | null;
-  replyTo: string | null;
-  /** Domain für Kalender-UID. */
-  domain: string;
-  now: Date;
 }
 
 export interface MailContent {
@@ -30,97 +29,67 @@ export interface MailContent {
   ics: string;
 }
 
-const iso = (date: Date) => date.toISOString();
+export const LINK_NOTE: Block = {
+  kind: 'note',
+  text: 'Bitte gib den Link nicht weiter; er ermöglicht Änderungen an deiner Buchung.',
+};
 
-/** Maskiert Daten für HTML; Teilnehmer- und Angebotsangaben stammen aus Eingaben. */
-export function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-/** Zeilenumbrüche entfernen, damit Werte keine Kopfzeilen oder Absätze einschleusen. */
-const oneLine = (value: string) => value.replace(/[\r\n]+/g, ' ').trim();
-
-export function confirmationMail(data: ConfirmationData): MailContent {
-  const date = formatDate(iso(data.startsAt), data.timeZone);
-  const time = formatTimeRange(iso(data.startsAt), iso(data.endsAt), data.timeZone);
-  const deadline = formatDateTime(iso(data.changeDeadline), data.timeZone);
-  const changeable = data.now <= data.changeDeadline;
-  const name = oneLine(data.participantName);
-  const title = oneLine(data.serviceTitle);
-  const location = data.location ? oneLine(data.location) : null;
+/** Kalenderdatei ohne Verwaltungslink: Kalender werden oft synchronisiert und geteilt. */
+export function calendarFile(
+  data: BookingMailBase,
+  options: { sequence: number; cancelled?: boolean },
+): string {
   const business = oneLine(data.businessName);
-
-  const details: [string, string][] = [
-    ['Angebot', title],
-    ['Datum', date],
-    ['Uhrzeit', `${time} Uhr (Zeitzone ${data.timeZone})`],
-    ...(location ? ([['Ort', location]] as [string, string][]) : []),
-  ];
-  const changeText = changeable
-    ? `Bis ${deadline} Uhr kannst du den Termin über diesen Link stornieren oder einmal umbuchen:`
-    : 'Eine Änderung über den Link ist für diesen Termin nicht mehr möglich; bitte wende dich bei Fragen direkt an uns. Deine Buchung kannst du hier ansehen:';
-  const contact = [
-    business,
-    ...(data.businessPhone ? [`Telefon: ${oneLine(data.businessPhone)}`] : []),
-    ...(data.replyTo ? [`E-Mail: ${data.replyTo}`] : []),
-  ];
-
-  const subject = `Terminbestätigung: ${title} am ${date}`;
-
-  const text = [
-    `Hallo ${name},`,
-    '',
-    'vielen Dank für deine Buchung. Dein Termin ist bestätigt.',
-    '',
-    ...details.map(([label, value]) => `${label}: ${value}`),
-    '',
-    changeText,
-    data.manageUrl,
-    '',
-    'Bitte gib den Link nicht weiter; er ermöglicht Änderungen an deiner Buchung.',
-    '',
-    'Viele Grüße',
-    ...contact,
-    '',
-    'Diese E-Mail wurde automatisch versendet.',
-  ].join('\n');
-
-  const rows = details
-    .map(
-      ([label, value]) =>
-        `<tr><th align="left" style="padding:4px 16px 4px 0;font-weight:600">${escapeHtml(label)}</th><td style="padding:4px 0">${escapeHtml(value)}</td></tr>`,
-    )
-    .join('');
-  const html = `<!doctype html>
-<html lang="de">
-<head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>
-<body style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1a1a1a;margin:0;padding:24px">
-<p>Hallo ${escapeHtml(name)},</p>
-<p>vielen Dank für deine Buchung. Dein Termin ist bestätigt.</p>
-<table role="presentation" cellspacing="0" cellpadding="0">${rows}</table>
-<p>${escapeHtml(changeText)}</p>
-<p><a href="${escapeHtml(data.manageUrl)}" style="display:inline-block;padding:10px 18px;background:#1a5fb4;color:#ffffff;text-decoration:none;border-radius:4px">${changeable ? 'Buchung verwalten' : 'Buchung ansehen'}</a></p>
-<p style="font-size:13px;color:#555">Bitte gib den Link nicht weiter; er ermöglicht Änderungen an deiner Buchung.</p>
-<p>Viele Grüße<br>${contact.map(escapeHtml).join('<br>')}</p>
-<p style="font-size:12px;color:#777">Diese E-Mail wurde automatisch versendet.</p>
-</body>
-</html>`;
-
-  // Ohne Verwaltungslink: Kalender werden oft synchronisiert und geteilt.
-  const ics = buildIcs({
-    uid: `booking-${data.bookingId}@${data.domain}`,
+  return buildIcs({
+    uid: `booking-${data.calendarId}@${data.domain}`,
     start: data.startsAt,
     end: data.endsAt,
-    summary: `${title} – ${business}`,
-    location,
-    description: `Gebucht bei ${business}. Änderungen über den Link in der Bestätigungsmail.`,
+    summary: `${oneLine(data.serviceTitle)} – ${business}`,
+    location: data.location ? oneLine(data.location) : null,
+    description: options.cancelled
+      ? `Abgesagt. Gebucht war bei ${business}.`
+      : `Gebucht bei ${business}. Änderungen über den Link in der Bestätigungsmail.`,
     stamp: data.now,
+    status: options.cancelled ? 'CANCELLED' : 'CONFIRMED',
+    sequence: options.sequence,
   });
+}
 
-  return { subject, text, html, ics };
+/** Hinweis auf die Änderungsfrist mit Verwaltungslink. */
+export function manageBlock(
+  data: Pick<ConfirmationData, 'changeDeadline' | 'manageUrl' | 'timeZone' | 'now'>,
+  allowed: 'cancel_or_rebook' | 'cancel',
+): Block {
+  const deadline = formatDateTime(data.changeDeadline.toISOString(), data.timeZone);
+  if (data.now > data.changeDeadline) {
+    return {
+      kind: 'action',
+      intro:
+        'Eine Änderung über den Link ist für diesen Termin nicht mehr möglich; bitte wende dich bei Fragen direkt an uns. Deine Buchung kannst du hier ansehen:',
+      label: 'Buchung ansehen',
+      url: data.manageUrl,
+    };
+  }
+  const what = allowed === 'cancel_or_rebook' ? 'stornieren oder einmal umbuchen' : 'stornieren';
+  return {
+    kind: 'action',
+    intro: `Bis ${deadline} Uhr kannst du den Termin über diesen Link ${what}:`,
+    label: 'Buchung verwalten',
+    url: data.manageUrl,
+  };
+}
+
+export function confirmationMail(data: ConfirmationData): MailContent {
+  const mail = renderMail({
+    subject: `Terminbestätigung: ${data.serviceTitle} am ${appointmentDate(data)}`,
+    participantName: data.participantName,
+    contact: data,
+    blocks: [
+      { kind: 'paragraph', text: 'vielen Dank für deine Buchung. Dein Termin ist bestätigt.' },
+      { kind: 'details', rows: appointmentRows(data) },
+      manageBlock(data, 'cancel_or_rebook'),
+      LINK_NOTE,
+    ],
+  });
+  return { ...mail, ics: calendarFile(data, { sequence: 0 }) };
 }

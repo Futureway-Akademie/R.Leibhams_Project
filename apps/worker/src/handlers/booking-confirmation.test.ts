@@ -38,6 +38,7 @@ const MAIL: WorkerConfig['mail'] = {
   businessName: 'Friseur Muster',
   businessPhone: '030 123456',
   managePageUrl: 'https://friseur.test/termin-verwalten',
+  bookingPageUrl: 'https://friseur.test/termine',
 };
 
 const RULES = { minLeadMinutes: null, horizonDays: null, changeDeadlineMinutes: null };

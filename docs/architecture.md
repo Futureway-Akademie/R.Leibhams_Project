@@ -180,11 +180,11 @@ Unbekannte Kalender sowie unbekannte oder deaktivierte Angebote ergeben 404. Jed
 - **Wiederholungen:** Handler werfen `temporaryFailure(kategorie)` (Wiederholung) oder `permanentFailure(kategorie)` (sofort `failed`); unbekannte Fehler gelten als vorübergehend (`unexpected`). Abstände nach Versuch 1–5: 1, 5, 15, 60, 180 Minuten (±10 %), nach 6 Versuchen `failed` mit `failedAt`. Gespeichert wird nur `lastErrorCategory`, nie die Fehlermeldung. Ein Job, dessen Lease nach dem letzten Versuch abgelaufen ist, wird ohne erneute Ausführung `failed` (`lease_expired`).
 - **Zeitlimit:** Handler laufen höchstens 4 Minuten (unter der Lease) und erhalten ein `AbortSignal`; Überschreitung zählt als vorübergehender Fehler `timeout`.
 - **Zustellung mindestens einmal:** Stürzt ein Worker nach dem Versand, aber vor `complete` ab, wird der Job nach Ablauf der Lease erneut ausgeführt. Mails tragen deshalb eine stabile Message-ID je Job (`<jobId.typ@absenderdomain>`).
-- **Handler:** `src/handlers/index.ts` ordnet Jobtypen Handler zu; Handler liefern `sent` oder `skipped` (gespeichert in `result`). Nur registrierte Typen werden beansprucht, andere bleiben unverändert `pending` (derzeit `booking_cancellation`, `booking_rebooked`, `owner_cancellation`, `booking_reminder` bis task-3-3/3-4).
+- **Handler:** `src/handlers/index.ts` ordnet Jobtypen Handler zu; Handler liefern `sent` oder `skipped` (gespeichert in `result`). Nur registrierte Typen werden beansprucht, andere bleiben unverändert `pending` (derzeit `booking_reminder` bis task-3-4).
 
 ## E-Mail-Versand
 
-SMTP über `nodemailer` (`src/mail/mailer.ts`); lokal Mailpit (`SMTP_HOST=127.0.0.1`, `SMTP_PORT=1025`, Oberfläche http://127.0.0.1:8025). In Produktion ist eine verschlüsselte Verbindung Pflicht (STARTTLS oder `SMTP_SECURE=true`). Absender und Kontakt je Installation aus Umgebungsvariablen: `MAIL_FROM_ADDRESS` (Anzeigename `BUSINESS_NAME`), optional `MAIL_REPLY_TO`, `BUSINESS_PHONE`, `SMTP_USER`/`SMTP_PASSWORD`. Der Verwaltungslink lautet `MANAGE_PAGE_URL#t=TOKEN` (WordPress-Seite mit Widget, in Produktion nur https).
+SMTP über `nodemailer` (`src/mail/mailer.ts`); lokal Mailpit (`SMTP_HOST=127.0.0.1`, `SMTP_PORT=1025`, Oberfläche http://127.0.0.1:8025). In Produktion ist eine verschlüsselte Verbindung Pflicht (STARTTLS oder `SMTP_SECURE=true`). Absender und Kontakt je Installation aus Umgebungsvariablen: `MAIL_FROM_ADDRESS` (Anzeigename `BUSINESS_NAME`), optional `MAIL_REPLY_TO`, `BUSINESS_PHONE`, `SMTP_USER`/`SMTP_PASSWORD`. Der Verwaltungslink lautet `MANAGE_PAGE_URL#t=TOKEN` (WordPress-Seite mit Widget, in Produktion nur https); optional verlinken Storno- und Absagemail `BOOKING_PAGE_URL` zum erneuten Buchen.
 
 | SMTP-Fehler | Kategorie | Folge |
 |---|---|---|
@@ -195,6 +195,16 @@ SMTP über `nodemailer` (`src/mail/mailer.ts`); lokal Mailpit (`SMTP_HOST=127.0.
 | 5xx sonst | `message_rejected` | sofort `failed` |
 
 **Bestätigungsmail** (`booking_confirmation`, `src/handlers/booking-confirmation.ts`): lädt Buchung, Angebot, Kurstermin (Ort) und Einstellungen; ist die Buchung nicht mehr `confirmed`, wird der Job ohne Mail mit `result: 'skipped'` abgeschlossen, fehlt sie, endet er als `booking_missing`. Sonst stellt der Handler über `issueActionToken` (`@fw-booking/db`, gemeinsam mit der API) einen neuen Link aus und versendet Text, HTML und `termin.ics`: Angebot, Datum und Uhrzeit in der Zeitzone der Installation, Ort, Änderungsfrist (Angebot bzw. Installation), Link sowie Kontakt. Nach Ablauf der Frist weist die Mail auf den direkten Kontakt hin. Scheitert der Versand, wird der eben ausgestellte Token wieder gelöscht. Alle Werte werden im HTML maskiert; die Kalenderdatei enthält keinen Verwaltungslink. Logs enthalten nur Job-ID, Typ, Versuch und Kategorie.
+
+**Storno-, Umbuchungs- und Absagemail** (`src/handlers/booking-changes.ts`, Inhalte in `src/mail/changes.ts`; alle Mails teilen das Gerüst `src/mail/layout.ts`):
+
+| Auftrag | Bezug | Versand nur bei Status | Inhalt | Kalenderdatei |
+|---|---|---|---|---|
+| `booking_cancellation` | stornierte Buchung | `cancelled` | Bestätigung des Stornos, kein Verwaltungslink (alle Links entwertet), optional Link zum erneuten Buchen | `STATUS:CANCELLED` |
+| `booking_rebooked` | neue Buchung | `confirmed` | bisheriger und neuer Termin, neue Frist, neuer Verwaltungslink (nur noch Storno möglich), Hinweis auf weiter gültige Links | neue Zeit |
+| `owner_cancellation` | abgesagte Buchung (je Teilnehmer ein Auftrag) | `cancelled_by_owner` | Absage mit optionaler Begründung, Entschuldigung, Kontakt, optional Link zum erneuten Buchen | `STATUS:CANCELLED` |
+
+Trägt die Buchung einen anderen Status, wird der Auftrag ohne Mail mit `result: 'skipped'` abgeschlossen (z. B. Umbuchungsmail, wenn die neue Buchung bereits wieder storniert ist). Die Kalenderdatei verwendet immer die UID der ersten Buchung der Umbuchungskette (`booking-<id>@absenderdomain`) mit steigender `SEQUENCE` (Bestätigung 0, Umbuchung 1, Absage +1), damit Kalender-Apps den vorhandenen Eintrag verschieben bzw. als abgesagt markieren. **Deduplizierung:** je Buchung und Anlass höchstens ein Auftrag (eindeutiger `dedupeKey`), ein erledigter Auftrag wird nicht erneut beansprucht, und eine nach Absturz wiederholte Mail trägt dieselbe Message-ID.
 - **Herunterfahren:** SIGTERM/SIGINT beenden das Abfragen; laufende Jobs werden abgeschlossen, danach endet der Prozess.
 - **Aufbewahrung:** Versendete Jobs löscht ein TTL-Index 30 Tage nach `completedAt` (Migration `008`, nur `status: 'sent'`); `failed` bleibt für die Anzeige im Portal. Index `status_leaseUntil` für abgelaufene Leases.
 
