@@ -55,6 +55,16 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Einzeltermine bieten jede passende 
 - `progress.json` wird von einem strikten Validator (ajv ohne Toleranz) bei manchen korrekt gerundeten Werten abgelehnt, z. B. `overall: 34.69`, weil `multipleOf: 0.01` im Schema an Gleitkomma-Rundung scheitert (34.69 / 0.01 = 3468.9999999999995). Mit Toleranz (`--multiple-of-precision=2`) gültig. Betrifft das Schema der Workshop-Vorlage bzw. das Dashboard; nicht eigenmächtig geändert.
 - Geklärt: Der sporadische Testfehlschlag aus task-2-9 war ein Testfehler (Prüfmuster `/030/` traf Ziffern in Hex-IDs), behoben in task-2-10.
 
+## Hinweise zur Arbeitsumgebung
+
+- **Docker:** CLI liegt unter `~/.docker/bin` (in `~/.zprofile` eingetragen). In Shells, die vor der Docker-Installation gestartet wurden, `export PATH="$PATH:$HOME/.docker/bin"` setzen. Lokale Infrastruktur: `pnpm infra:up`, Prüfung `pnpm infra:verify`.
+- **pnpm:** Version 12 über Corepack; ein Shim liegt in `/opt/homebrew/bin/pnpm` (`corepack enable` nach `/usr/local/bin` war nicht möglich). Build-Skripte sind nur für `@swc/core`, `mongodb-memory-server` und `argon2` freigegeben (`allowBuilds` in `pnpm-workspace.yaml`).
+- **Lokale Datenbank:** Migrationen bis `006` sind auf der Docker-MongoDB angewendet (`pnpm --filter @fw-booking/api db:migrate`). Es existiert bewusst kein Owner-Konto.
+- **Manuelle Tests:** Bisheriges Vorgehen je Task: temporären Owner mit zufälligem Passwort per `owner:create` anlegen, API mit `pnpm --filter @fw-booking/api dev` starten, Endpunkte per `curl` prüfen, danach Testdaten und Owner in der Docker-MongoDB wieder entfernen. Verwaltungslinks für Tests entstehen bis task-3-2 durch direktes Einfügen eines SHA-256-Token-Hashes in `actionTokens`.
+- **Prüfung der Zustandsdateien:** `roadmap.json` und `project.json` mit `ajv` gegen die Schemas; `progress.json` mit `--multiple-of-precision=2` (siehe Bekannte Probleme).
+- **Tests:** Bei Änderungen am Buchungskern zusätzlich `pnpm --filter @fw-booking/api test:concurrency` und mehrere protokollierte Läufe von `pnpm exec vitest run src/bookings` (in `apps/api`). Prüfungen auf fehlende personenbezogene Daten immer mit vollständigen Testwerten, nicht mit kurzen Ziffernfolgen (Hex-IDs).
+- **Arbeitsweise mit dem Teilnehmer:** Pro Task wird gemeinsam geplant (offene Entscheidungen als Auswahlfragen mit Empfehlung), dann umgesetzt; nach Abschluss pusht der Agent auf Wunsch („push zu github“) direkt auf `main`.
+
 ## Empfohlener nächster Schritt
 
 task-2-14 (Teilnehmerliste und Owner-Absage), danach ist der Buchungskern bis auf Missbrauchsschutz (task-2-15) vollständig.
