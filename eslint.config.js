@@ -23,6 +23,6 @@ export default tseslint.config(
     files: ['packages/widget/**', 'apps/portal/**'],
     languageOptions: { globals: { ...globals.browser } },
   },
-  { files: ['**/*.js'], extends: [tseslint.configs.disableTypeChecked] },
+  { files: ['**/*.js', '**/*.mjs'], extends: [tseslint.configs.disableTypeChecked] },
   prettier,
 );

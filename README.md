@@ -28,6 +28,7 @@ pnpm --filter @fw-booking/api dev   # API auf http://127.0.0.1:3000, Healthcheck
 | `pnpm typecheck` | `tsc --noEmit` in allen Workspace-Paketen |
 | `pnpm test` | Vitest in allen Workspace-Paketen |
 | `pnpm format` / `pnpm format:check` | Prettier schreiben bzw. prüfen |
+| `pnpm --filter @fw-booking/api test:concurrency` | Lastlauf der Nebenläufigkeitstests (200 parallele Anfragen × 20 Durchläufe, Log unter `apps/api/logs/`) |
 | `pnpm infra:up` / `infra:down` / `infra:reset` / `infra:verify` | Lokale MongoDB und Mailpit (siehe `infra/README.md`) |
 
 ## Struktur

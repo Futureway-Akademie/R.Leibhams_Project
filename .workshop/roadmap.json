@@ -520,7 +520,7 @@
           "description": "Integrationstests mit vielen gleichzeitigen Buchungsanfragen für beide Terminarten.",
           "order": 11,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-10"
           ],
@@ -529,13 +529,22 @@
             "Ein Kurs mit N Plätzen nimmt bei parallelen Anfragen genau N Buchungen an",
             "Tests laufen gegen ein echtes Replica Set"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T09:58:12Z",
+          "completedAt": "2026-10-08T10:02:58Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "Sechs Nebenläufigkeitsszenarien gegen ein echtes Replica Set (mongodb-memory-server): Kurs mit 5 Plätzen inkl. Doppelklicks → genau 5 Buchungen; Kapazität senken während gebucht wird → nie über Kapazität; Sperren während gebucht wird → danach keine Buchungen; Kurstermin anlegen vs. Einzelbuchung → genau einer gewinnt; Regel-Erzeugung vs. Einzelbuchungen → keine Doppelbelegung, verdrängter Termin als Konflikt gemeldet; überlappende Einzelbuchungen dreier Angebote → keine Überschneidung. Nach jedem Durchlauf Konsistenz-Check (4 eigene Tests belegen, dass er Fehler erkennt). Normallauf (50 Anfragen) Teil von pnpm test. Lastlauf test:concurrency: 200 parallele Anfragen × 20 Durchläufe × 6 Szenarien, 0 Abweichungen, Log gesichert. Dabei gefunden und behoben: supertest startete je Anfrage einen eigenen Listener; macOS begrenzt die Verbindungs-Warteschlange auf 128 → Test lauscht auf echtem Port, Client mit max. 64 Verbindungen. Quality Gate grün.",
+            "commands": [
+              "pnpm exec vitest run src/concurrency",
+              "CONCURRENCY_LOAD=200 CONCURRENCY_ROUNDS=1 pnpm exec vitest run src/concurrency",
+              "pnpm --filter @fw-booking/api test:concurrency",
+              "pnpm exec vitest run src/testing/consistency.test.ts",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T10:02:58Z"
           }
         },
         {

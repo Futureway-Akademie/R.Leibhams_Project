@@ -279,3 +279,17 @@ Einzelbuchung nur zu berechneten Startzeiten; die Transaktion belegt die Einheit
 ### Begründung
 
 Der sporadische Fehlschlag aus task-2-9 ist geklärt: Das Prüfmuster `/030/` traf gelegentlich zufällige Ziffernfolgen in Hex-IDs der Antwort. Es handelte sich um einen Testfehler, nicht um einen Fehler der Buchungslogik. Nach der Korrektur liefen die Buchungstests 20 von 20 Mal fehlerfrei.
+
+## 2026-10-08 – Nebenläufigkeitstests
+
+### Kontext
+
+Die Garantien des Buchungskerns müssen auch dann halten, wenn Buchungen und Owner-Aktionen gleichzeitig stattfinden.
+
+### Entscheidung
+
+Sechs Szenarien mit gemeinsamem Konsistenz-Check (`checkConsistency`). Im normalen Testlauf einmal mit 50 parallelen Anfragen; zusätzlicher Lastlauf `test:concurrency` mit 200 Anfragen und 20 Durchläufen, Ausgabe in `apps/api/logs/` (nicht versioniert). Die Tests starten die API auf einem echten Port und begrenzen den Client auf 64 Verbindungen mit Keep-Alive.
+
+### Begründung
+
+Ein gemeinsamer Konsistenz-Check deckt auch Fehler auf, die einzelne Statuscodes nicht zeigen. Die Begrenzung der Client-Verbindungen umgeht eine macOS-Grenze (`kern.ipc.somaxconn` = 128), ohne Systemeinstellungen zu ändern; die Anfragen konkurrieren weiterhin gleichzeitig um dieselben Plätze.

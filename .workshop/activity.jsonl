@@ -93,3 +93,7 @@
 {"timestamp": "2026-10-08T08:43:14Z", "type": "task_ready", "taskId": "task-2-14", "summary": "Task bereit: Teilnehmerliste und Owner-Absage."}
 {"timestamp": "2026-10-08T08:43:14Z", "type": "task_ready", "taskId": "task-2-15", "summary": "Task bereit: Missbrauchsschutz und CORS."}
 {"timestamp": "2026-10-08T08:43:14Z", "type": "task_ready", "taskId": "task-3-1", "summary": "Task bereit: Worker mit Job-Leases."}
+{"timestamp": "2026-10-08T09:58:12Z", "type": "task_started", "taskId": "task-2-11", "summary": "Nebenläufigkeitstests begonnen: gemischte Szenarien mit Owner-Aktionen, Konsistenz-Check, 50 parallele Anfragen im Normallauf, Lastlauf 200 × 20 Durchläufe mit Logs."}
+{"timestamp": "2026-10-08T10:02:58Z", "type": "verification_passed", "taskId": "task-2-11", "summary": "Lastlauf 200 × 20 × 6 Szenarien ohne Abweichung; Konsistenz-Check verifiziert."}
+{"timestamp": "2026-10-08T10:02:58Z", "type": "task_completed", "taskId": "task-2-11", "summary": "Nebenläufigkeitstests mit gemischten Owner-/Buchungsszenarien, Konsistenz-Check und Lastlauf-Befehl umgesetzt."}
+{"timestamp": "2026-10-08T10:02:58Z", "type": "decision_recorded", "summary": "Nebenläufigkeitstests: Normallauf 50 Anfragen, Lastlauf 200 × 20 mit Logs; Client auf 64 Verbindungen begrenzt (macOS-Grenze)."}

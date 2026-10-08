@@ -13,7 +13,8 @@
     "db:migrate": "node --env-file-if-exists=../../.env --conditions=development --import @swc-node/register/esm-register src/database/migrate.ts",
     "db:migrate:dist": "node --env-file-if-exists=../../.env dist/database/migrate.js",
     "owner:create": "node --env-file-if-exists=../../.env --conditions=development --import @swc-node/register/esm-register src/auth/owner-create.cli.ts",
-    "owner:create:dist": "node --env-file-if-exists=../../.env dist/auth/owner-create.cli.js"
+    "owner:create:dist": "node --env-file-if-exists=../../.env dist/auth/owner-create.cli.js",
+    "test:concurrency": "node scripts/concurrency.mjs"
   },
   "dependencies": {
     "@fw-booking/shared": "workspace:*",

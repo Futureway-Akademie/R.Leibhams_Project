@@ -2,7 +2,7 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 34,69 % (34 von 98 Gewichtspunkten, 16 von 49 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 36,73 % (36 von 98 Gewichtspunkten, 17 von 49 Tasks).
 
 ## Aktive Phase
 
@@ -14,6 +14,7 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
+- task-2-11 – Nebenläufigkeitstests (6 Szenarien, Konsistenz-Check, Lastlauf `test:concurrency` 200 × 20 ohne Abweichung)
 - task-2-10 – Atomare Einzeltermin-Buchung (Belegung der Dauer in einer Transaktion, gemeinsamer Abschluss mit Kursbuchung; 241 API-Tests)
 - task-2-16 – Slot-Startzeiten im 5-Minuten-Raster, ohne Puffer (Migration 006; Bartrasur 20 Min in 12–13 Uhr → 12:00–12:40)
 - task-2-9 – Atomare Kursbuchung (`POST /api/public/calendars/:calendarId/bookings`, Transaktion mit bedingtem `$inc`, Idempotenz, Outbox, Pflicht-Datenschutzbestätigung, Migration 005; 227 API-Tests)
@@ -29,7 +30,6 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-2-11 – Nebenläufigkeitstests
 - task-2-12 – Action-Tokens und Storno
 - task-2-14 – Teilnehmerliste und Owner-Absage
 - task-2-15 – Missbrauchsschutz und CORS
@@ -56,4 +56,4 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Einzeltermine bieten jede passende 
 
 ## Empfohlener nächster Schritt
 
-task-2-12 (Action-Tokens und Storno) als nächster Baustein des Buchungsablaufs; task-2-11 (Nebenläufigkeitstests) ist durch die Gleichzeitigkeitstests in task-2-9 und task-2-10 bereits teilweise vorbereitet.
+task-2-12 (Action-Tokens und Storno) als nächster Baustein des Buchungsablaufs.
