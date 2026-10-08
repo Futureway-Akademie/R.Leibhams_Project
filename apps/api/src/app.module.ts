@@ -7,6 +7,7 @@ import { BookingsModule } from './bookings/bookings.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
 import { CoursesModule } from './courses/courses.module.js';
 import { PublicModule } from './public/public.module.js';
+import { SecurityModule } from './security/security.module.js';
 import type { DestinationStream } from 'pino';
 import { APP_CONFIG } from './config/config.js';
 import type { AppConfig } from './config/config.js';
@@ -29,6 +30,7 @@ export class AppModule {
         LoggerModule.forRoot(loggerParams(config, options.logStream)),
         DatabaseModule,
         AuthModule,
+        SecurityModule,
         CatalogModule,
         AvailabilityModule,
         CoursesModule,

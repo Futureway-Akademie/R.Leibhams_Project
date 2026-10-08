@@ -52,6 +52,7 @@ describe('runMigrations', () => {
         '004-public-calendar',
         '005-booking-privacy',
         '006-remove-buffer-and-grid',
+        '007-booking-email-index',
       ],
       alreadyApplied: [],
     });
@@ -63,6 +64,7 @@ describe('runMigrations', () => {
       '004-public-calendar',
       '005-booking-privacy',
       '006-remove-buffer-and-grid',
+      '007-booking-email-index',
     ]);
   });
 
@@ -80,6 +82,7 @@ describe('runMigrations', () => {
         '004-public-calendar',
         '005-booking-privacy',
         '006-remove-buffer-and-grid',
+        '007-booking-email-index',
       ],
     });
     expect(await indexNames(db, COLLECTIONS.bookings)).toEqual(before);
@@ -149,7 +152,10 @@ describe('001-initial', () => {
 
   it.each([
     [COLLECTIONS.sessions, ['startsAt', 'serviceId_startsAt']],
-    [COLLECTIONS.bookings, ['startsAt', 'serviceId_startsAt', 'sessionId_status']],
+    [
+      COLLECTIONS.bookings,
+      ['startsAt', 'serviceId_startsAt', 'sessionId_status', 'participantEmailKey_createdAt'],
+    ],
     [COLLECTIONS.resourceOccupancy, ['ref']],
     [COLLECTIONS.outboxJobs, ['status_dueAt', 'bookingId']],
     [COLLECTIONS.auditEvents, ['at', 'object']],

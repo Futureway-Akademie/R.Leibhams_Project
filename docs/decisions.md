@@ -335,3 +335,17 @@ Absage eines Kurstermins und einer einzelnen Buchung jeweils in einer Transaktio
 ### Begründung
 
 Die gemeinsame Transaktion verhindert halbe Absagen; Gleichzeitigkeit mit Buchungen und Stornos wird durch Schreibkonflikte auf demselben Dokument aufgelöst. Die Begründung kann personenbezogene Angaben enthalten und gehört deshalb nicht in das langlebige Audit-Log. Absagen vergangener Termine würden nur sinnlose Mails erzeugen. Die Historie in der Teilnehmerliste macht Stornos und Absagen für den Owner nachvollziehbar.
+
+## 2026-10-08 – Missbrauchsschutz und CORS
+
+### Kontext
+
+Die öffentliche API wird von WordPress-Seiten aus dem Browser aufgerufen und ist ohne Anmeldung erreichbar. Sie muss vor Massenanfragen, Massenbuchungen und Aufrufen von fremden Websites geschützt sein und darf bei ungültigen Eingaben keine internen Details preisgeben.
+
+### Entscheidung
+
+Freigegebene Origins per Umgebungsvariable `CORS_ALLOWED_ORIGINS` (je Installation bei der Einrichtung gesetzt, keine Portal-Oberfläche). Eigene CORS-Middleware nur für `/api/public/*`: fremde Origins erhalten 403 statt nur fehlender Header, damit auch einfache Anfragen keine Buchung auslösen. Ratenbegrenzung je Client-IP (IPv6 je /64) mit festen Fenstern im Speicher der API: Lesen 120/Min, Buchen 10/10 Min, Verwaltungslink-Ansicht 60/Min, Storno/Umbuchung 10/10 Min, per Umgebungsvariable anpassbar. Zusätzlich höchstens 5 neue Buchungen je E-Mail-Adresse und Stunde, gezählt über vorhandene Buchungen. Eigener JSON-Parser (16 KB) mit generischen Fehlerantworten; unbekannte Routen ohne Pfadangabe.
+
+### Begründung
+
+Je Installation läuft eine API-Instanz; Zähler im Speicher vermeiden einen Datenbank-Schreibzugriff bei jedem Slot-Abruf, ein Neustart setzt sie lediglich zurück. Das /64-Netz verhindert das einfache Umgehen über wechselnde IPv6-Adressen. Das Limit je E-Mail ergänzt die IP-Grenzen gegen verteilte Massenbuchungen, ohne die Entscheidung „beliebig viele Einzeltermine je E-Mail“ im Alltag einzuschränken. Origins in der Konfiguration halten die Freigabe beim Betreiber und brauchen keinen zusätzlichen Owner-Endpunkt.

@@ -23,6 +23,15 @@ export function testConfig(mongoUri: string, overrides: Partial<AppConfig> = {})
     logLevel: 'silent',
     session: { cookieSecure: false },
     trustProxy: 0,
+    cors: { allowedOrigins: [] },
+    // Grenzen in Tests standardmäßig aus; die Missbrauchsschutz-Tests setzen sie gezielt.
+    rateLimits: {
+      read: { limit: 0, windowMs: 60_000 },
+      booking: { limit: 0, windowMs: 600_000 },
+      manageRead: { limit: 0, windowMs: 60_000 },
+      manageWrite: { limit: 0, windowMs: 600_000 },
+    },
+    bookingsPerEmailPerHour: 0,
     ...overrides,
   };
 }

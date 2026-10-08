@@ -173,7 +173,7 @@
       "description": "NestJS-API mit Owner-Login, Angeboten beider Terminarten, Slot-Berechnung, Kursterminen sowie atomarer Buchung, Storno und Umbuchung.",
       "order": 2,
       "weight": 36,
-      "status": "in_progress",
+      "status": "completed",
       "tasks": [
         {
           "id": "task-2-1",
@@ -654,7 +654,7 @@
           "description": "Rate Limiting für öffentliche Endpunkte, konsequente Eingabevalidierung und Domainfreigabe per CORS.",
           "order": 15,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-10"
           ],
@@ -663,13 +663,22 @@
             "Nicht freigegebene Origins werden per CORS abgewiesen",
             "Ungültige Eingaben liefern 400 ohne interne Details"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-08T11:16:48Z",
+          "completedAt": "2026-10-08T11:25:38Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "38 neue API-Tests (341 in der API). CORS: freigegebene Origins erhalten Allow-Origin und Vary, Preflight 204 mit GET/POST, Content-Type/X-Booking-Token, Max-Age 600, keine Credentials; fremde Origins (andere Domain, Subdomain-Trick, http, anderer Port, null) → 403 origin_not_allowed ohne CORS-Header, auch bei Preflight; Buchung mit fremdem Origin legt nichts an; ohne Origin unverändert; Owner-Routen und Healthcheck ohne CORS-Freigabe. Ratenbegrenzung je IP: Lesen, Buchen, Verwaltungslink lesend/schreibend getrennt, 429 rate_limited mit Retry-After, vor der Eingabeprüfung, andere Clients unberührt, IPv6 je /64, Healthcheck und Owner-Routen unbegrenzt; Store-Fenster und Aufräumen. Je E-Mail: dritte neue Buchung derselben Adresse (Groß-/Kleinschreibung egal) → 429 too_many_bookings ohne Adresse in der Antwort, Wiederholung und andere Adressen erlaubt, ältere und Umbuchungs-Buchungen zählen nicht. Eingaben: kaputtes JSON → 400 ohne Parsermeldung, > 16 KB → 413, text/plain → 415, Validierungsfehler nennen Felder ohne Werte, doppelte Query-Parameter und unbekannte Felder 400, unbekannte Routen 404 ohne Pfad. Konfiguration: Origins und Grenzen aus Umgebungsvariablen, ungültige Origins abgelehnt. Migration 007 (Index) lokal angewendet. Lastlauf test:concurrency 200 × 20 × 7 ohne Abweichung. Manuell gegen lokale API mit Umgebungsvariablen: erlaubter Origin, fremder Origin 403, Preflight, Lesen 3/Min → 4. Anfrage 429 mit Retry-After, Buchen 2 → 429, kaputtes JSON, unbekannte Route, Healthcheck unbegrenzt. Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api test",
+              "pnpm --filter @fw-booking/api test:concurrency",
+              "pnpm --filter @fw-booking/api db:migrate",
+              "curl gegen lokale API mit CORS_ALLOWED_ORIGINS, RATE_LIMIT_READ=3, RATE_LIMIT_BOOKING=2",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-08T11:25:38Z"
           }
         },
         {

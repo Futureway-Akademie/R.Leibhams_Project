@@ -2,6 +2,7 @@ import { Controller, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { Public } from '../auth/decorators.js';
 import { DatabaseService } from '../database/database.module.js';
+import { SkipRateLimit } from '../security/rate-limit.js';
 
 export interface HealthResponse {
   status: 'ok' | 'error';
@@ -9,6 +10,7 @@ export interface HealthResponse {
 }
 
 @Public()
+@SkipRateLimit()
 @Controller('health')
 export class HealthController {
   constructor(private readonly database: DatabaseService) {}

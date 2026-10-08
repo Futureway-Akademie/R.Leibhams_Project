@@ -67,6 +67,24 @@ Dokumenttypen: `apps/api/src/database/documents.ts`. Zeitpunkte sind BSON-Dates 
 - **Passwort-Raten:** Nach 5 Fehlversuchen in 15 Minuten je E-Mail oder IP antwortet der Login mit 429. Unbekannte E-Mails und falsche Passwörter sind von außen nicht unterscheidbar.
 - **Konten:** Keine Selbstregistrierung; Anlage per `owner:create` (Passwort ≥ 12 Zeichen, verdeckte Eingabe).
 
+## Missbrauchsschutz und CORS
+
+`apps/api/src/security/` bündelt den Schutz der öffentlichen API. Die Reihenfolge in `app.factory.ts`: CORS-Prüfung, JSON-Parser, Parserfehler, Cookies, Routen.
+
+- **CORS:** Nur Origins aus `CORS_ALLOWED_ORIGINS` (exakte Origins der WordPress-Seiten, kommagetrennt) erhalten für `/api/public/*` die Header `Access-Control-Allow-Origin`, `Vary: Origin` und bei Preflights `GET, POST`, `Content-Type, X-Booking-Token`, 10 Minuten Cache; keine Credentials. Anfragen mit fremdem `Origin` (auch `null`) beantwortet die API mit 403 `origin_not_allowed`, bevor der Body gelesen wird, sodass sie keine Buchung auslösen. Anfragen ohne `Origin` (Server, curl) sind nicht betroffen. Owner-Routen erhalten keine CORS-Freigabe.
+- **Ratenbegrenzung:** `RateLimitGuard` zählt je Client-IP (IPv6 je /64, Client-IP über `TRUST_PROXY`) in festen Fenstern im Speicher der API. Öffentliche Routen fallen standardmäßig unter `read`; `@RateLimit(...)` ordnet zu, `@SkipRateLimit()` nimmt den Healthcheck aus. Owner-Routen sind nicht begrenzt (Login-Schutz siehe oben). Überschreitung: 429 `rate_limited` mit `Retry-After`.
+
+| Grenze | Routen | Standard (Variable) |
+|---|---|---|
+| `read` | Angebote, Slots, Tage, Kurstermine, Login | 120 je Minute (`RATE_LIMIT_READ`) |
+| `booking` | `POST …/bookings` | 10 je 10 Minuten (`RATE_LIMIT_BOOKING`) |
+| `manageRead` | Verwaltungslink: Ansicht, mögliche Termine | 60 je Minute (`RATE_LIMIT_MANAGE_READ`) |
+| `manageWrite` | Verwaltungslink: Storno, Umbuchung | 10 je 10 Minuten (`RATE_LIMIT_MANAGE_WRITE`) |
+| je E-Mail | neue Buchungen derselben Adresse | 5 je Stunde (`BOOKING_LIMIT_PER_EMAIL`) |
+
+  `0` schaltet eine Grenze ab (Tests). Das Limit je E-Mail zählt in `BookingService` die Buchungen der letzten Stunde (Index `participantEmailKey_createdAt`, Migration `007`); Wiederholungen mit gleichem Idempotenzschlüssel und Umbuchungen zählen nicht. Überschreitung: 429 `too_many_bookings`. Bei gleichzeitigen Anfragen derselben Adresse kann es knapp überschritten werden.
+- **Eingaben:** Eigener JSON-Parser mit 16 KB Limit; fehlerhaftes JSON ergibt 400 „Ungültige Eingabe“, zu große Anfragen 413, jeweils ohne Parsermeldung. Zod-Fehler nennen nur Feldpfad und Regel, nie Werte. Unbekannte Routen ergeben 404 „Nicht gefunden“ ohne Methode und Pfad.
+
 ## Owner-API: Angebote
 
 | Endpunkt | Wirkung |

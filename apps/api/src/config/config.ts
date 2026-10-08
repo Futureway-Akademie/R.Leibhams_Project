@@ -2,6 +2,33 @@ import { z } from 'zod';
 
 const MONGODB_URI_PATTERN = /^mongodb(?:\+srv)?:\/\/[^/]+\/([^?/]+)/;
 
+/** Anzahl Anfragen je Zeitfenster; 0 schaltet die Grenze ab. */
+const limitSchema = (fallback: number) =>
+  z.coerce.number().int().min(0).max(100_000).default(fallback);
+
+/** Kommagetrennte Liste exakter Origins, z. B. `https://kunde.de,https://www.kunde.de`. */
+const originsSchema = z
+  .string()
+  .default('')
+  .transform((value) =>
+    value
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  )
+  .pipe(
+    z.array(
+      z.string().refine((origin) => {
+        try {
+          const url = new URL(origin);
+          return ['http:', 'https:'].includes(url.protocol) && url.origin === origin;
+        } catch {
+          return false;
+        }
+      }, 'jeder Eintrag muss ein Origin wie https://kunde.de sein (ohne Pfad und abschließenden Schrägstrich)'),
+    ),
+  );
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   HOST: z.string().min(1).default('127.0.0.1'),
@@ -17,7 +44,24 @@ const envSchema = z.object({
   SESSION_COOKIE_SECURE: z.enum(['true', 'false']).optional(),
   /** Anzahl vertrauenswürdiger Reverse-Proxys vor der API (für die Client-IP). */
   TRUST_PROXY: z.coerce.number().int().min(0).max(10).default(0),
+  /** Origins (WordPress-Domains), die die öffentliche API aus dem Browser nutzen dürfen. */
+  CORS_ALLOWED_ORIGINS: originsSchema,
+  /** Grenzen je Client-IP: Lesen und Verwaltungslink-Ansicht je Minute, Schreiben je 10 Minuten. */
+  RATE_LIMIT_READ: limitSchema(120),
+  RATE_LIMIT_BOOKING: limitSchema(10),
+  RATE_LIMIT_MANAGE_READ: limitSchema(60),
+  RATE_LIMIT_MANAGE_WRITE: limitSchema(10),
+  /** Neue Buchungen je E-Mail-Adresse und Stunde. */
+  BOOKING_LIMIT_PER_EMAIL: limitSchema(5),
 });
+
+export type RateLimitBucket = 'read' | 'booking' | 'manageRead' | 'manageWrite';
+
+export interface RateLimitRule {
+  /** Anfragen je Fenster; 0 = unbegrenzt. */
+  limit: number;
+  windowMs: number;
+}
 
 export interface AppConfig {
   nodeEnv: 'development' | 'test' | 'production';
@@ -27,7 +71,13 @@ export interface AppConfig {
   logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent';
   session: { cookieSecure: boolean };
   trustProxy: number;
+  cors: { allowedOrigins: string[] };
+  rateLimits: Record<RateLimitBucket, RateLimitRule>;
+  /** Neue Buchungen je E-Mail-Adresse und Stunde; 0 = unbegrenzt. */
+  bookingsPerEmailPerHour: number;
 }
+
+const MINUTE_MS = 60_000;
 
 /** Konfigurationsfehler. Die Meldung nennt nur Variablennamen und Regeln, niemals Werte. */
 export class ConfigError extends Error {
@@ -57,6 +107,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
           : values.SESSION_COOKIE_SECURE === 'true',
     },
     trustProxy: values.TRUST_PROXY,
+    cors: { allowedOrigins: values.CORS_ALLOWED_ORIGINS },
+    rateLimits: {
+      read: { limit: values.RATE_LIMIT_READ, windowMs: MINUTE_MS },
+      booking: { limit: values.RATE_LIMIT_BOOKING, windowMs: 10 * MINUTE_MS },
+      manageRead: { limit: values.RATE_LIMIT_MANAGE_READ, windowMs: MINUTE_MS },
+      manageWrite: { limit: values.RATE_LIMIT_MANAGE_WRITE, windowMs: 10 * MINUTE_MS },
+    },
+    bookingsPerEmailPerHour: values.BOOKING_LIMIT_PER_EMAIL,
   };
 }
 

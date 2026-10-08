@@ -131,7 +131,7 @@ Alle drei Werte sind je Angebot überschreibbar und werden serverseitig zum Zeit
 - Ist der Slot bzw. Kursplatz inzwischen vergeben, lautet das Ergebnis „Termin inzwischen vergeben“; es entsteht keine Buchung.
 - Dieselbe E-Mail-Adresse darf denselben Kurstermin nur einmal aktiv buchen.
 - Einzeltermine sind nur zu berechneten Startzeiten buchbar (2.3). Eine E-Mail-Adresse darf beliebig viele Einzeltermine buchen.
-- Fehlschläge liefern einen fachlichen Code für das Widget: `session_full` (Kurs voll), `slot_taken` (Einzeltermin vergeben), `not_bookable` (gesperrt, abgesagt, außerhalb von Mindestvorlauf oder Horizont), `already_booked` (E-Mail hat den Kurstermin bereits aktiv gebucht), `idempotency_conflict` (gleicher Schlüssel mit anderen Daten).
+- Fehlschläge liefern einen fachlichen Code für das Widget: `session_full` (Kurs voll), `slot_taken` (Einzeltermin vergeben), `not_bookable` (gesperrt, abgesagt, außerhalb von Mindestvorlauf oder Horizont), `already_booked` (E-Mail hat den Kurstermin bereits aktiv gebucht), `idempotency_conflict` (gleicher Schlüssel mit anderen Daten), `too_many_bookings` (mehr als 5 neue Buchungen derselben E-Mail-Adresse in einer Stunde), `rate_limited` (zu viele Anfragen von diesem Anschluss), `origin_not_allowed` (einbindende Website nicht freigegeben).
 - Die Bestätigungsantwort enthält keinen Verwaltungslink; dieser wird ausschließlich per E-Mail versendet.
 
 ### 5.5 Buchungsstatus

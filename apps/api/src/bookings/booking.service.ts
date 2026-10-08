@@ -7,6 +7,8 @@ import type { ClientSession } from 'mongodb';
 import { normalizeEmail } from '../auth/crypto.js';
 import { SlotService } from '../availability/slot.service.js';
 import { recordAudit } from '../common/audit.js';
+import { APP_CONFIG } from '../config/config.js';
+import type { AppConfig } from '../config/config.js';
 import { isOccupancyConflict, occupancyUnits } from '../courses/occupancy.js';
 import { MONGO_CLIENT, MONGO_DB } from '../database/database.module.js';
 import { DEFAULT_RESOURCE_ID, collections } from '../database/documents.js';
@@ -16,7 +18,7 @@ import type {
   ServiceDocument,
   SettingsDocument,
 } from '../database/documents.js';
-import { bookingConflict } from './booking-errors.js';
+import { bookingConflict, bookingLimit } from './booking-errors.js';
 
 const MINUTE_MS = 60_000;
 
@@ -46,6 +48,7 @@ export class BookingService {
     @Inject(MONGO_DB) db: Db,
     @Inject(MONGO_CLIENT) private readonly client: MongoClient,
     private readonly slots: SlotService,
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {
     this.c = collections(db);
   }
@@ -67,6 +70,7 @@ export class BookingService {
 
     const previous = await this.c.bookings.findOne({ idempotencyKey: request.idempotencyKey });
     if (previous) return this.replay(previous, matches);
+    await this.assertEmailQuota(emailKey, now);
 
     const sessionId = new ObjectId(request.sessionId);
     const session = await this.c.sessions.findOne({ _id: sessionId });
@@ -126,6 +130,7 @@ export class BookingService {
 
     const previous = await this.c.bookings.findOne({ idempotencyKey: request.idempotencyKey });
     if (previous) return this.replay(previous, matches);
+    await this.assertEmailQuota(emailKey, now);
 
     const service = await this.c.services.findOne({
       _id: new ObjectId(request.serviceId),
@@ -159,6 +164,25 @@ export class BookingService {
         { session: tx },
       );
     });
+  }
+
+  /**
+   * Begrenzt neue Buchungen je E-Mail-Adresse und Stunde (Missbrauchsschutz). Wiederholungen mit
+   * gleichem Idempotenzschlüssel und durch Umbuchung entstandene Buchungen zählen nicht. Bei
+   * gleichzeitigen Anfragen derselben Adresse kann die Grenze knapp überschritten werden.
+   */
+  private async assertEmailQuota(emailKey: string, now: Date): Promise<void> {
+    const limit = this.config.bookingsPerEmailPerHour;
+    if (limit === 0) return;
+    const recent = await this.c.bookings.countDocuments(
+      {
+        participantEmailKey: emailKey,
+        createdAt: { $gt: new Date(now.getTime() - 60 * MINUTE_MS) },
+        idempotencyKey: { $not: /^rebook-/ },
+      },
+      { limit },
+    );
+    if (recent >= limit) throw bookingLimit('too_many_bookings');
   }
 
   private newBooking(

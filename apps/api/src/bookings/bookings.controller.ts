@@ -6,6 +6,7 @@ import { Public } from '../auth/decorators.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { PublicCalendarService } from '../public/public-calendar.service.js';
 import { assertPublic } from '../public/public-response.js';
+import { RateLimit } from '../security/rate-limit.js';
 import { BookingService } from './booking.service.js';
 
 const iso = (date: Date) => date.toISOString().replace('.000Z', 'Z');
@@ -20,6 +21,7 @@ export class BookingsController {
   ) {}
 
   @Post()
+  @RateLimit('booking')
   async create(
     @Param('calendarId') calendarId: string,
     @Body(new ZodValidationPipe(bookingRequestSchema)) body: BookingRequest,

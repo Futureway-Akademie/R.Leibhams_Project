@@ -22,6 +22,7 @@ import type { Response } from 'express';
 import { Public } from '../auth/decorators.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { assertPublic } from '../public/public-response.js';
+import { RateLimit } from '../security/rate-limit.js';
 import { RebookService } from './rebook.service.js';
 import { SelfServiceService } from './self-service.service.js';
 
@@ -45,6 +46,7 @@ export class SelfServiceController {
   }
 
   @Get()
+  @RateLimit('manageRead')
   async view(
     @Headers(BOOKING_TOKEN_HEADER) token: string | undefined,
     @Res({ passthrough: true }) res: Response,
@@ -54,6 +56,7 @@ export class SelfServiceController {
   }
 
   @Post('cancel')
+  @RateLimit('manageWrite')
   @HttpCode(200)
   async cancel(
     @Headers(BOOKING_TOKEN_HEADER) token: string | undefined,
@@ -70,6 +73,7 @@ export class SelfServiceController {
 
   /** Mögliche neue Startzeiten eines Einzeltermins (die eigene Zeit gilt als frei). */
   @Get('slots')
+  @RateLimit('manageRead')
   async slots(
     @Headers(BOOKING_TOKEN_HEADER) token: string | undefined,
     @Query(new ZodValidationPipe(slotsQuerySchema)) query: SlotsQuery,
@@ -86,6 +90,7 @@ export class SelfServiceController {
 
   /** Andere Kurstermine desselben Kurses. */
   @Get('sessions')
+  @RateLimit('manageRead')
   async sessions(
     @Headers(BOOKING_TOKEN_HEADER) token: string | undefined,
     @Query(new ZodValidationPipe(availableDatesQuerySchema)) query: AvailableDatesQuery,
@@ -108,6 +113,7 @@ export class SelfServiceController {
   }
 
   @Post('rebook')
+  @RateLimit('manageWrite')
   @HttpCode(200)
   async rebook(
     @Headers(BOOKING_TOKEN_HEADER) token: string | undefined,

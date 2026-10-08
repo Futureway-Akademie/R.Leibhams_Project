@@ -13,7 +13,40 @@ describe('loadConfig', () => {
       logLevel: 'info',
       session: { cookieSecure: false },
       trustProxy: 0,
+      cors: { allowedOrigins: [] },
+      rateLimits: {
+        read: { limit: 120, windowMs: 60_000 },
+        booking: { limit: 10, windowMs: 600_000 },
+        manageRead: { limit: 60, windowMs: 60_000 },
+        manageWrite: { limit: 10, windowMs: 600_000 },
+      },
+      bookingsPerEmailPerHour: 5,
     });
+  });
+
+  it('liest freigegebene Origins und Grenzen', () => {
+    const config = loadConfig({
+      ...validEnv,
+      CORS_ALLOWED_ORIGINS: ' https://kunde.de, https://www.kunde.de ,',
+      RATE_LIMIT_BOOKING: '0',
+      BOOKING_LIMIT_PER_EMAIL: '3',
+    });
+    expect(config.cors.allowedOrigins).toEqual(['https://kunde.de', 'https://www.kunde.de']);
+    expect(config.rateLimits.booking.limit).toBe(0);
+    expect(config.bookingsPerEmailPerHour).toBe(3);
+  });
+
+  it.each(['https://kunde.de/', 'https://kunde.de/buchen', 'kunde.de', 'ftp://kunde.de', '*'])(
+    'lehnt den Origin %s ab',
+    (origin) => {
+      expect(() => loadConfig({ ...validEnv, CORS_ALLOWED_ORIGINS: origin })).toThrow(
+        /CORS_ALLOWED_ORIGINS/,
+      );
+    },
+  );
+
+  it('lehnt negative Grenzen ab', () => {
+    expect(() => loadConfig({ ...validEnv, RATE_LIMIT_READ: '-1' })).toThrow(/RATE_LIMIT_READ/);
   });
 
   it('setzt Secure-Cookies in Produktion standardmäßig', () => {

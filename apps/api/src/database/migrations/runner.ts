@@ -5,6 +5,7 @@ import { serviceOrderMigration } from './003-service-order.js';
 import { publicCalendarMigration } from './004-public-calendar.js';
 import { bookingPrivacyMigration } from './005-booking-privacy.js';
 import { removeBufferAndGridMigration } from './006-remove-buffer-and-grid.js';
+import { bookingEmailIndexMigration } from './007-booking-email-index.js';
 import type { Migration } from './migration.js';
 
 /** Alle Migrationen in Ausführungsreihenfolge. Neue Schritte nur anhängen. */
@@ -15,6 +16,7 @@ export const MIGRATIONS: readonly Migration[] = [
   publicCalendarMigration,
   bookingPrivacyMigration,
   removeBufferAndGridMigration,
+  bookingEmailIndexMigration,
 ];
 
 export const MIGRATIONS_COLLECTION = '_migrations';

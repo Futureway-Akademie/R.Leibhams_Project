@@ -123,6 +123,12 @@ export const bookingErrorCodeSchema = z.enum([
   'not_cancellable',
   'link_expired',
   'rebook_not_allowed',
+  /** 429: zu viele Anfragen von dieser Verbindung (Retry-After beachten). */
+  'rate_limited',
+  /** 429: zu viele neue Buchungen mit dieser E-Mail-Adresse innerhalb einer Stunde. */
+  'too_many_bookings',
+  /** 403: die einbindende Website ist nicht freigegeben. */
+  'origin_not_allowed',
 ]);
 export type BookingErrorCode = z.infer<typeof bookingErrorCodeSchema>;
 

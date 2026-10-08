@@ -23,6 +23,7 @@
     "@nestjs/platform-express": "^12.1.2",
     "argon2": "^0.45.1",
     "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
     "mongodb": "^7.7.0",
     "nestjs-pino": "^5.3.1",
     "pino": "^10.4.0",

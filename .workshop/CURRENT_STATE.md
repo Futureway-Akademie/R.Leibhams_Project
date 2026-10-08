@@ -2,11 +2,11 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 42,86 % (42 von 98 Gewichtspunkten, 20 von 49 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 44,9 % (44 von 98 Gewichtspunkten, 21 von 49 Tasks).
 
 ## Aktive Phase
 
-phase-2 – Buchungskern (API).
+Keine. phase-2 – Buchungskern (API) ist abgeschlossen; startbar sind Aufgaben aus Phase 3, 4, 5 und 7.
 
 ## Aktive Aufgabe
 
@@ -14,6 +14,7 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
+- task-2-15 – Missbrauchsschutz und CORS (`CORS_ALLOWED_ORIGINS`, Ratenbegrenzung je IP und je E-Mail, Migration 007, generische Fehlerantworten; 341 API-Tests)
 - task-2-14 – Teilnehmerliste und Owner-Absage (`/api/owner/bookings`, `/api/owner/sessions/:id/participants`, Absage von Buchung und Kurstermin mit Auftrag `owner_cancellation`; 303 API-Tests)
 - task-2-13 – Umbuchung (`/api/public/manage/rebook`, Links übertragen, höchstens einmal; 280 API-Tests)
 - task-2-12 – Action-Tokens und Storno (`/api/public/manage`, Token im Link-Fragment und Header; 265 API-Tests)
@@ -33,7 +34,6 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-2-15 – Missbrauchsschutz und CORS
 - task-3-1 – Worker mit Job-Leases
 - task-4-1 – Widget-Build
 - task-5-1 – Portal-Gerüst und Login
@@ -45,10 +45,11 @@ Nichts.
 
 ## Wichtige Entscheidungen
 
-Siehe `docs/decisions.md`. Neu (2026-10-08): Owner-Absage nur bis Terminende, optionale Begründung (nicht im Audit-Log), Belegung abgesagter Kurstermine sofort frei, Teilnehmerliste mit allen Status. Ebenfalls 2026-10-08: Einzeltermine bieten jede passende Startzeit im 5-Minuten-Raster an, Slot-Raster und Puffer entfallen (Dauer enthält Puffer); nur berechnete Startzeiten buchbar; unbegrenzt viele Einzeltermine je E-Mail. Davor: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
+Siehe `docs/decisions.md`. Neu (2026-10-08): Freigegebene Origins per `CORS_ALLOWED_ORIGINS` (fremde Origins 403), Ratenbegrenzung im Speicher je IP (IPv6 je /64) und 5 neue Buchungen je E-Mail und Stunde, JSON-Limit 16 KB. Zuvor: Owner-Absage nur bis Terminende, optionale Begründung (nicht im Audit-Log), Belegung abgesagter Kurstermine sofort frei, Teilnehmerliste mit allen Status. Ebenfalls 2026-10-08: Einzeltermine bieten jede passende Startzeit im 5-Minuten-Raster an, Slot-Raster und Puffer entfallen (Dauer enthält Puffer); nur berechnete Startzeiten buchbar; unbegrenzt viele Einzeltermine je E-Mail. Davor: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
 
 ## Bekannte Probleme
 
+- Anfragen, die die CORS-Prüfung mit 403 abweist, erscheinen nicht im Request-Log (die Middleware läuft vor dem Logger). Bei Bedarf in task-7-x (Betrieb) ergänzen.
 - PHP ist auf dem Entwicklungsrechner nicht installiert; wird für task-4-7 benötigt.
 - In der lokalen Datenbank existiert kein Owner-Konto; bei Bedarf mit `pnpm --filter @fw-booking/api owner:create --email …` anlegen.
 - `availableDates` berechnet jeden Tag einzeln (mehrere Abfragen pro Tag); bei Bedarf später optimieren.
@@ -59,7 +60,8 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Owner-Absage nur bis Terminende, op
 
 - **Docker:** CLI liegt unter `~/.docker/bin` (in `~/.zprofile` eingetragen). In Shells, die vor der Docker-Installation gestartet wurden, `export PATH="$PATH:$HOME/.docker/bin"` setzen. Lokale Infrastruktur: `pnpm infra:up`, Prüfung `pnpm infra:verify`.
 - **pnpm:** Version 12 über Corepack; ein Shim liegt in `/opt/homebrew/bin/pnpm` (`corepack enable` nach `/usr/local/bin` war nicht möglich). Build-Skripte sind nur für `@swc/core`, `mongodb-memory-server` und `argon2` freigegeben (`allowBuilds` in `pnpm-workspace.yaml`).
-- **Lokale Datenbank:** Migrationen bis `006` sind auf der Docker-MongoDB angewendet (`pnpm --filter @fw-booking/api db:migrate`). Es existiert bewusst kein Owner-Konto.
+- **Lokale Datenbank:** Migrationen bis `007` sind auf der Docker-MongoDB angewendet (`pnpm --filter @fw-booking/api db:migrate`). Es existiert bewusst kein Owner-Konto.
+- **CORS lokal:** Für Widget-Tests im Browser den Origin des Entwicklungsservers in `.env` unter `CORS_ALLOWED_ORIGINS` eintragen; ohne Eintrag lehnt die API Browser-Anfragen anderer Origins mit 403 ab. Für manuelle Lasttests die Grenzen per `RATE_LIMIT_*=0` abschalten.
 - **Manuelle Tests:** Bisheriges Vorgehen je Task: temporären Owner mit zufälligem Passwort per `owner:create` anlegen, API mit `pnpm --filter @fw-booking/api dev` starten, Endpunkte per `curl` prüfen, danach Testdaten und Owner in der Docker-MongoDB wieder entfernen. Verwaltungslinks für Tests entstehen bis task-3-2 durch direktes Einfügen eines SHA-256-Token-Hashes in `actionTokens`.
 - **Prüfung der Zustandsdateien:** `roadmap.json` und `project.json` mit `ajv` gegen die Schemas; `progress.json` mit `--multiple-of-precision=2` (siehe Bekannte Probleme).
 - **Tests:** Bei Änderungen am Buchungskern zusätzlich `pnpm --filter @fw-booking/api test:concurrency` (7 Szenarien) und mehrere protokollierte Läufe von `pnpm exec vitest run src/bookings` (in `apps/api`). Prüfungen auf fehlende personenbezogene Daten immer mit vollständigen Testwerten, nicht mit kurzen Ziffernfolgen (Hex-IDs).
@@ -67,4 +69,4 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Owner-Absage nur bis Terminende, op
 
 ## Empfohlener nächster Schritt
 
-task-2-15 (Missbrauchsschutz und CORS) schließt Phase 2 ab. Danach task-3-1 (Worker mit Job-Leases) als Grundlage für die Mails (task-3-2, task-3-3 nutzt die Absageaufträge aus task-2-14).
+task-3-1 (Worker mit Job-Leases): Grundlage für Bestätigungs-, Storno-, Umbuchungs- und Absagemails, deren Aufträge die API bereits in die Outbox schreibt. Alternativ task-4-1 (Widget-Build) oder task-5-1 (Portal-Gerüst und Login).
