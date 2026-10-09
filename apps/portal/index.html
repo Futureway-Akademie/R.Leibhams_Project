@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
     <meta name="robots" content="noindex, nofollow" />
+    <!-- Installierbare App (PWA): Manifest, Icons und Farben der Kopfzeile. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1c2029" media="(prefers-color-scheme: dark)" />
+    <!-- iPhone liest das Manifest nur teilweise. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Buchungen" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Buchungsverwaltung</title>
   </head>
   <body>

@@ -1372,7 +1372,7 @@
       "description": "Installierbare mobile Terminübersicht mit sicherer, länger gültiger Sitzung und klarem Offline-Zustand.",
       "order": 6,
       "weight": 7,
-      "status": "ready",
+      "status": "in_progress",
       "tasks": [
         {
           "id": "task-6-1",
@@ -1380,7 +1380,7 @@
           "description": "Web-App-Manifest und Service Worker, der ausschließlich statische App-Dateien cacht.",
           "order": 1,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-5-1"
           ],
@@ -1388,13 +1388,20 @@
             "Portal ist auf Android und iPhone installierbar",
             "Service Worker cacht nur statische Assets"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T22:18:36Z",
+          "completedAt": "2026-10-09T22:29:08Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "Manifest (Name, Kurzname, start_url/scope /, standalone, Icons 192/512, maskable, SVG) und iPhone-Angaben in index.html (apple-touch-icon 180, apple-mobile-web-app-*, theme-color). Eigener Service Worker /sw.js aus Vite-Plugin mit fester Liste der statischen Dateien (Build-Ausgabe plus public/), nichts zur Laufzeit gespeichert, /api/*, fremde Origins und Nicht-GET nie beantwortet; Hinweis „Neue Version“ mit Knopf. 197 Portal-Tests (davon 28 neu: Cache-Regeln, Registrierung/Update, Hinweis, echter Produktions-Build mit Abgleich Dateiliste ↔ Ausgabe und Manifest). Manuell mit headless Chrome (temporäres Profil) gegen vite preview, lokale API und Docker-MongoDB: Service Worker aktiv, Cache enthält genau 9 statische Dateien, nach Login und Aufruf aller Bereiche keine /api-Antwort im Cache (alle API-Antworten aus dem Netz), keine Installierbarkeits- und Manifest-Fehler (Page.getInstallabilityErrors leer), offline lädt die App-Hülle aus dem Cache und zeigt den Hinweis „Server nicht erreichbar“, simulierte neue Version zeigt den Hinweis, „Neu laden“ übernimmt sie und löscht den alten Cache. Einschränkungen: Der Browser-Pane der Desktop-App registriert keine Service Worker; Xcode/iOS-Simulator sind nicht installiert. Installation auf echten Android- und iPhone-Geräten braucht HTTPS und ist mit task-7-4 (Deployment) nachzuholen; lokal geprüft sind alle dafür nötigen Angaben.",
+            "commands": [
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm --filter @fw-booking/portal test",
+              "pnpm format:check",
+              "pnpm --filter @fw-booking/portal build",
+              "pnpm --filter @fw-booking/portal preview + headless Chrome (DevTools-Protokoll)"
+            ],
+            "checkedAt": "2026-10-09T22:29:08Z"
           }
         },
         {
@@ -1403,7 +1410,7 @@
           "description": "Heute und als Nächstes anstehende Termine mit Belegung, Navigation zu den nächsten Tagen und Zeitpunkt der letzten Aktualisierung.",
           "order": 2,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-6-1",
             "task-5-5"
@@ -1452,7 +1459,7 @@
           "description": "Sitzungsdauer, Rotation und Widerruf für dauerhaft angemeldete PWA-Nutzung.",
           "order": 4,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-6-1"
           ],

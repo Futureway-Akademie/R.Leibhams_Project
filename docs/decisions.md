@@ -602,3 +602,18 @@ Seite `/benachrichtigungen` mit Filter nach Art. Die Zahl offener Fehlschläge s
 ### Begründung
 
 Fehlschläge sind selten, aber wichtig; die Zahl in der Navigation macht sie sichtbar, ohne eine eigene Benachrichtigungsfunktion zu bauen. Aussichtslose Wiederholungen würden nur erneut scheitern und Vertrauen in die Schaltfläche kosten. Die Rückfrage verhindert versehentliches Ausblenden. Die Abfrage enthält Kontaktdaten; sie liegt nur im Arbeitsspeicher, wird beim Abmelden verworfen und nach dem Verlassen nicht lange gehalten.
+
+## 2026-10-10 – Portal als PWA: Manifest und Service Worker
+
+### Kontext
+
+Owner sollen das Portal auf Android und iPhone wie eine App installieren können. Ein Service Worker ist dafür auf Android nötig und macht den Start schneller; er darf aber keine Teilnehmerdaten speichern (`.workshop/specialization/CONSTRAINTS.md`).
+
+### Entscheidung
+
+Eigener kleiner Service Worker statt `vite-plugin-pwa`/Workbox: Ein Vite-Plugin baut ihn als eigenständige `/sw.js` und setzt die beim Build ermittelte Liste der statischen Dateien samt Inhalts-Hash ein. Nur diese Dateien werden beim Installieren gespeichert, zur Laufzeit nichts; `/api/*`, fremde Origins und alle Nicht-GET-Anfragen laufen nie über den Service Worker. Seitenaufrufe im Portal erhalten die gespeicherte `index.html`. Neue Versionen übernehmen erst nach „Neu laden“ im Hinweis „Eine neue Version des Portals ist verfügbar“. Neutrales Kalender-Icon und Name „Buchungsverwaltung“ (Kurzname „Buchungen“) für alle Installationen; Installation über die Browser-Funktion ohne eigenen Knopf.
+
+### Begründung
+
+Eine feste Dateiliste macht die Regel „nur statische Assets“ prüfbar (Build-Test vergleicht Liste und Ausgabe) und schließt API-Antworten im Cache aus, statt sie über Laufzeitregeln auszufiltern; ohne zusätzliche Abhängigkeit bleibt der Service Worker bei etwa 1,4 KB. Der Hinweis mit Knopf verhindert, dass ein automatisches Neuladen halb ausgefüllte Formulare verwirft. Ein fester Name und ein neutrales Icon genügen für das MVP; eine Anpassung je Kunde gehört bei Bedarf zum Deployment (Phase 7). Die Installationsfunktionen der Browser reichen aus und sparen plattformabhängige Sonderwege (`beforeinstallprompt` gibt es nur in Chromium).
+

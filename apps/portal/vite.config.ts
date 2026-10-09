@@ -3,13 +3,15 @@
 import react from '@vitejs/plugin-react';
 import { defaultClientConditions } from 'vite';
 import { defineConfig } from 'vitest/config';
+import { serviceWorkerPlugin } from './build/service-worker-plugin.js';
 
 /** Ziel des Proxys im Dev-Server und in `vite preview`; Standard ist die lokale API. */
 const apiTarget = process.env.PORTAL_API_TARGET ?? 'http://127.0.0.1:3000';
 const proxy = { '/api': { target: apiTarget, changeOrigin: false } };
 
 export default defineConfig({
-  plugins: [react()],
+  // Service Worker nur im Build (/sw.js); der Dev-Server registriert keinen.
+  plugins: [react(), serviceWorkerPlugin()],
   // Workspace-Pakete aus dem Quellcode bauen (Bedingung `development` der shared-Exports).
   resolve: { conditions: ['development', ...defaultClientConditions] },
   server: { host: '127.0.0.1', port: 5173, strictPort: true, proxy },
