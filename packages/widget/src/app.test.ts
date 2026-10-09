@@ -1,96 +1,23 @@
 import { MAX_AVAILABLE_DATES_RANGE_DAYS } from '@fw-booking/shared';
-import type { PublicService, PublicSession } from '@fw-booking/shared';
-import { JSDOM } from 'jsdom';
 import { describe, expect, it, vi } from 'vitest';
 import { SELECT_EVENT } from './app.js';
 import type { Selection } from './app.js';
-import { install } from './bootstrap.js';
+import {
+  BASE,
+  CAL,
+  HAIRCUT,
+  PILATES,
+  TZ,
+  YOGA,
+  click,
+  json,
+  mount,
+  service,
+  session,
+  sessionsResponse,
+  twoCourses,
+} from './test-utils.js';
 import { SESSION_WINDOW_DAYS } from './views/course.js';
-
-const CAL = 'cal_AAAAAAAAAAAAAAAA';
-const API = 'https://api.example.de';
-const BASE = `${API}/api/public/calendars/${CAL}`;
-const TZ = 'Europe/Berlin';
-const YOGA = '66f1a2b3c4d5e6f708192a01';
-const PILATES = '66f1a2b3c4d5e6f708192a02';
-const HAIRCUT = '66f1a2b3c4d5e6f708192a03';
-/** 2026-10-11 22:30 UTC ist in Berlin bereits der 12.10. */
-const NOW = new Date('2026-10-11T22:30:00Z');
-
-type TestWindow = Window & typeof globalThis;
-type Handler = (url: URL, init: RequestInit | undefined) => Promise<Response> | Response;
-
-function json(body: unknown, status = 200, headers: Record<string, string> = {}): Response {
-  return new Response(JSON.stringify(body), { status, headers });
-}
-
-function service(id: string, title: string, type: 'single' | 'group' = 'group'): PublicService {
-  return { id, title, type, description: null, durationMinutes: 60 };
-}
-
-function session(id: string, startsAt: string, freeSeats: number, location: string | null = null) {
-  const endsAt = new Date(Date.parse(startsAt) + 60 * 60_000).toISOString().replace('.000', '');
-  return { id, serviceId: YOGA, startsAt, endsAt, freeSeats, location } satisfies PublicSession;
-}
-
-function sessionsResponse(sessions: PublicSession[], serviceId = YOGA) {
-  return json({ serviceId, timeZone: TZ, sessions });
-}
-
-/** Fetch-Attrappe, die Anfragen nach Pfad beantwortet und alle Aufrufe festhält. */
-function router(routes: Record<string, Handler | Handler[]>) {
-  const calls: { url: URL; signal: AbortSignal | null }[] = [];
-  const counters = new Map<string, number>();
-  const fetchMock: typeof fetch = (input, init) => {
-    const url = new URL(input as string);
-    calls.push({ url, signal: init?.signal ?? null });
-    const path = url.pathname.slice(new URL(BASE).pathname.length);
-    const route = routes[path];
-    if (!route) return Promise.resolve(json({ statusCode: 404, message: 'Nicht gefunden' }, 404));
-    const n = counters.get(path) ?? 0;
-    counters.set(path, n + 1);
-    const handler = Array.isArray(route)
-      ? (route[Math.min(n, route.length - 1)] as Handler)
-      : route;
-    return Promise.resolve(handler(url, init));
-  };
-  return { fetchMock, calls };
-}
-
-async function mount(routes: Record<string, Handler | Handler[]>, attrs = '') {
-  const dom = new JSDOM(
-    `<!doctype html><html><body><div id="w" data-fw-booking-calendar="${CAL}" data-fw-booking-api="${API}" ${attrs}></div></body></html>`,
-  );
-  const win = dom.window as unknown as TestWindow;
-  if (win.document.readyState === 'loading') {
-    await new Promise((resolve) => {
-      win.document.addEventListener('DOMContentLoaded', resolve);
-    });
-  }
-  const { fetchMock, calls } = router(routes);
-  const api = install(win, { fetch: fetchMock, now: () => NOW, autoScan: false });
-  const container = win.document.getElementById('w');
-  if (!container) throw new Error('Container fehlt');
-  const events: (Selection | null)[] = [];
-  container.addEventListener(SELECT_EVENT, (event) => {
-    events.push((event as CustomEvent<Selection | null>).detail);
-  });
-  const instance = api.mount(container);
-  const $ = (selector: string) => container.querySelector<HTMLElement>(selector);
-  const $$ = (selector: string) => [...container.querySelectorAll<HTMLElement>(selector)];
-  const text = (selector: string) => $$(selector).map((node) => node.textContent);
-  return { win, api, container, instance, calls, events, $, $$, text };
-}
-
-const twoCourses = {
-  '/services': () =>
-    json({ timeZone: TZ, services: [service(YOGA, 'Yoga'), service(PILATES, 'Pilates')] }),
-};
-
-function click(node: HTMLElement | null) {
-  if (!node) throw new Error('Element fehlt');
-  node.click();
-}
 
 describe('Angebote', () => {
   it('zeigt während des Ladens einen Status', async () => {
@@ -186,19 +113,6 @@ describe('Angebote', () => {
         'Dieses Angebot ist derzeit nicht buchbar.',
       );
     });
-  });
-
-  it('zeigt für Einzeltermine vorerst einen Hinweis', async () => {
-    const w = await mount({
-      '/services': () =>
-        json({ timeZone: TZ, services: [service(HAIRCUT, 'Haarschnitt', 'single')] }),
-    });
-    await vi.waitFor(() => {
-      expect(w.$('.fw-booking-single .fw-booking-message--info')?.textContent).toBe(
-        'Die Terminauswahl für dieses Angebot folgt in Kürze.',
-      );
-    });
-    expect(w.calls.map((c) => c.url.pathname)).toEqual([new URL(`${BASE}/services`).pathname]);
   });
 });
 
@@ -485,10 +399,10 @@ describe('Auswahl', () => {
     expect(first?.classList.contains('fw-booking-session--selected')).toBe(true);
 
     click(second ?? null);
-    expect(w.instance.selection?.sessionId).toBe('s2');
+    expect(w.instance.selection).toMatchObject({ type: 'group', sessionId: 's2' });
     expect(first?.getAttribute('aria-pressed')).toBe('false');
     expect(second?.getAttribute('aria-pressed')).toBe('true');
-    expect(w.events.map((e) => e?.sessionId)).toEqual(['s1', 's2']);
+    expect(w.events.map((e) => (e?.type === 'group' ? e.sessionId : null))).toEqual(['s1', 's2']);
   });
 
   it('löst das Ereignis bubbelnd am Container aus', async () => {

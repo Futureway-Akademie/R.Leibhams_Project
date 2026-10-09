@@ -7,8 +7,8 @@ import type { WidgetConfig } from './config.js';
 import { loadErrorMessage, messages } from './messages.js';
 import { errorMessage, infoMessage, statusMessage } from './views/common.js';
 import { courseView } from './views/course.js';
-import { serviceHeader } from './views/service-header.js';
 import { servicesView } from './views/services.js';
+import { singleView } from './views/single.js';
 
 /** Ereignis am Container bei jeder Änderung der Auswahl; `detail` ist die Auswahl oder `null`. */
 export const SELECT_EVENT = 'fw-booking:select';
@@ -24,7 +24,17 @@ export interface SessionSelection {
   timeZone: string;
 }
 
-export type Selection = SessionSelection;
+/** Gewählter Einzeltermin-Slot, ohne personenbezogene Daten. */
+export interface SlotSelection {
+  type: 'single';
+  calendarId: string;
+  serviceId: string;
+  startsAt: string;
+  endsAt: string;
+  timeZone: string;
+}
+
+export type Selection = SessionSelection | SlotSelection;
 
 export interface App {
   readonly selection: Selection | null;
@@ -126,7 +136,7 @@ export function startApp({ container, root, config, api, now }: AppOptions): App
           timeZone,
           now,
           back,
-          selectedSessionId: selection?.sessionId ?? null,
+          selectedSessionId: selection?.type === 'group' ? selection.sessionId : null,
           onSelect: (session) => {
             setSelection({
               type: 'group',
@@ -142,11 +152,31 @@ export function startApp({ container, root, config, api, now }: AppOptions): App
       );
       return;
     }
-    // Einzeltermine folgen mit der Slot-Auswahl (task-4-3).
-    const view = doc.createElement('div');
-    view.className = 'fw-booking-view fw-booking-single';
-    view.append(serviceHeader(doc, service, back), infoMessage(doc, messages.singleFollows));
-    show(view);
+    show(
+      singleView({
+        doc,
+        api,
+        signal,
+        service,
+        timeZone,
+        now,
+        back,
+        onSelect: (slot) => {
+          setSelection(
+            slot === null
+              ? null
+              : {
+                  type: 'single',
+                  calendarId: config.calendarId,
+                  serviceId: service.id,
+                  startsAt: slot.startsAt,
+                  endsAt: slot.endsAt,
+                  timeZone,
+                },
+          );
+        },
+      }),
+    );
   }
 
   void loadServices();

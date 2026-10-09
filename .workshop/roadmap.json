@@ -976,7 +976,7 @@
           "description": "Tagesauswahl und Anzeige freier Uhrzeiten für ein Einzeltermin-Angebot.",
           "order": 3,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-4-1",
             "task-2-8"
@@ -986,13 +986,21 @@
             "Zeiten werden in der Zeitzone des Owners korrekt dargestellt",
             "Lade-, Leer- und Fehlerzustände sind sichtbar"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T11:05:34Z",
+          "completedAt": "2026-10-09T11:13:55Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "17 neue Widget-Tests (95 im Widget; Test-Helfer in src/test-utils.ts); API 315, Worker 98, DB 36, shared 147 unverändert grün. Getestet: Monat als Tabelle (Wochenzeilen à 7 Zellen), nur Tage aus available-dates wählbar, heute markiert, Abfrage im aktuellen Monat ab heute in der Zeitzone der Installation; Vorauswahl des ersten freien Tages ohne Terminauswahl, Sprung zum ersten Monat mit freien Tagen, Hinweis ohne freie Tage nach 12 Abfragen; Blättern mit Ladezustand, bekannte Monate ohne erneute Abfrage, Grenze 12 Monate; Uhrzeiten nach Vormittag/Nachmittag/Abend, Zeiten nach der Zeitumstellung korrekt, aria-label Beginn–Ende; Slot-Auswahl mit fw-booking:select (type single); Tageswechsel setzt Auswahl zurück, bricht die vorherige Abfrage ab, verspätete Antworten überschreiben nichts; Tag ohne verbliebene Uhrzeiten mit Hinweis; Fehler für Tage und Uhrzeiten mit erneutem Versuch; Abbruch beim Zurück zur Liste. Bundle 17,4 KB (gzip 6,4 KB). Manuell im Browser-Pane gegen lokale API (temporärer Owner, Öffnungszeiten Mo–Do 9–12/13–19, Fr 9–12, Sperrtag 15.10.): Wochenenden und 15.10. gesperrt, 12.10. vorausgewählt mit 98 Zeiten bis 18:30, Wahl 14:30 meldet 12:30 UTC nur am eigenen Container, November ab 09:00 nach Zeitumstellung, Januar 2027 mit 5 Tagen bis zum Horizont, Februar mit Hinweis, Kursansicht weiter funktionsfähig, bei gestoppter API Fehler mit erneutem Versuch. Testdaten danach entfernt (Collection-Zählung wie vorher), Server beendet, .env unverändert. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/widget test (mehrfach)",
+              "Browser-Pane: Demo-Seite gegen lokale API mit temporären Öffnungszeiten und Angeboten (CORS_ALLOWED_ORIGINS per Umgebungsvariable)",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T11:13:55Z"
           }
         },
         {
@@ -1001,7 +1009,7 @@
           "description": "Formular für Name und E-Mail für beide Terminarten mit Idempotenzschlüssel und Behandlung von bereits vergebenen Plätzen.",
           "order": 4,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-4-2",
             "task-4-3",

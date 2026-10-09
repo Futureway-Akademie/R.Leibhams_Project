@@ -448,3 +448,17 @@ Ohne weiteres Attribut zeigt der Container eine Angebotsliste, mit `data-fw-book
 
 Die Angebotsliste genügt für die meisten Seiten mit einem Shortcode, das feste Angebot erlaubt Kursseiten je Angebot. Nachladen in API-großen Zeiträumen hält Anfragen klein und macht spätere Termine erreichbar, ohne Monatsnavigation. Sichtbare ausgebuchte Termine zeigen, dass der Kurs stattfindet. Das Ereignis entkoppelt die Ansicht vom späteren Formular und lässt einbindende Seiten reagieren. Ein leerer Zeitraum als Ende ist eine bewusste Vereinfachung: Lücken von mehr als 62 Tagen innerhalb des Buchungshorizonts beenden die Liste vorzeitig.
 
+## 2026-10-09 – Slot-Auswahl für Einzeltermine im Widget
+
+### Kontext
+
+Für Einzeltermine berechnet die API freie Startzeiten im 5-Minuten-Raster; an einem langen Tag sind das rund 100 Zeiten. Besucher brauchen einen schnellen Weg zum ersten freien Termin und eine übersichtliche Uhrzeitwahl. Freie Tage liefert `available-dates` für höchstens 62 Tage je Abfrage.
+
+### Entscheidung
+
+Monatskalender (Tabelle Mo–So, höchstens 12 Monate voraus) mit wählbaren Tagen aus `available-dates`, eine Abfrage je Monat. Der erste freie Tag ist vorausgewählt, seine Uhrzeiten werden sofort geladen. Startzeiten werden nach Vormittag, Nachmittag und Abend gruppiert und zeigen nur den Beginn. Jeder Tageswechsel lädt die Slots neu und setzt eine gewählte Uhrzeit zurück; die Auswahl wird wie bei Kursen über `fw-booking:select` gemeldet (`type: 'single'`).
+
+### Begründung
+
+Ein Monatskalender ist die vertraute Darstellung und hält Abfragen klein. Die Vorauswahl spart einen Klick und zeigt sofort, wann der nächste Termin frei ist. Gruppen nach Tageszeit machen 100 Zeiten überblickbar, ohne die fachliche Regel (jede Startzeit buchbar) einzuschränken. Die Tabelle bleibt auch ohne Styling als Kalender lesbar. Die Suche nach dem ersten freien Monat kann bis zu 12 Abfragen auslösen, wenn lange nichts frei ist; das liegt deutlich unter der Lesegrenze von 120 Anfragen je Minute.
+
