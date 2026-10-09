@@ -8,11 +8,17 @@ import { LoginPage } from './pages/LoginPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PlaceholderPage } from './pages/PlaceholderPage.js';
 import { AvailabilityPage } from './pages/availability/AvailabilityPage.js';
+import { CoursesLayout } from './pages/courses/CoursesLayout.js';
+import { RuleEditPage, RuleNewPage } from './pages/courses/RuleFormPage.js';
+import { RuleListPage } from './pages/courses/RuleListPage.js';
+import { SessionDetailPage } from './pages/courses/SessionDetailPage.js';
+import { SessionListPage } from './pages/courses/SessionListPage.js';
+import { SessionNewPage } from './pages/courses/SessionNewPage.js';
 import { EditServicePage, NewServicePage } from './pages/services/ServiceFormPage.js';
 import { ServiceListPage } from './pages/services/ServiceListPage.js';
 
 /** Bereiche mit eigenen Seiten; die übrigen Einträge der Navigation sind noch Platzhalter. */
-const IMPLEMENTED = new Set(['/', '/angebote', '/oeffnungszeiten']);
+const IMPLEMENTED = new Set(['/', '/angebote', '/oeffnungszeiten', '/kurstermine']);
 
 export const routes: RouteObject[] = [
   { path: LOGIN_PATH, element: <LoginPage /> },
@@ -33,6 +39,18 @@ export const routes: RouteObject[] = [
             ],
           },
           { path: '/oeffnungszeiten', element: <AvailabilityPage /> },
+          {
+            path: '/kurstermine',
+            element: <CoursesLayout />,
+            children: [
+              { index: true, element: <SessionListPage /> },
+              { path: 'neu', element: <SessionNewPage /> },
+              { path: 'regeln', element: <RuleListPage /> },
+              { path: 'regeln/neu', element: <RuleNewPage /> },
+              { path: 'regeln/:ruleId', element: <RuleEditPage /> },
+              { path: ':sessionId', element: <SessionDetailPage /> },
+            ],
+          },
           ...NAV_ITEMS.filter((item) => !IMPLEMENTED.has(item.path)).map((item) => ({
             path: item.path,
             element: <PlaceholderPage title={item.label} />,

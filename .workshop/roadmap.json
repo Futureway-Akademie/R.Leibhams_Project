@@ -1261,7 +1261,7 @@
           "description": "Oberfläche für Kurstermine und wiederkehrende Regeln inklusive Sperren und Absagen.",
           "order": 4,
           "weight": 3,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-5-2",
             "task-2-7",
@@ -1272,13 +1272,25 @@
             "Termine können gesperrt und mit Bestätigung abgesagt werden",
             "Belegung im Verhältnis zur Kapazität ist sichtbar"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T20:23:24Z",
+          "completedAt": "2026-10-09T20:34:57Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "35 neue Portal-Tests (142 im Portal): Kalenderwochen (Montag, ISO-KW am Jahreswechsel, Woche aus der Adresse), Formatierung (Belegung, ausgebucht, Regelzusammenfassung, Erzeugungsbericht), Terminformular (Umrechnung lokal→UTC in Sommer- und Winterzeit, übersprungene Uhrzeit bei Zeitumstellung, Pflichtfelder, Kapazität nicht unter gebuchten Plätzen, Teiländerung), Regelformular (sortierte Wochentage, Pflichtangaben, verdrehter Zeitraum, Teiländerung); Seiten: Wochenansicht mit Belegung, Status und Regelherkunft, Blättern mit Adresse, Filter nur Gruppenkurse, Anlegen mit CSRF-Token und 409-Meldung, Detailseite (Uhrzeit bei Buchungen gesperrt, Kapazität/Ort, Verschieben ohne Buchungen, Sperren/Entsperren, Absage nur nach Bestätigung mit Begründung, Löschen nach Rückfrage, 409 bei Buchungshistorie, abgesagte nur lesend), Regeln (Liste, Anlegen mit Bericht inkl. Konflikt, Pflichtangaben, Bearbeiten als Teiländerung, Löschen mit verbleibenden gebuchten Terminen). Manuell im Browser-Pane gegen API und Docker-MongoDB: Gruppenkurs per API, Regel Mo+Mi 18:00 angelegt (26 Termine erzeugt), zwei echte Buchungen per öffentlicher API, Wochenansicht zeigt 2 / 10 Plätze mit Balken, Kapazität 1 abgelehnt und 8 gespeichert, Sperren (öffentliche Liste blendet Termin aus), Absage mit Begründung (beide Buchungen cancelled_by_owner, zwei owner_cancellation-Aufträge), leeren Regeltermin gelöscht, einzelnen Termin Di 10:00 angelegt (lokale Zeit korrekt), Regel auf 19:00 geändert (Bericht) und gelöscht, mobile Ansicht 375 px; dabei Abstand in der Kurzinfo korrigiert. Keine Passwörter oder Teilnehmerdaten im API-Log. Alle Testdaten (außer settings und _migrations) entfernt, Server per PID beendet. Quality Gate grün (lint, typecheck, 922 Tests, format:check).",
+            "commands": [
+              "pnpm --filter @fw-booking/portal test",
+              "pnpm --filter @fw-booking/portal build",
+              "pnpm --filter @fw-booking/api dev",
+              "pnpm --filter @fw-booking/portal dev",
+              "pnpm --filter @fw-booking/api owner:create -- --email …",
+              "curl POST /api/owner/services, POST /api/public/calendars/:id/bookings, GET …/sessions",
+              "Browser-Pane: http://127.0.0.1:5173/kurstermine (Woche, Detail, Absage, Regeln, mobil)",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T20:34:57Z"
           }
         },
         {
@@ -1287,7 +1299,7 @@
           "description": "Übersicht der Buchungen und Teilnehmer für beide Terminarten.",
           "order": 5,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-5-3",
             "task-5-4"

@@ -560,3 +560,17 @@ Eine Seite `/oeffnungszeiten` mit den Abschnitten Wochenplan und Ausnahmen. Uhrz
 ### Begründung
 
 Wochenplan und Ausnahmen gehören fachlich zusammen und bleiben unter einem Menüpunkt. Native Zeitfelder bieten auf dem Handy die Systemauswahl und am Desktop Tastatureingabe ohne zusätzliche Bibliothek. Ganztägige Eingabe mit einschließlichem Enddatum entspricht der Art, wie Owner über Urlaub sprechen, und vermeidet das fehleranfällige „00:00 am Folgetag“. Das Speichern als Ganzes entspricht der API und verhindert halb gespeicherte Wochen.
+
+## 2026-10-09 – Kurstermine und Kursregeln im Portal
+
+### Kontext
+
+Owner verwalten einzelne Kurstermine und wiederkehrende Regeln; Termine können gesperrt, abgesagt (mit Mail an alle Teilnehmer) oder ohne Buchungen gelöscht werden. Die API erwartet Beginne in UTC, Regeln in lokaler Zeit; Regeländerungen erzeugen Termine und liefern einen Bericht.
+
+### Entscheidung
+
+Reiter „Termine“ und „Regeln“ unter `/kurstermine`. Termine als Kalenderwoche mit Blättern (Woche in der Adresse), Belegung als Zahl und Balken. Eigene Detailseite je Termin mit Bearbeiten, Sperren, Absagen in einem aufklappbaren Bestätigungsbereich (betroffene Buchungen, optionale Begründung, „Verbindlich absagen“) und Löschen nur ohne Buchungen. Die Teilnehmerliste folgt in task-5-5; hier nur die Belegung. Lokale Eingaben werden im Portal mit `localToUtc` aus `@fw-booking/shared` umgerechnet. Der Erzeugungsbericht erscheint nach dem Speichern einer Regel als Hinweis in der Regelliste.
+
+### Begründung
+
+Die Wochenansicht passt zum Rhythmus von Kursen und funktioniert auf dem Handy besser als ein Monatsraster. Eine Absage löst Mails aus und ist nicht umkehrbar; der Bestätigungsbereich zeigt die Folgen vor dem Klick. Die gemeinsame Umrechnung behandelt Zeitumstellungen wie die API; der Polyfill vergrößert das Portal-Bundle um etwa 27 KB gzip, was für eine Verwaltungsoberfläche vertretbar ist (Aufteilung bei Bedarf in Phase 6). Teilnehmerdaten erst in task-5-5 hält diesen Schritt frei von personenbezogenen Daten.
