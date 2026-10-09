@@ -2,11 +2,11 @@
 
 ## Projekt
 
-WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 53,06 % (52 von 98 Gewichtspunkten, 26 von 49 Tasks).
+WP Buchung Kalender plus PWA (`wp-buchung-kalender-plus-pwa`), Status aktiv, Roadmap v2 mit 7 Phasen und 49 Tasks (Gesamtgewicht 98). Fortschritt: 55,1 % (54 von 98 Gewichtspunkten, 27 von 49 Tasks).
 
 ## Aktive Phase
 
-Keine. phase-3 – Hintergrund-Worker und E-Mail ist abgeschlossen; startbar sind Aufgaben aus Phase 4, 5 und 7.
+phase-4 – Öffentliches Widget und WordPress (task-4-1 abgeschlossen).
 
 ## Aktive Aufgabe
 
@@ -14,6 +14,7 @@ Keine.
 
 ## Zuletzt abgeschlossen
 
+- task-4-1 – Widget-Build (IIFE-Datei `packages/widget/dist/fw-booking-widget.js`, 4,3 KB; Container per `data-fw-booking-calendar`/`data-fw-booking-api`, `window.FwBooking` mit `scan`/`mount`/`unmount`, einmalige Initialisierung je Container, schlanker API-Client mit `ApiError`; Build-Wächter; 41 Widget-Tests)
 - task-3-5 – API für fehlgeschlagene Jobs (`/api/owner/notifications/failed` mit Buchungsübersicht, `retry`, `dismiss`, Kategorien mit deutschen Texten in shared, Migration 009; 315 API-Tests) – Phase 3 abgeschlossen
 - task-3-4 – Erinnerungen (Planer im Worker, Vorlauf `settings.reminderLeadMinutes`, Prüfung vor Versand, ohne Kalenderdatei; 98 Worker-Tests, Ende-zu-Ende mit Mailpit)
 - task-3-3 – Storno-, Umbuchungs- und Absagemails (gemeinsames Mail-Gerüst, Kalender-Aktualisierung über UID/SEQUENCE, optional `BOOKING_PAGE_URL`; 84 Worker-Tests, Ende-zu-Ende mit Mailpit)
@@ -39,7 +40,8 @@ Keine.
 
 ## Bereite nächste Aufgaben
 
-- task-4-1 – Widget-Build
+- task-4-2 – Kursansicht
+- task-4-3 – Slot-Auswahl für Einzeltermine
 - task-5-1 – Portal-Gerüst und Login
 - task-7-1 – Geschützter Entwicklerzugang
 
@@ -49,7 +51,7 @@ Nichts.
 
 ## Wichtige Entscheidungen
 
-Siehe `docs/decisions.md`. Neu (2026-10-08): Owner-API für fehlgeschlagene Benachrichtigungen mit erneutem Versuch und Ausblenden, Fehlerkategorien als feste Aufzählung. Davor: Erinnerungen über einen minütlichen Planer im Worker (Vorlauf aus den Installations-Einstellungen, Prüfung vor Versand). Davor: Storno-, Umbuchungs- und Absagemails mit Statusprüfung (sonst skipped), Kalenderdatei mit UID der ersten Buchung und steigender SEQUENCE, optionaler Link zum erneuten Buchen. Davor: Bestätigungsmail mit Absender und Link-Ziel aus Umgebungsvariablen, Kalenderdatei ohne Link, Token bei Versandfehler gelöscht, inaktive Buchungen übersprungen. Davor: Worker als eigener Node.js-Prozess mit Paket `@fw-booking/db` für Datenmodell und Migrationen, Lease 5 Min mit Token, 6 Versuche, versendete Jobs nach 30 Tagen gelöscht, Zustellung mindestens einmal (Mail-Handler brauchen stabile Message-ID je Job). Davor: Freigegebene Origins per `CORS_ALLOWED_ORIGINS` (fremde Origins 403), Ratenbegrenzung im Speicher je IP (IPv6 je /64) und 5 neue Buchungen je E-Mail und Stunde, JSON-Limit 16 KB. Zuvor: Owner-Absage nur bis Terminende, optionale Begründung (nicht im Audit-Log), Belegung abgesagter Kurstermine sofort frei, Teilnehmerliste mit allen Status. Ebenfalls 2026-10-08: Einzeltermine bieten jede passende Startzeit im 5-Minuten-Raster an, Slot-Raster und Puffer entfallen (Dauer enthält Puffer); nur berechnete Startzeiten buchbar; unbegrenzt viele Einzeltermine je E-Mail. Davor: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
+Siehe `docs/decisions.md`. Neu (2026-10-09): Widget als IIFE-Datei (ES2020) mit Konfiguration über Datenattribute am Container, automatischer Erkennung plus `window.FwBooking` statt `MutationObserver`, aus `@fw-booking/shared` nur Typ-Importe (Build-Wächter). Davor (2026-10-08): Owner-API für fehlgeschlagene Benachrichtigungen mit erneutem Versuch und Ausblenden, Fehlerkategorien als feste Aufzählung. Davor: Erinnerungen über einen minütlichen Planer im Worker (Vorlauf aus den Installations-Einstellungen, Prüfung vor Versand). Davor: Storno-, Umbuchungs- und Absagemails mit Statusprüfung (sonst skipped), Kalenderdatei mit UID der ersten Buchung und steigender SEQUENCE, optionaler Link zum erneuten Buchen. Davor: Bestätigungsmail mit Absender und Link-Ziel aus Umgebungsvariablen, Kalenderdatei ohne Link, Token bei Versandfehler gelöscht, inaktive Buchungen übersprungen. Davor: Worker als eigener Node.js-Prozess mit Paket `@fw-booking/db` für Datenmodell und Migrationen, Lease 5 Min mit Token, 6 Versuche, versendete Jobs nach 30 Tagen gelöscht, Zustellung mindestens einmal (Mail-Handler brauchen stabile Message-ID je Job). Davor: Freigegebene Origins per `CORS_ALLOWED_ORIGINS` (fremde Origins 403), Ratenbegrenzung im Speicher je IP (IPv6 je /64) und 5 neue Buchungen je E-Mail und Stunde, JSON-Limit 16 KB. Zuvor: Owner-Absage nur bis Terminende, optionale Begründung (nicht im Audit-Log), Belegung abgesagter Kurstermine sofort frei, Teilnehmerliste mit allen Status. Ebenfalls 2026-10-08: Einzeltermine bieten jede passende Startzeit im 5-Minuten-Raster an, Slot-Raster und Puffer entfallen (Dauer enthält Puffer); nur berechnete Startzeiten buchbar; unbegrenzt viele Einzeltermine je E-Mail. Davor: Kursbuchung in einer Transaktion mit Kapazitätsprüfung in der Schreibbedingung, eine aktive Buchung je E-Mail und Kurstermin, Verwaltungslink nur per E-Mail (Token erst beim Versand), Pflicht-Checkbox für Datenschutzhinweise, 409 bei Idempotenzkonflikt, fachliche Fehlercodes für das Widget.
 
 ## Bekannte Probleme
 
@@ -73,14 +75,16 @@ Siehe `docs/decisions.md`. Neu (2026-10-08): Owner-API für fehlgeschlagene Bena
 
 ## Hinweise für Phase 4 (Widget und WordPress)
 
-- **Stand:** `packages/widget` ist nur ein leeres Gerüst (`src/index.ts`, ohne Build); `plugins/wordpress` enthält nur eine README. task-4-1 legt den eigenen schlanken Vite-Library-Build an (Stack siehe `.workshop/specialization/STACK.md`).
+- **Stand:** task-4-1 hat den Build und das Gerüst angelegt (siehe `docs/architecture.md`, Abschnitt „Öffentliches Widget“). `createInstance` (`packages/widget/src/instance.ts`) rendert bisher nur den Platzhalter „Buchungskalender wird geladen …“ im `.fw-booking-root`; task-4-2/4-3 ersetzen ihn durch die Ansichten und nutzen `instance.api` (`src/api/client.ts`). `plugins/wordpress` enthält nur eine README.
+- **Bundle-Wächter:** Laufzeitcode aus `@fw-booking/shared` (z. B. `formatDate`/`formatTime` aus `packages/shared/src/time/format.ts`) bricht den Build ab, bis die einzelne Datei in `packages/widget/vite.config.ts` (`bundleGuard`) freigegeben ist; nie den ganzen Index von shared importieren (Zod). Größenlimit 50 000 Bytes.
+- **Demo-Seite:** `pnpm --filter @fw-booking/widget demo` (baut und startet Vite auf http://localhost:5180/demo/, optional `?calendar=cal_…&api=http://127.0.0.1:3000`). API dafür mit `CORS_ALLOWED_ORIGINS=http://localhost:5180 pnpm --filter @fw-booking/api dev` starten (Umgebungsvariable hat Vorrang vor `.env`, `.env` bleibt unverändert). Lokaler Kalender: `cal_Z8XdgTHf5Gys-5YA`, derzeit ohne Angebote.
 - **Verbindliche Rahmenbedingungen** (`.workshop/specialization/CONSTRAINTS.md`): Light DOM ohne iframe, alle Klassen mit Präfix `fw-booking-`, kein ungeprüftes HTML aus Daten (DOM sicher erzeugen), keine Zugangsdaten im Browser.
 - **Öffentliche API für das Widget** (`docs/architecture.md`, Abschnitte „Öffentliche API (Widget)“, „Öffentliche Buchung“, „Selbstverwaltung über den Verwaltungslink“): Angebote, Slots, verfügbare Tage, Kurstermine, `POST …/bookings` (Idempotenzschlüssel, `privacyAccepted: true`), fachliche Fehlercodes (`session_full`, `slot_taken`, `not_bookable`, `already_booked`, `idempotency_conflict`, `too_many_bookings`, `rate_limited`, `origin_not_allowed`). Schemas und Typen kommen aus `@fw-booking/shared`; Anzeige von Zeiten mit `formatDate`/`formatTime` aus `packages/shared/src/time/format.ts` (nur Intl, kein Polyfill im Widget).
 - **CORS und Grenzen:** Der Origin der Test-Seite muss in `.env` unter `CORS_ALLOWED_ORIGINS` stehen, sonst 403. Ratenbegrenzung je IP aktiv (Lesen 120/Min); für Browser-Tests ausreichend, für Lasttests `RATE_LIMIT_*=0`.
 - **Self-Service-Seite (task-4-6):** Mails verlinken `MANAGE_PAGE_URL#t=TOKEN`. Die Seite liest das Token aus dem Fragment, sendet es im Header `X-Booking-Token` an `/api/public/manage…` und darf es nie in URL-Pfad, Query, Referrer oder Analytics bringen (Fragment nach dem Lesen entfernen, z. B. `history.replaceState`). Storno und Umbuchung nur mit `{ confirm: true }`.
-- **Browser-Prüfung:** Im Desktop-App-Browser (Browser-Pane) eine lokale Testseite öffnen; deren Origin vorher in `CORS_ALLOWED_ORIGINS` eintragen.
+- **Browser-Prüfung:** Im Desktop-App-Browser (Browser-Pane) die Demo-Seite öffnen. Von einem nicht freigegebenen Origin meldet der Client `kind: 'network'` (403 ohne CORS-Header ist im Browser unlesbar).
 - **WordPress (task-4-7):** PHP ist lokal nicht installiert; vor task-4-7 mit dem Teilnehmer klären (z. B. WordPress per Docker in `infra/`).
 
 ## Empfohlener nächster Schritt
 
-Phase 4 mit task-4-1 (Widget-Build), damit Buchung, Verwaltungslink und Mails im Browser durchgängig nutzbar werden; alternativ Phase 5 mit task-5-1 (Portal-Gerüst und Login), in dem später auch die fehlgeschlagenen Benachrichtigungen (task-5-6) erscheinen.
+task-4-2 (Kursansicht) oder task-4-3 (Slot-Auswahl für Einzeltermine); beide bauen auf `instance.api` auf und ersetzen den Platzhalter. Für die Browser-Prüfung zuerst Testangebote (Kurs und Einzeltermin) über die Owner-API anlegen und danach wieder entfernen. Alternativ Phase 5 mit task-5-1 (Portal-Gerüst und Login).

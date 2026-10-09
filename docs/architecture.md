@@ -153,6 +153,24 @@ Alle Antworten enthalten Teilnehmerdaten und tragen `Cache-Control: no-store`.
 
 Jeder Eintrag enthält `id`, `type`, `category`, `failedAt`, `attempts` und eine Kurzübersicht der Buchung (Angebot, Beginn, Status, Name, E-Mail, Telefon) oder `null`, wenn sie nicht mehr existiert. Antworten tragen `Cache-Control: no-store` und werden gegen strikte Schemas aus `@fw-booking/shared` geprüft (`failedNotificationsResponseSchema`); interne Felder wie `leaseToken` oder `dedupeKey` verhindern die Auslieferung. Kategorien sind eine feste Aufzählung (`notificationErrorCategorySchema`), unbekannte Werte erscheinen als `unknown`. Deutsche Beschreibungen und der Hinweis, ob ein erneuter Versuch sinnvoll ist, stehen in `NOTIFICATION_ERROR_INFO`, Typbezeichnungen in `NOTIFICATION_TYPE_LABELS`. Index `status_failedAt` (Migration `009`).
 
+## Öffentliches Widget
+
+`packages/widget` baut mit Vite im Library-Modus eine einzelne IIFE-Datei `dist/fw-booking-widget.js` (Ziel ES2020, ohne Laufzeitabhängigkeiten). Build: `pnpm --filter @fw-booking/widget build`; lokale Prüfseite: `pnpm --filter @fw-booking/widget demo` (http://localhost:5180/demo/, optional `?calendar=cal_…&api=http://127.0.0.1:3000`; der Origin muss in `CORS_ALLOWED_ORIGINS` stehen).
+
+Einbindung je Kalender:
+
+```html
+<div data-fw-booking-calendar="cal_…" data-fw-booking-api="https://buchung.example.de"></div>
+<script src="…/fw-booking-widget.js"></script>
+```
+
+- **Konfiguration** ausschließlich über die Datenattribute des Containers (Kalenderkennung `cal_…`, absolute http(s)-Basisadresse der API ohne Query und Fragment). Ungültige Einbindungen zeigen einen Hinweis im Container und eine Konsolenwarnung ohne Attributwerte (`data-fw-booking-state="error"`).
+- **Mehrere Container** je Seite erhalten jeweils eine eigene Instanz mit eigenem API-Client und eigenem Root (`.fw-booking-root`); der vorhandene Inhalt des Containers (z. B. `<noscript>`) wird ersetzt.
+- **Einmaliges Laden:** Die erste Ausführung des Scripts installiert `window.FwBooking` (eingefroren, nicht aufzählbar); weitere Script-Tags verwenden es. Initialisierte Container tragen `data-fw-booking-state` und werden weder von einem zweiten Scan noch von einem anderen Widget-Bundle erneut übernommen.
+- **Automatische Erkennung** nach `DOMContentLoaded` (bzw. sofort, wenn die Seite schon geladen ist). Für nachträglich eingefügte Container: `FwBooking.scan(element?)`, `FwBooking.mount(container)` (liefert eine bestehende Instanz unverändert) und `FwBooking.unmount(container)`; kein dauerhafter `MutationObserver`.
+- **API-Client** (`src/api/client.ts`): Endpunkte der öffentlichen API und `POST …/bookings`, `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`, Zeitlimit 15 s, Abbruch über `AbortSignal`. Fehler als `ApiError` mit `kind` (`network`, `timeout`, `http`), Status, bekanntem fachlichem `code` und `retryAfterSeconds` bei 429. Eine nicht freigegebene Website erscheint im Browser als `network`, weil die 403-Antwort ohne CORS-Header unlesbar ist.
+- **Bundle-Wächter** im Vite-Build: Nur Module aus `packages/widget/src` sind erlaubt (aus `@fw-booking/shared` nur Typ-Importe, damit weder Zod noch Temporal-Polyfill ins Bundle gelangen), Größenlimit 50 000 Bytes. `src/bundle.test.ts` baut das Bundle und prüft Inhalt, Größe und dreifaches Einbinden in jsdom.
+
 ## Öffentliche API (Widget)
 
 Ohne Anmeldung, je öffentlicher Kalenderkennung (`cal_…`, eine je Installation, Migration `004`; für den Owner über `GET /api/owner/calendar`).

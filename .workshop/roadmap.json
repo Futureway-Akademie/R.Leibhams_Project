@@ -903,7 +903,7 @@
       "description": "Schlankes TypeScript-Widget im Light DOM ohne iframe für Kurse und Einzeltermine, Self-Service-Seite und WordPress-Plugin.",
       "order": 4,
       "weight": 14,
-      "status": "ready",
+      "status": "in_progress",
       "tasks": [
         {
           "id": "task-4-1",
@@ -911,7 +911,7 @@
           "description": "Eigener kleiner Build, der Container erkennt, mehrere Kalender pro Seite unterstützt und nur einmal geladen wird.",
           "order": 1,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-1-4"
           ],
@@ -920,13 +920,21 @@
             "Mehrere Container auf einer Seite werden unabhängig initialisiert",
             "Mehrfaches Einbinden des Scripts führt nicht zu doppelter Initialisierung"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T09:20:20Z",
+          "completedAt": "2026-10-09T09:29:31Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "41 neue Widget-Tests (4 Dateien), übrige Pakete unverändert grün (API 315, Worker 98, DB 36, shared 147). Build: Vite-Library-Build erzeugt eine IIFE-Datei dist/fw-booking-widget.js (4,3 KB, gzip 2,1 KB); Build-Wächter erlaubt nur Module aus packages/widget/src (keine Portal-, React-, Zod- oder Temporal-Module), Größenlimit 50 000 Bytes; bundle.test.ts baut das echte Bundle und prüft Einzeldatei, Modulherkunft, Größe und fehlende ES-Modul-Syntax. Mehrere Container: eigene Instanz, eigener API-Client und eigener Root je Container, Abfragen gehen an den jeweils eigenen Kalender, Entfernen einer Instanz lässt andere unberührt. Mehrfaches Einbinden: dreifach eingebundenes Bundle in jsdom initialisiert jeden Container genau einmal nach DOMContentLoaded; erneuter install/scan/mount erzeugt keine zweite Instanz, von anderem Bundle übernommene Container bleiben unberührt; nachträglich eingefügte Container über scan(), unmount erlaubt Neuinitialisierung. Ungültige Datenattribute zeigen einen Hinweis ohne Attributwerte, kein HTML aus Attributen. API-Client: URLs mit Kodierung, credentials omit, no-referrer, JSON-Buchung, fachliche Fehlercodes, unbekannte Codes ignoriert, Retry-After, Fehler ohne JSON, Netzwerkfehler, Zeitlimit, Abbruch durch Aufrufer. Manuell im Browser-Pane: Demo-Seite (localhost:5180, Script dreifach eingebunden) gegen lokale API mit freigegebenem Origin: window.FwBooking 0.1.0, zwei Kalender-Container ready mit je einem Root, fehlerhafter Container mit Hinweis und Konsolenwarnung, zwei nachträglich eingefügte Container über scan() initialisiert, weiterer scan() ohne Wirkung (5 Roots), getServices() lieferte die Angebotsliste der lokalen Installation; von nicht freigegebenem Origin (127.0.0.1:5180) meldet der Client network. CORS-Freigabe nur per Umgebungsvariable beim Start, .env unverändert; Server danach beendet, keine Testdaten angelegt. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/widget test",
+              "pnpm --filter @fw-booking/widget demo + Browser-Pane gegen lokale API (CORS_ALLOWED_ORIGINS per Umgebungsvariable)",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T09:29:31Z"
           }
         },
         {
@@ -935,7 +943,7 @@
           "description": "Anzeige von Kursterminen mit freien Plätzen inklusive Lade-, Leer- und Fehlerzustand.",
           "order": 2,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-4-1",
             "task-2-8"
@@ -960,7 +968,7 @@
           "description": "Tagesauswahl und Anzeige freier Uhrzeiten für ein Einzeltermin-Angebot.",
           "order": 3,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-4-1",
             "task-2-8"

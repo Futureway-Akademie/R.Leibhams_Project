@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Widget-Demo</title>
+    <!-- Lokale Prüfseite für das gebaute Bundle (pnpm --filter @fw-booking/widget demo).
+         Optional: ?calendar=cal_…&api=http://127.0.0.1:3000 verwendet echte Werte. -->
+    <script>
+      const params = new URLSearchParams(location.search);
+      window.demoConfig = {
+        calendar: params.get('calendar') ?? 'cal_DemoDemoDemoDemo',
+        api: params.get('api') ?? 'http://127.0.0.1:3000',
+      };
+    </script>
+    <!-- Absichtlich doppelt eingebunden, wie bei mehreren Shortcodes auf einer Seite. -->
+    <script src="/dist/fw-booking-widget.js"></script>
+    <script src="/dist/fw-booking-widget.js"></script>
+  </head>
+  <body>
+    <h1>Widget-Demo</h1>
+
+    <h2>Kalender A</h2>
+    <div id="a" class="demo-calendar"></div>
+
+    <h2>Kalender B</h2>
+    <div id="b" class="demo-calendar"></div>
+
+    <h2>Fehlerhafte Einbindung</h2>
+    <div
+      id="broken"
+      data-fw-booking-calendar="ungueltig"
+      data-fw-booking-api="http://127.0.0.1:3000"
+    ></div>
+
+    <h2>Nachträglich eingefügt</h2>
+    <button id="add" type="button">Container einfügen und FwBooking.scan() aufrufen</button>
+    <div id="later"></div>
+
+    <h2>Angebote laden (API-Client von Kalender A)</h2>
+    <button id="load" type="button">getServices()</button>
+    <pre id="out"></pre>
+
+    <script>
+      for (const id of ['a', 'b']) {
+        const el = document.getElementById(id);
+        el.setAttribute('data-fw-booking-calendar', window.demoConfig.calendar);
+        el.setAttribute('data-fw-booking-api', window.demoConfig.api);
+      }
+      document.getElementById('add').addEventListener('click', () => {
+        const el = document.createElement('div');
+        el.setAttribute('data-fw-booking-calendar', window.demoConfig.calendar);
+        el.setAttribute('data-fw-booking-api', window.demoConfig.api);
+        document.getElementById('later').append(el);
+        window.FwBooking.scan(document.getElementById('later'));
+      });
+      document.getElementById('load').addEventListener('click', async () => {
+        const out = document.getElementById('out');
+        const instance = window.FwBooking.mount(document.getElementById('a'));
+        try {
+          const result = await instance.api.getServices();
+          out.textContent = JSON.stringify(result, null, 2);
+        } catch (error) {
+          out.textContent = `${error.name}: ${error.kind} ${error.status ?? ''} ${error.code ?? ''}`;
+        }
+      });
+    </script>
+    <!-- Ein drittes Mal am Ende der Seite. -->
+    <script src="/dist/fw-booking-widget.js"></script>
+  </body>
+</html>

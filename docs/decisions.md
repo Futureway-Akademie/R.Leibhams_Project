@@ -419,3 +419,17 @@ Owner-Endpunkt mit endgültig fehlgeschlagenen, nicht ausgeblendeten Jobs (neues
 ### Begründung
 
 Mit Kontaktdaten kann der Owner ohne weiteren Abruf reagieren; die Daten sind ohnehin nur für ihn sichtbar. Erneutes Versenden behebt Ausfälle nach einer Korrektur, Ausblenden hält die Liste übersichtlich, ohne Historie zu löschen. Die feste Aufzählung und strikte Schemas garantieren, dass auch künftige Worker-Änderungen keine Fehlertexte oder internen Felder offenlegen.
+
+## 2026-10-09 – Widget-Build und Einbindung
+
+### Kontext
+
+Das öffentliche Widget wird auf beliebigen WordPress-Seiten eingebunden, teils mehrfach auf einer Seite und durch mehrere Shortcodes oder Plugins, die das Script mehrfach ausgeben. Es muss klein bleiben, darf keine Portal- oder Validierungsbibliotheken mitbringen und soll später vom WordPress-Plugin ohne Build-Schritt eingebunden werden.
+
+### Entscheidung
+
+Eine einzelne IIFE-Datei aus einem eigenen Vite-Library-Build (Ziel ES2020). Konfiguration ausschließlich über Datenattribute am Container (`data-fw-booking-calendar`, `data-fw-booking-api`). Automatische Erkennung beim Laden plus öffentliche API `window.FwBooking` mit `scan`, `mount` und `unmount`, kein `MutationObserver`. Die erste Ausführung installiert die globale API, weitere verwenden sie; Container werden über eine WeakMap und `data-fw-booking-state` höchstens einmal initialisiert. Ein schlanker API-Client mit fachlichen Fehlercodes gehört bereits zum Build; aus `@fw-booking/shared` werden nur Typen importiert, ein Build-Wächter erzwingt das.
+
+### Begründung
+
+Ein klassisches Script funktioniert ohne `type="module"` mit `wp_enqueue_script` und auf jeder Seite. Datenattribute machen jeden Container selbstbeschreibend, passend zu Shortcode und Block, und erlauben unterschiedliche Kalender auf einer Seite. Ein dauerhafter Beobachter auf der ganzen Seite wäre für die seltenen nachträglich eingefügten Container unverhältnismäßig; `scan()` genügt dafür. Nur Typ-Importe halten das Bundle bei rund 4 KB statt Zod und Temporal mitzuliefern; die API prüft ihre Antworten ohnehin selbst gegen die strikten Schemas.
