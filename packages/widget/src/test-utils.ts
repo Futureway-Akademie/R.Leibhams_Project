@@ -46,11 +46,23 @@ export function sessionsResponse(sessions: PublicSession[], serviceId = YOGA) {
 
 /** Fetch-Attrappe, die Anfragen nach Pfad beantwortet und alle Aufrufe festhält. */
 export function router(routes: Record<string, Handler | Handler[]>) {
-  const calls: { url: URL; signal: AbortSignal | null }[] = [];
+  const calls: {
+    url: URL;
+    method: string;
+    body: string | null;
+    cache: RequestCache | null;
+    signal: AbortSignal | null;
+  }[] = [];
   const counters = new Map<string, number>();
   const fetchMock: typeof fetch = (input, init) => {
     const url = new URL(input as string);
-    calls.push({ url, signal: init?.signal ?? null });
+    calls.push({
+      url,
+      method: init?.method ?? 'GET',
+      body: typeof init?.body === 'string' ? init.body : null,
+      cache: init?.cache ?? null,
+      signal: init?.signal ?? null,
+    });
     const path = url.pathname.slice(new URL(BASE).pathname.length);
     const route = routes[path];
     if (!route) return Promise.resolve(json({ statusCode: 404, message: 'Nicht gefunden' }, 404));
@@ -66,7 +78,7 @@ export function router(routes: Record<string, Handler | Handler[]>) {
 
 export async function mount(routes: Record<string, Handler | Handler[]>, attrs = '') {
   const dom = new JSDOM(
-    `<!doctype html><html><body><div id="w" data-fw-booking-calendar="${CAL}" data-fw-booking-api="${API}" ${attrs}></div></body></html>`,
+    `<!doctype html><html><body><div id="w" data-fw-booking-calendar="${CAL}" data-fw-booking-api="${API}" data-fw-booking-privacy-url="https://example.de/datenschutz" ${attrs}></div></body></html>`,
   );
   const win = dom.window as unknown as TestWindow;
   if (win.document.readyState === 'loading') {

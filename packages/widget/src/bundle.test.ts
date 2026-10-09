@@ -27,7 +27,7 @@ beforeAll(async () => {
 }, 60_000);
 
 function container(calendarId: string): string {
-  return `<div data-fw-booking-calendar="${calendarId}" data-fw-booking-api="https://api.example.de"></div>`;
+  return `<div data-fw-booking-calendar="${calendarId}" data-fw-booking-api="https://api.example.de" data-fw-booking-privacy-url="https://example.de/datenschutz"></div>`;
 }
 
 describe('Widget-Bundle', () => {

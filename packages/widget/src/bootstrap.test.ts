@@ -22,7 +22,7 @@ async function page(body: string): Promise<TestWindow> {
 }
 
 function container(calendarId: string, extra = ''): string {
-  return `<div data-fw-booking-calendar="${calendarId}" data-fw-booking-api="${API}" ${extra}></div>`;
+  return `<div data-fw-booking-calendar="${calendarId}" data-fw-booking-api="${API}" data-fw-booking-privacy-url="https://example.de/datenschutz" ${extra}></div>`;
 }
 
 /** fetch, das nie antwortet: Die Tests prüfen nur die Initialisierung, keine Netzwerkzugriffe. */
@@ -47,8 +47,18 @@ describe('install', () => {
     const instanceA = api.mount(a);
     const instanceB = api.mount(b);
     expect(instanceA).not.toBe(instanceB);
-    expect(instanceA.config).toEqual({ calendarId: CAL_A, apiUrl: API, serviceId: null });
-    expect(instanceB.config).toEqual({ calendarId: CAL_B, apiUrl: API, serviceId: null });
+    expect(instanceA.config).toEqual({
+      calendarId: CAL_A,
+      apiUrl: API,
+      serviceId: null,
+      privacyUrl: 'https://example.de/datenschutz',
+    });
+    expect(instanceB.config).toEqual({
+      calendarId: CAL_B,
+      apiUrl: API,
+      serviceId: null,
+      privacyUrl: 'https://example.de/datenschutz',
+    });
     expect(instanceA.api).not.toBe(instanceB.api);
     expect(instanceA.root.parentElement).toBe(a);
     expect(instanceB.root.parentElement).toBe(b);
@@ -156,7 +166,7 @@ describe('install', () => {
   it('zeigt bei ungültiger Einbindung einen Hinweis ohne die Attributwerte', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const win = await page(
-      `<div id="x" data-fw-booking-calendar="&lt;img src=x onerror=alert(1)&gt;" data-fw-booking-api="${API}"></div>`,
+      `<div id="x" data-fw-booking-calendar="&lt;img src=x onerror=alert(1)&gt;" data-fw-booking-api="${API}" data-fw-booking-privacy-url="https://example.de/datenschutz"></div>`,
     );
     install(win, { fetch: pendingFetch });
     const x = win.document.getElementById('x');
@@ -172,7 +182,7 @@ describe('install', () => {
 
   it('ersetzt vorhandene Platzhalter im Container', async () => {
     const win = await page(
-      `<div data-fw-booking-calendar="${CAL_A}" data-fw-booking-api="${API}"><noscript>Bitte JavaScript aktivieren</noscript></div>`,
+      `<div data-fw-booking-calendar="${CAL_A}" data-fw-booking-api="${API}" data-fw-booking-privacy-url="https://example.de/datenschutz"><noscript>Bitte JavaScript aktivieren</noscript></div>`,
     );
     install(win, { fetch: pendingFetch });
     const [root] = roots(win);

@@ -78,6 +78,16 @@ describe('createApiClient', () => {
     expect(init.body).toBeUndefined();
   });
 
+  it('umgeht mit fresh() den Browser-Cache, sonst nicht', async () => {
+    const { client, fetchMock } = setup(() => json(200, {}));
+    await client.getSessions(SERVICE_ID, '2026-10-01', '2026-10-31');
+    expect(lastCall(fetchMock).init.cache).toBeUndefined();
+    await client.fresh().getSessions(SERVICE_ID, '2026-10-01', '2026-10-31');
+    const { url, init } = lastCall(fetchMock);
+    expect(init.cache).toBe('reload');
+    expect(url).toBe(`${BASE}/services/${SERVICE_ID}/sessions?from=2026-10-01&to=2026-10-31`);
+  });
+
   it('sendet Buchungen als JSON und liefert die Bestätigung', async () => {
     const confirmation = { bookingId: SERVICE_ID, status: 'confirmed' };
     const { client, fetchMock } = setup(() => json(201, confirmation));
@@ -129,6 +139,24 @@ describe('createApiClient', () => {
     );
     const error = await rejection(client.getServices());
     expect(error).toMatchObject({ status: 429, code: 'rate_limited', retryAfterSeconds: 42 });
+  });
+
+  it('übernimmt die Feldpfade ungültiger Eingaben', async () => {
+    const { client } = setup(() =>
+      json(400, {
+        message: 'Ungültige Eingabe',
+        issues: [
+          { path: 'participant.email', message: 'Invalid email' },
+          { path: 'participant.phone', message: 'x' },
+          { message: 'ohne Pfad' },
+        ],
+      }),
+    );
+    const error = await rejection(client.getServices());
+    expect(error).toMatchObject({
+      status: 400,
+      fieldPaths: ['participant.email', 'participant.phone'],
+    });
   });
 
   it('verträgt Fehlerantworten ohne JSON', async () => {

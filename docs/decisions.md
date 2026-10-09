@@ -462,3 +462,17 @@ Monatskalender (Tabelle Mo–So, höchstens 12 Monate voraus) mit wählbaren Tag
 
 Ein Monatskalender ist die vertraute Darstellung und hält Abfragen klein. Die Vorauswahl spart einen Klick und zeigt sofort, wann der nächste Termin frei ist. Gruppen nach Tageszeit machen 100 Zeiten überblickbar, ohne die fachliche Regel (jede Startzeit buchbar) einzuschränken. Die Tabelle bleibt auch ohne Styling als Kalender lesbar. Die Suche nach dem ersten freien Monat kann bis zu 12 Abfragen auslösen, wenn lange nichts frei ist; das liegt deutlich unter der Lesegrenze von 120 Anfragen je Minute.
 
+## 2026-10-09 – Buchungsformular im Widget
+
+### Kontext
+
+Besucher sollen beide Terminarten über das Widget verbindlich buchen. Doppelklicks dürfen keine zweite Buchung erzeugen, zwischenzeitlich vergebene Termine brauchen eine verständliche Meldung. Die Bestätigung der Datenschutzhinweise ist Pflicht und muss auf die Hinweise der einbindenden Website verweisen.
+
+### Entscheidung
+
+Nach der Terminwahl führt „Weiter zu deinen Angaben“ in einen eigenen Schritt; die Auswahlansicht bleibt erhalten und ist über „Termin ändern“ erreichbar. Die Datenschutzadresse ist ein Pflicht-Attribut des Containers (`data-fw-booking-privacy-url`), ohne sie gilt die Einbindung als fehlerhaft. Während einer Anfrage ist das Absenden gesperrt; derselbe Termin mit denselben Angaben behält seinen Idempotenzschlüssel, Änderungen erzeugen einen neuen. Vergebene oder nicht mehr buchbare Termine führen mit Hinweis zurück zur Auswahl, die am Browser-Cache vorbei neu geladen wird; die Eingaben bleiben erhalten, die Datenschutz-Checkbox wird je Buchung neu bestätigt. Nach Erfolg folgen eine Bestätigungsansicht und das Ereignis `fw-booking:booked` ohne Teilnehmerdaten.
+
+### Begründung
+
+Ein eigener Schritt bleibt bei rund 100 Uhrzeiten und auf dem Handy übersichtlich. Das Pflicht-Attribut verhindert Einbindungen ohne erreichbare Datenschutzhinweise; das WordPress-Plugin kann die Datenschutzseite von WordPress vorbelegen. Gesperrtes Absenden plus stabiler Schlüssel schützt sowohl vor Doppelklicks als auch vor doppelten Buchungen bei verlorenen Antworten. Ohne Umgehung des Caches zeigte die Auswahl nach einem Konflikt bis zu 30 Sekunden lang die alte Verfügbarkeit (im Browser beobachtet). Die erneute Bestätigung der Checkbox hält die Einwilligung an die einzelne Buchung gebunden.
+

@@ -32,6 +32,8 @@ export class ApiError extends Error {
   declare readonly code: BookingErrorCode | null;
   /** Sekunden aus `Retry-After` bei 429. */
   declare readonly retryAfterSeconds: number | null;
+  /** Feldpfade ungültiger Eingaben bei 400 (z. B. `participant.email`), ohne Werte. */
+  declare readonly fieldPaths: readonly string[];
 
   constructor(
     kind: ApiErrorKind,
@@ -39,6 +41,7 @@ export class ApiError extends Error {
     code: BookingErrorCode | null,
     retryAfterSeconds: number | null,
     message: string,
+    fieldPaths: readonly string[] = [],
   ) {
     super(message);
     this.name = 'ApiError';
@@ -46,6 +49,7 @@ export class ApiError extends Error {
     this.status = status;
     this.code = code;
     this.retryAfterSeconds = retryAfterSeconds;
+    this.fieldPaths = fieldPaths;
   }
 }
 
@@ -69,6 +73,8 @@ export interface ApiClientOptions {
   calendarId: string;
   timeoutMs?: number;
   fetch?: typeof fetch;
+  /** Lese-Anfragen am HTTP-Cache des Browsers vorbei (`cache: 'reload'`). */
+  bypassCache?: boolean;
 }
 
 export interface ApiClient {
@@ -87,6 +93,11 @@ export interface ApiClient {
     signal?: AbortSignal,
   ): Promise<PublicSessionsResponse>;
   createBooking(request: BookingRequest, signal?: AbortSignal): Promise<BookingConfirmation>;
+  /**
+   * Gleicher Client, dessen Lese-Anfragen den Browser-Cache umgehen; nach einem vergebenen Termin,
+   * damit nicht die bis zu 30 s alte Verfügbarkeit erneut angezeigt wird.
+   */
+  fresh(): ApiClient;
 }
 
 export function createApiClient(options: ApiClientOptions): ApiClient {
@@ -123,6 +134,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
           signal: controller.signal,
           // Keine Cookies der einbindenden Seite mitsenden, keinen Referrer preisgeben.
           credentials: 'omit',
+          ...(options.bypassCache === true ? { cache: 'reload' as const } : {}),
           referrerPolicy: 'no-referrer',
         });
       } catch (error) {
@@ -156,6 +168,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     getSessions: (serviceId, from, to, signal) =>
       request(`${service(serviceId)}/sessions?${query({ from, to })}`, { method: 'GET' }, signal),
     createBooking: (body, signal) => request('/bookings', { method: 'POST', body }, signal),
+    fresh: () => createApiClient({ ...options, bypassCache: true }),
   };
 }
 
@@ -166,6 +179,7 @@ function query(params: Record<string, string>): string {
 async function toApiError(response: Response): Promise<ApiError> {
   let code: BookingErrorCode | null = null;
   let message = `Anfrage fehlgeschlagen (${String(response.status)})`;
+  const fieldPaths: string[] = [];
   try {
     const body: unknown = await response.json();
     if (typeof body === 'object' && body !== null) {
@@ -173,6 +187,13 @@ async function toApiError(response: Response): Promise<ApiError> {
         code = body.code as BookingErrorCode;
       }
       if ('message' in body && typeof body.message === 'string') message = body.message;
+      if ('issues' in body && Array.isArray(body.issues)) {
+        for (const issue of body.issues as unknown[]) {
+          if (typeof issue === 'object' && issue !== null && 'path' in issue) {
+            if (typeof issue.path === 'string') fieldPaths.push(issue.path);
+          }
+        }
+      }
     }
   } catch {
     // Kein JSON: Status genügt.
@@ -184,5 +205,6 @@ async function toApiError(response: Response): Promise<ApiError> {
     code,
     response.status === 429 && Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : null,
     message,
+    fieldPaths,
   );
 }

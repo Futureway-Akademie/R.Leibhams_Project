@@ -24,6 +24,29 @@ export const messages = {
   morning: 'Vormittag',
   afternoon: 'Nachmittag',
   evening: 'Abend',
+  continue: 'Weiter zu deinen Angaben',
+  chosen: 'Gewählt:',
+  formTitle: 'Deine Angaben',
+  changeAppointment: 'Termin ändern',
+  fieldName: 'Name',
+  fieldEmail: 'E-Mail',
+  fieldPhone: 'Telefon',
+  phoneHint: 'Nur für kurzfristige Rückfragen zum Termin.',
+  privacyBefore: 'Ich habe die ',
+  privacyLink: 'Datenschutzhinweise',
+  privacyAfter: ' gelesen.',
+  submit: 'Verbindlich buchen',
+  submitting: 'Wird gebucht …',
+  invalidName: 'Bitte gib deinen Namen an (mindestens 2 Zeichen).',
+  invalidEmail: 'Bitte gib eine gültige E-Mail-Adresse an.',
+  invalidPhone:
+    'Bitte gib eine Telefonnummer an (6–20 Zeichen: Ziffern, Leerzeichen und + - / ( )).',
+  invalidPrivacy: 'Bitte bestätige, dass du die Datenschutzhinweise gelesen hast.',
+  checkInput: 'Bitte prüfe deine Angaben.',
+  bookedTitle: 'Dein Termin ist gebucht',
+  bookedMail: (email: string) =>
+    `Du erhältst gleich eine Bestätigung per E-Mail an ${email}. Darin findest du auch den Link, mit dem du den Termin verwalten kannst.`,
+  bookAnother: 'Weiteren Termin buchen',
   serviceNotFound: 'Dieses Angebot ist derzeit nicht buchbar.',
   misconfigured: 'Der Buchungskalender ist nicht richtig eingebunden.',
   timeZoneHint: (timeZone: string) => `Alle Zeiten in der Zeitzone ${timeZone}.`,
@@ -48,4 +71,71 @@ export function loadErrorMessage(error: unknown): string {
     if (error.status === 404) return 'Dieser Buchungskalender wurde nicht gefunden.';
   }
   return 'Die Termine konnten nicht geladen werden. Bitte versuche es erneut.';
+}
+
+/** Ergebnis eines fehlgeschlagenen Buchungsversuchs für das Formular. */
+export interface BookingFailure {
+  message: string;
+  /** Termin ist vergeben oder nicht mehr buchbar: zurück zur Auswahl mit frischen Daten. */
+  conflict: boolean;
+}
+
+export function bookingErrorMessage(error: unknown): BookingFailure {
+  if (error instanceof ApiError) {
+    switch (error.code) {
+      case 'slot_taken':
+        return {
+          conflict: true,
+          message: 'Diese Uhrzeit wurde gerade vergeben. Bitte wähle eine andere.',
+        };
+      case 'session_full':
+        return {
+          conflict: true,
+          message: 'Dieser Kurstermin ist inzwischen ausgebucht. Bitte wähle einen anderen.',
+        };
+      case 'not_bookable':
+        return {
+          conflict: true,
+          message: 'Dieser Termin ist nicht mehr buchbar. Bitte wähle einen anderen.',
+        };
+      case 'already_booked':
+        return {
+          conflict: false,
+          message: 'Mit dieser E-Mail-Adresse ist dieser Kurstermin bereits gebucht.',
+        };
+      case 'too_many_bookings':
+        return {
+          conflict: false,
+          message:
+            'Mit dieser E-Mail-Adresse wurden in kurzer Zeit zu viele Termine gebucht. Bitte versuche es später erneut.',
+        };
+      case 'idempotency_conflict':
+        return {
+          conflict: false,
+          message: 'Die Buchung konnte nicht eindeutig zugeordnet werden. Bitte sende sie erneut.',
+        };
+      case 'rate_limited':
+        return { conflict: false, message: loadErrorMessage(error) };
+      default:
+        break;
+    }
+    if (error.kind === 'network' || error.kind === 'timeout') {
+      return {
+        conflict: false,
+        message:
+          'Die Buchung konnte nicht gesendet werden. Bitte prüfe deine Verbindung und versuche es erneut.',
+      };
+    }
+    if (error.status === 400) return { conflict: false, message: messages.checkInput };
+    if (error.status === 404) {
+      return {
+        conflict: true,
+        message: 'Dieser Termin ist nicht mehr buchbar. Bitte wähle einen anderen.',
+      };
+    }
+  }
+  return {
+    conflict: false,
+    message: 'Die Buchung ist fehlgeschlagen. Bitte versuche es erneut.',
+  };
 }

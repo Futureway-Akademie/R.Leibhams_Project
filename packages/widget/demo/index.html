@@ -33,6 +33,7 @@
       id="broken"
       data-fw-booking-calendar="ungueltig"
       data-fw-booking-api="http://127.0.0.1:3000"
+      data-fw-booking-privacy-url="/demo/datenschutz.html"
     ></div>
 
     <h2>Nachträglich eingefügt</h2>
@@ -48,6 +49,7 @@
         const el = document.getElementById(id);
         el.setAttribute('data-fw-booking-calendar', window.demoConfig.calendar);
         el.setAttribute('data-fw-booking-api', window.demoConfig.api);
+        el.setAttribute('data-fw-booking-privacy-url', '/demo/datenschutz.html');
       }
       if (window.demoConfig.service) {
         document
@@ -61,6 +63,7 @@
         const el = document.createElement('div');
         el.setAttribute('data-fw-booking-calendar', window.demoConfig.calendar);
         el.setAttribute('data-fw-booking-api', window.demoConfig.api);
+        el.setAttribute('data-fw-booking-privacy-url', '/demo/datenschutz.html');
         document.getElementById('later').append(el);
         window.FwBooking.scan(document.getElementById('later'));
       });

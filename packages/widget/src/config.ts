@@ -1,6 +1,7 @@
 // Konfiguration eines Widget-Containers aus seinen Datenattributen:
 // <div data-fw-booking-calendar="cal_…" data-fw-booking-api="https://buchung.example.de"></div>
-// Optional legt data-fw-booking-service="<Angebots-ID>" den Container auf ein Angebot fest.
+// Pflicht ist außerdem data-fw-booking-privacy-url (Datenschutzhinweise der einbindenden Seite);
+// optional legt data-fw-booking-service="<Angebots-ID>" den Container auf ein Angebot fest.
 
 /** Selektor, an dem das Widget seine Container erkennt. */
 export const CONTAINER_SELECTOR = '[data-fw-booking-calendar]';
@@ -14,6 +15,8 @@ export interface WidgetConfig {
   apiUrl: string;
   /** Festes Angebot; ohne Angabe zeigt das Widget alle Angebote zur Auswahl. */
   serviceId: string | null;
+  /** Absolute Adresse der Datenschutzhinweise, verlinkt an der Pflicht-Checkbox. */
+  privacyUrl: string;
 }
 
 export type ConfigResult = { ok: true; config: WidgetConfig } | { ok: false; reason: string };
@@ -27,6 +30,16 @@ export function readConfig(container: HTMLElement): ConfigResult {
   if (apiUrl === null) {
     return { ok: false, reason: 'data-fw-booking-api fehlt oder ist keine http(s)-Adresse' };
   }
+  const privacyUrl = parsePrivacyUrl(
+    container.dataset['fwBookingPrivacyUrl'],
+    container.ownerDocument.baseURI,
+  );
+  if (privacyUrl === null) {
+    return {
+      ok: false,
+      reason: 'data-fw-booking-privacy-url fehlt oder ist keine http(s)-Adresse',
+    };
+  }
   const rawService = container.dataset['fwBookingService']?.trim();
   let serviceId: string | null = null;
   if (rawService !== undefined && rawService !== '') {
@@ -35,7 +48,7 @@ export function readConfig(container: HTMLElement): ConfigResult {
     }
     serviceId = rawService;
   }
-  return { ok: true, config: { calendarId, apiUrl, serviceId } };
+  return { ok: true, config: { calendarId, apiUrl, serviceId, privacyUrl } };
 }
 
 function parseApiUrl(value: string | undefined): string | null {
@@ -50,4 +63,17 @@ function parseApiUrl(value: string | undefined): string | null {
   // Query und Fragment gehören nicht zur Basisadresse.
   if (url.search !== '' || url.hash !== '') return null;
   return url.href.replace(/\/+$/, '');
+}
+
+/** Datenschutzseite: auch relativ zur Seite und mit Query (z. B. WordPress `?page_id=3`). */
+function parsePrivacyUrl(value: string | undefined, base: string): string | null {
+  if (value === undefined || value.trim() === '') return null;
+  let url: URL;
+  try {
+    url = new URL(value.trim(), base);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+  return url.href;
 }

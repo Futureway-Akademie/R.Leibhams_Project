@@ -1009,7 +1009,7 @@
           "description": "Formular für Name und E-Mail für beide Terminarten mit Idempotenzschlüssel und Behandlung von bereits vergebenen Plätzen.",
           "order": 4,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-4-2",
             "task-4-3",
@@ -1020,13 +1020,21 @@
             "Doppelklick erzeugt keine zweite Buchung",
             "Zwischenzeitlich vergebene Termine zeigen eine verständliche Meldung"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T11:33:45Z",
+          "completedAt": "2026-10-09T11:46:25Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "46 neue Widget-Tests (141 im Widget); API 315, Worker 98, DB 36, shared 147 unverändert grün. Getestet: Pflicht-Attribut data-fw-booking-privacy-url (relativ, Query, Ablehnung javascript/mailto); Weiter-Leiste nur mit Auswahl; Formular mit Labels, autocomplete, Zweckhinweis Telefon, Checkbox mit Link (neuer Tab, noopener noreferrer); Termin ändern ohne erneutes Laden, Eingaben bleiben; Validierung wie participantSchema (Abgleich gegen shared), Fehler am Feld, Fokus; Buchung beider Terminarten mit korrektem Body, Bestätigung, fw-booking:booked ohne Teilnehmerdaten; mehrfaches Absenden ergibt eine Anfrage; nach Netzwerkfehler gleicher Schlüssel, nach Änderung und idempotency_conflict neuer; slot_taken und session_full zurück zur Auswahl (gleicher Tag) mit cache reload; already_booked, too_many_bookings, rate_limited im Formular; 400-Feldpfade am Feld; Abbruch beim Entfernen; keine HTML-Ausgabe. Bundle 26,5 KB (gzip 9,5 KB). Ende-zu-Ende im Browser-Pane mit API, Worker und Mailpit (temporärer Owner, Öffnungszeiten, Haarschnitt 30 Min., Kurs mit 2 Plätzen): Kursbuchung per Doppelklick ergab eine POST-Anfrage (201), eine Buchung und eine Bestätigungsmail; nach Fremdbuchung desselben Slots slot_taken mit Rückkehr zum 12.10., erste freie Zeit 09:30, Eingaben erhalten, Buchung 09:30 erfolgreich; already_booked bei gleicher E-Mail; session_full zunächst mit veralteter Platzzahl aus dem Browser-Cache (behoben durch api.fresh()), danach Ausgebucht angezeigt; Pflichtfeldfehler mit Fokus. 5 Buchungen und 5 Mails (2 Widget, 3 direkt), abgelehnte Versuche ohne Buchung. Danach Testdaten, Mails, Owner und Sitzung entfernt (Collection-Zählung wie vorher, Mailpit leer), Server beendet, .env unverändert. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/widget test (mehrfach)",
+              "Ende-zu-Ende: Browser-Pane mit API, Worker und Mailpit, temporäre Testdaten (CORS_ALLOWED_ORIGINS und Mail-Variablen per Umgebungsvariable)",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T11:46:25Z"
           }
         },
         {
@@ -1035,7 +1043,7 @@
           "description": "Klassen mit Präfix fw-booking-, CSS Custom Properties, gekapselte Basisstyles, Tastaturbedienung und sichtbarer Fokus.",
           "order": 5,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-4-4"
           ],
@@ -1060,7 +1068,7 @@
           "description": "Seite für Interessenten zum Ansehen, Stornieren und Umbuchen der eigenen Buchung über den Verwaltungslink.",
           "order": 6,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-4-4",
             "task-2-13"

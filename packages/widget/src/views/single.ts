@@ -47,6 +47,8 @@ export interface SingleViewOptions {
   timeZone: string;
   now: () => Date;
   back: (() => void) | null;
+  /** Tag, der bevorzugt gewählt wird (z. B. nach einem vergebenen Termin), sonst der erste freie. */
+  preferredDay?: string | null;
   /** Gewählter Slot oder `null`, wenn die Auswahl durch einen Tageswechsel entfällt. */
   onSelect: (slot: PublicSlot | null) => void;
 }
@@ -303,12 +305,20 @@ export function singleView(options: SingleViewOptions): HTMLElement {
     slotsArea.replaceChildren(heading, ...groups.filter((g) => g !== null));
   }
 
-  /** Sucht ab dem aktuellen Monat den ersten Monat mit freien Tagen und wählt den ersten Tag. */
+  /**
+   * Sucht ab dem aktuellen (bzw. bevorzugten) Monat den ersten Monat mit freien Tagen und wählt
+   * den bevorzugten Tag, falls er noch frei ist, sonst den ersten freien Tag.
+   */
   async function start(): Promise<void> {
     calendarStatus.replaceChildren(statusMessage(doc, messages.loadingDays));
     prev.disabled = true;
     next.disabled = true;
-    for (let target = firstMonth; target <= lastMonth; target = addMonths(target, 1)) {
+    const preferred = options.preferredDay ?? null;
+    const startMonth =
+      preferred !== null && monthOf(preferred) > firstMonth && monthOf(preferred) <= lastMonth
+        ? monthOf(preferred)
+        : firstMonth;
+    for (let target = startMonth; target <= lastMonth; target = addMonths(target, 1)) {
       let days: Set<string>;
       try {
         days = await loadMonth(target);
@@ -323,12 +333,16 @@ export function singleView(options: SingleViewOptions): HTMLElement {
         return;
       }
       if (signal.aborted) return;
-      const [firstFree] = [...days].sort();
-      if (firstFree !== undefined) {
+      const sorted = [...days].sort();
+      const choice =
+        preferred !== null && days.has(preferred)
+          ? preferred
+          : (sorted.find((day) => preferred === null || day >= preferred) ?? sorted[0]);
+      if (choice !== undefined) {
         month = target;
         renderGrid(target, days);
         calendarStatus.replaceChildren();
-        selectDay(firstFree);
+        selectDay(choice);
         return;
       }
     }
