@@ -1225,7 +1225,7 @@
           "description": "Oberfläche zur Pflege von Öffnungszeiten und Ausnahmen.",
           "order": 3,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-5-2",
             "task-2-5"
@@ -1234,13 +1234,25 @@
             "Öffnungszeiten je Wochentag sind pflegbar",
             "Ausnahmen wie Urlaub können angelegt und entfernt werden"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T20:10:51Z",
+          "completedAt": "2026-10-09T20:20:25Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "37 neue Portal-Tests (107 im Portal): lokale Zeiten (Daten, Raster, Tagesaddition, heutiges Datum je Zeitzone, lesbare Zeiträume), Wochenplan-Logik (24:00 als bis Mitternacht, Sortierung, Pflicht/Raster/Ende nach Beginn, Überschneidung, angrenzende Fenster, Kopieren, Änderungserkennung), Ausnahmen-Logik (ganztägig bis einschließlich, mit Uhrzeit, Ende vor Beginn, Pflichtfelder, Notizlänge); Seite: Anzeige, Öffnen eines Tages und Speichern mit CSRF-Token, bis Mitternacht, Zeitfenster hinzufügen/entfernen, Prüfung mit Fokus, Überschneidung und Zurücksetzen der Meldung, Übertragen auf andere Tage, Verwerfen, Speicherfehler; Ausnahmen-Liste, Leerzustand, Urlaub mit Warnung zu betroffenen Buchungen, zusätzliche Öffnung mit Uhrzeit, Prüfung, Enddatum folgt Startdatum, Entfernen nach Rückfrage, Fehler beim Entfernen. Manuell im Browser-Pane gegen API und Docker-MongoDB: Montag 09–12 und 13–18 Uhr (Überschneidung erkannt), auf Di–Fr übertragen und gespeichert; öffentliche Slots für einen Testschnitt beginnen danach um 09:00 Uhr; echte Buchung am 12.10. 10:00 Uhr, ganztägige Sperrzeit am 12.10. zeigt Warnung „1 bestätigte Buchung“, öffentliche Slots am 12.10. leer; zusätzliche Öffnung Sa 17.10. 10–14 Uhr liefert Slots 10:00–13:30; Sperrzeit nach Rückfrage entfernt; mobile Ansicht 375 px. Dabei korrigiert: feste Beschriftung „Geöffnet“ statt wechselnder Beschriftung, Rahmen des Übertragen-Bereichs, veraltete Tagesmeldung nach Korrektur. Tippen in native Zeitfelder war mit dem Testwerkzeug nicht möglich; Werte wurden per Formularwert gesetzt, Tastaturbedienung ist durch Tests abgedeckt. Keine Passwörter oder Teilnehmerdaten im API-Log. Alle Testdaten (außer settings und _migrations) entfernt, Server per PID beendet. Quality Gate grün (lint, typecheck, 887 Tests, format:check).",
+            "commands": [
+              "pnpm --filter @fw-booking/portal test",
+              "pnpm --filter @fw-booking/portal build",
+              "pnpm --filter @fw-booking/api dev",
+              "pnpm --filter @fw-booking/portal dev",
+              "pnpm --filter @fw-booking/api owner:create -- --email …",
+              "curl POST /api/owner/services, POST /api/public/calendars/:id/bookings, GET …/slots",
+              "Browser-Pane: http://127.0.0.1:5173/oeffnungszeiten (Wochenplan, Übertragen, Ausnahmen, mobil)",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T20:20:25Z"
           }
         },
         {

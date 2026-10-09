@@ -546,3 +546,17 @@ Eigene Seiten für Liste (`/angebote`), Anlegen (`/angebote/neu`) und Bearbeiten
 ### Begründung
 
 Eigene Adressen funktionieren auf dem Handy, mit Zurück-Taste und Neuladen erwartbar. Pfeil-Knöpfe sind ohne zusätzliche Bibliothek per Tastatur und Touch bedienbar. Stunden und Tage entsprechen der Sprache der Owner; die Umrechnung bleibt im Portal, die API speichert unverändert Minuten. Gemeinsame Schemas halten Portal und API bei denselben Regeln; Teiländerungen halten das Audit-Log aussagekräftig (nur tatsächlich geänderte Felder).
+
+## 2026-10-09 – Öffnungszeiten und Ausnahmen im Portal
+
+### Kontext
+
+Owner pflegen den Wochenplan für Einzeltermine (mehrere Zeitfenster je Tag, `24:00` als Tagesende) und Ausnahmen wie Urlaub oder zusätzliche Öffnungen. Die API ersetzt den Wochenplan als Ganzes, Ausnahmen werden nur angelegt oder gelöscht und speichern lokale Zeitpunkte mit ausschließlichem Ende. Gesperrte Zeiten sagen bestehende Buchungen nicht ab.
+
+### Entscheidung
+
+Eine Seite `/oeffnungszeiten` mit den Abschnitten Wochenplan und Ausnahmen. Uhrzeiten über native Zeitfelder in 5-Minuten-Schritten; `24:00` als eigene Option „bis Mitternacht“. Kopierhilfe „Auf andere Tage übertragen“. Der Plan wird mit einem Knopf als Ganzes gespeichert, mit Hinweis auf ungespeicherte Änderungen. Ausnahmen standardmäßig ganztägig mit Datum von–bis einschließlich (Ende intern 00:00 am Folgetag), wahlweise mit Uhrzeiten; Entfernen mit Rückfrage im Eintrag. Betroffene Buchungen meldet das Portal als Warnung mit Verweis auf „Buchungen“.
+
+### Begründung
+
+Wochenplan und Ausnahmen gehören fachlich zusammen und bleiben unter einem Menüpunkt. Native Zeitfelder bieten auf dem Handy die Systemauswahl und am Desktop Tastatureingabe ohne zusätzliche Bibliothek. Ganztägige Eingabe mit einschließlichem Enddatum entspricht der Art, wie Owner über Urlaub sprechen, und vermeidet das fehleranfällige „00:00 am Folgetag“. Das Speichern als Ganzes entspricht der API und verhindert halb gespeicherte Wochen.

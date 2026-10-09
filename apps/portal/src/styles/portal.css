@@ -14,6 +14,8 @@
   --color-error-bg: #fdecea;
   --color-success: #1e6b34;
   --color-success-bg: #e6f4ea;
+  --color-warning: #7a4a00;
+  --color-warning-bg: #fff4d6;
   --color-focus: #f0a500;
   --radius: 8px;
   --space-1: 0.25rem;
@@ -38,6 +40,8 @@
     --color-error-bg: #3b1411;
     --color-success: #a8dab5;
     --color-success-bg: #10291a;
+    --color-warning: #ffd88a;
+    --color-warning-bg: #33260a;
   }
 }
 
@@ -619,4 +623,191 @@ fieldset.field legend,
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+
+/* Öffnungszeiten und Ausnahmen */
+
+.section {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.section:last-child {
+  border-bottom: 0;
+}
+
+h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.25rem;
+}
+
+h3 {
+  margin: var(--space-6) 0 var(--space-3);
+  font-size: 1.05rem;
+}
+
+.form h3 {
+  margin: 0;
+}
+
+.form-wide {
+  max-width: 48rem;
+}
+
+.alert-warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.button-small {
+  min-height: 2.25rem;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.875rem;
+}
+
+.button-danger {
+  border-color: var(--color-error);
+  background: var(--color-error);
+  color: var(--color-surface);
+}
+
+.week {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.week-day {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.week-day > fieldset:not(.copy-panel) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.week-day-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.week-day-name {
+  min-width: 7rem;
+  font-weight: 600;
+}
+
+.week-windows {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.time-window {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-3);
+}
+
+.time-window .field input {
+  width: 8rem;
+}
+
+.time-midnight {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+}
+
+.time-window-midnight {
+  min-height: 2.75rem;
+  align-items: center;
+}
+
+.time-window-midnight input {
+  margin: 0;
+}
+
+.week-day-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.copy-panel {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+}
+
+.copy-panel legend {
+  padding: 0 var(--space-1);
+  font-weight: 600;
+}
+
+.copy-panel-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.exception-form {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  gap: var(--space-4);
+}
+
+.choice-group-inline {
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.choice-group-inline legend {
+  grid-column: 1 / -1;
+}
+
+.field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+}
+
+.field-row .field input {
+  width: 11rem;
+}
+
+.badge-closed {
+  margin-left: 0;
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.badge-open {
+  margin-left: 0;
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.item-note {
+  margin-left: var(--space-2);
+}
+
+.item-actions .muted {
+  align-self: center;
 }
