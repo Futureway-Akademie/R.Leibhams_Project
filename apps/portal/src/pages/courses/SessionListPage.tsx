@@ -3,12 +3,8 @@ import type { Service, Session } from '@fw-booking/shared';
 import type { ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { addDays, formatLocalDate, todayIn } from '../../availability/time.js';
-import {
-  SESSION_STATUS_LABELS,
-  formatOccupancy,
-  isFull,
-  sessionLocalStart,
-} from '../../courses/format.js';
+import { SESSION_STATUS_LABELS, sessionLocalStart } from '../../courses/format.js';
+import { Occupancy } from '../../courses/Occupancy.js';
 import { useSessions } from '../../courses/queries.js';
 import { formatWeek, weekDates, weekFromParam } from '../../courses/week.js';
 import { useTimeZone } from '../../installation.js';
@@ -180,21 +176,7 @@ function SessionItem({ session, title }: { session: Session; title: string }): R
           {session.ruleId && <span className="badge">Regel</span>}
         </span>
       </div>
-      {!cancelled && (
-        <div className="occupancy">
-          <span className={isFull(session) ? 'occupancy-text occupancy-full' : 'occupancy-text'}>
-            {formatOccupancy(session)}
-            {isFull(session) && ' · ausgebucht'}
-          </span>
-          {/* Natives Element statt Inline-Style (verträglich mit strikter Content-Security-Policy). */}
-          <progress
-            className="occupancy-bar"
-            max={session.capacity}
-            value={session.bookedCount}
-            aria-hidden="true"
-          />
-        </div>
-      )}
+      {!cancelled && <Occupancy session={session} />}
     </li>
   );
 }

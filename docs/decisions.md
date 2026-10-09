@@ -617,3 +617,17 @@ Eigener kleiner Service Worker statt `vite-plugin-pwa`/Workbox: Ein Vite-Plugin 
 
 Eine feste Dateiliste macht die Regel „nur statische Assets“ prüfbar (Build-Test vergleicht Liste und Ausgabe) und schließt API-Antworten im Cache aus, statt sie über Laufzeitregeln auszufiltern; ohne zusätzliche Abhängigkeit bleibt der Service Worker bei etwa 1,4 KB. Der Hinweis mit Knopf verhindert, dass ein automatisches Neuladen halb ausgefüllte Formulare verwirft. Ein fester Name und ein neutrales Icon genügen für das MVP; eine Anpassung je Kunde gehört bei Bedarf zum Deployment (Phase 7). Die Installationsfunktionen der Browser reichen aus und sparen plattformabhängige Sonderwege (`beforeinstallprompt` gibt es nur in Chromium).
 
+## 2026-10-10 – Mobile Startansicht
+
+### Kontext
+
+Auf dem Handy will der Owner vor allem sehen, was heute und als Nächstes ansteht und wie voll die Kurse sind. Die installierte App startet auf `/`. Die Daten liefern die vorhandenen Owner-Endpunkte für Kurstermine und Buchungen.
+
+### Entscheidung
+
+Die Übersicht `/` wird zur Startansicht auf allen Bildschirmgrößen; die Kacheln entfallen. Sie zeigt einen Tag, durch den man tageweise blättert (Datum in der Adresse); ist der Tag leer oder vorbei, zeigt „Als Nächstes“ den nächsten Termin. Kurstermine erscheinen mit Belegung, Einzeltermine mit Angebot, beide ohne Teilnehmernamen; Namen und Kontakte zeigt erst die Detailansicht. Die Daten werden beim Zurückkehren in die App, alle 5 Minuten und per Knopf aktualisiert; „Stand“ nennt die letzte erfolgreiche Aktualisierung.
+
+### Begründung
+
+Ein Tag pro Bildschirm passt zur Handynutzung und hält die Abfragen klein; „Als Nächstes“ vermeidet leere Bildschirme am Abend oder an freien Tagen. Ohne Namen in der Liste bleiben personenbezogene Daten auf einem oft öffentlich genutzten Handy-Bildschirm minimal. Automatische Aktualisierung plus „Stand“ zeigen ehrlich, wie aktuell die Belegung ist; der Offline-Zustand folgt in task-6-3.
+

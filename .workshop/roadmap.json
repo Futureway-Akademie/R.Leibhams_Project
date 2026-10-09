@@ -1410,7 +1410,7 @@
           "description": "Heute und als Nächstes anstehende Termine mit Belegung, Navigation zu den nächsten Tagen und Zeitpunkt der letzten Aktualisierung.",
           "order": 2,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-6-1",
             "task-5-5"
@@ -1420,13 +1420,20 @@
             "Teilnehmernamen sind in der Detailansicht sichtbar",
             "Zeitpunkt der letzten erfolgreichen Aktualisierung wird angezeigt"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T22:40:06Z",
+          "completedAt": "2026-10-09T22:48:54Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "Übersicht `/` ist die Startansicht: ein Tag (?tag=) mit Blättern und „Heute“, Kurstermine mit Belegung, bestätigte Einzeltermine ohne Namen, Hinweise „Läuft gerade“/„Vorbei“, Block „Als Nächstes“ bei leerem oder vergangenem Tag, „Stand: HH:MM Uhr“, Knopf „Aktualisieren“, automatische Aktualisierung alle 5 Minuten und bei Rückkehr, Warnung mit letztem Stand bei fehlgeschlagener Aktualisierung. 218 Portal-Tests (21 neu: Tagesplan-Logik, Seitentests inkl. Detailansicht mit Namen, Blättern, Als Nächstes, Fehlerfälle, automatische Aktualisierung mit Fake-Timern und Gegenprobe ohne Intervall). Manuell im Browser-Pane in Handybreite (375 px) mit echter API und Docker-MongoDB: Testangebote, Kurstermine und Buchungen über die öffentliche API; Startansicht zeigt Einzeltermin ohne Namen und Kurs mit „3 / 12 Plätze“, Kurs-Detail mit drei Teilnehmernamen, leerer Tag mit „Als Nächstes“ und „Tag anzeigen“, neue Buchung nach „Aktualisieren“ als „4 / 12 Plätze“, gestoppte API ergibt Warnung mit letztem Stand. Testdaten danach vollständig entfernt.",
+            "commands": [
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm --filter @fw-booking/portal test",
+              "pnpm format:check",
+              "pnpm --filter @fw-booking/portal build",
+              "Browser-Pane (375 px) gegen pnpm --filter @fw-booking/portal dev und lokale API"
+            ],
+            "checkedAt": "2026-10-09T22:48:54Z"
           }
         },
         {
@@ -1435,7 +1442,7 @@
           "description": "Klarer Offline-Zustand und Prüfung, dass personenbezogene Daten nicht gecacht werden.",
           "order": 3,
           "weight": 1,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-6-2"
           ],

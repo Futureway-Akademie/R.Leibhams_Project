@@ -291,30 +291,6 @@ a {
   padding: var(--space-6) var(--space-4);
 }
 
-.tile-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-  gap: var(--space-3);
-  margin: var(--space-6) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.tile {
-  display: block;
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.tile:hover {
-  border-color: var(--color-primary);
-}
-
 /* Gemeinsame Bausteine der Verwaltungsseiten */
 
 .visually-hidden {
@@ -1135,4 +1111,27 @@ select[aria-invalid='true'] {
 .update-notice p {
   margin: 0;
   font-weight: 600;
+}
+
+/* Startansicht (Übersicht) */
+
+.refresh {
+  align-items: center;
+}
+
+.refresh-time {
+  font-size: 0.875rem;
+}
+
+.item-past .item-title,
+.item-past .occupancy-text {
+  color: var(--color-muted);
+}
+
+.next-up {
+  margin-top: var(--space-6);
+}
+
+.next-up-day {
+  margin-top: var(--space-3);
 }

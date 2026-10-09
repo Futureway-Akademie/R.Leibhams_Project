@@ -22,8 +22,14 @@ export const ruleKey = (id: string) => [...rulesKey, id] as const;
 
 const path = (base: string, id: string): string => `${base}/${encodeURIComponent(id)}`;
 
+/** Optionen für Ansichten, die sich ohne Neuladen aktuell halten (Startansicht). */
+export interface RefreshOptions {
+  /** Abstand der automatischen Aktualisierung in ms; ohne Angabe keine. */
+  refetchInterval?: number;
+}
+
 /** Kurstermine eines Zeitraums (lokale Daten, einschließlich), auch abgesagte. */
-export function useSessions(from: string, to: string) {
+export function useSessions(from: string, to: string, options: RefreshOptions = {}) {
   const api = useApi();
   return useQuery({
     queryKey: sessionsWeekKey(from, to),
@@ -31,6 +37,7 @@ export function useSessions(from: string, to: string) {
       const query = new URLSearchParams({ from, to, includeCancelled: 'true' });
       return api.get<Session[]>(`/api/owner/sessions?${query.toString()}`, { signal });
     },
+    ...options,
   });
 }
 

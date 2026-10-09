@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Booking, OwnerBookingCancelResult, SessionParticipants } from '@fw-booking/shared';
 import { useApi } from '../auth/hooks.js';
 import { sessionsKey } from '../courses/queries.js';
+import type { RefreshOptions } from '../courses/queries.js';
 import type { DateRange } from './range.js';
 
 export const bookingsKey = ['owner', 'bookings'] as const;
@@ -16,7 +17,12 @@ export const participantsKey = (sessionId: string) =>
 /** Nicht mehr angezeigte Teilnehmerdaten schnell aus dem Speicher entfernen. */
 const PERSONAL_DATA_GC_MS = 60_000;
 
-export function useBookings(range: DateRange, serviceId: string, all: boolean) {
+export function useBookings(
+  range: DateRange,
+  serviceId: string,
+  all: boolean,
+  options: RefreshOptions = {},
+) {
   const api = useApi();
   return useQuery({
     queryKey: bookingListKey(range, serviceId, all),
@@ -27,6 +33,7 @@ export function useBookings(range: DateRange, serviceId: string, all: boolean) {
       return api.get<Booking[]>(`/api/owner/bookings?${query.toString()}`, { signal });
     },
     gcTime: PERSONAL_DATA_GC_MS,
+    ...options,
   });
 }
 
