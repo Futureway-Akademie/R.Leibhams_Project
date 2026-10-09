@@ -9,6 +9,11 @@
       "types": "./src/index.ts",
       "development": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./format": {
+      "types": "./src/time/format.ts",
+      "development": "./src/time/format.ts",
+      "default": "./dist/time/format.js"
     }
   },
   "scripts": {

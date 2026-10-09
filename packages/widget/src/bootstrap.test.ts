@@ -25,6 +25,9 @@ function container(calendarId: string, extra = ''): string {
   return `<div data-fw-booking-calendar="${calendarId}" data-fw-booking-api="${API}" ${extra}></div>`;
 }
 
+/** fetch, das nie antwortet: Die Tests prüfen nur die Initialisierung, keine Netzwerkzugriffe. */
+const pendingFetch: typeof fetch = () => new Promise<Response>(() => undefined);
+
 function roots(win: TestWindow): HTMLElement[] {
   return [...win.document.querySelectorAll<HTMLElement>('.fw-booking-root')];
 }
@@ -36,7 +39,7 @@ afterEach(() => {
 describe('install', () => {
   it('initialisiert alle Container einer Seite unabhängig voneinander', async () => {
     const win = await page(container(CAL_A, 'id="a"') + container(CAL_B, 'id="b"'));
-    const api = install(win);
+    const api = install(win, { fetch: pendingFetch });
     const a = win.document.getElementById('a');
     const b = win.document.getElementById('b');
     if (!a || !b) throw new Error('Container fehlen');
@@ -44,8 +47,8 @@ describe('install', () => {
     const instanceA = api.mount(a);
     const instanceB = api.mount(b);
     expect(instanceA).not.toBe(instanceB);
-    expect(instanceA.config).toEqual({ calendarId: CAL_A, apiUrl: API });
-    expect(instanceB.config).toEqual({ calendarId: CAL_B, apiUrl: API });
+    expect(instanceA.config).toEqual({ calendarId: CAL_A, apiUrl: API, serviceId: null });
+    expect(instanceB.config).toEqual({ calendarId: CAL_B, apiUrl: API, serviceId: null });
     expect(instanceA.api).not.toBe(instanceB.api);
     expect(instanceA.root.parentElement).toBe(a);
     expect(instanceB.root.parentElement).toBe(b);
@@ -64,9 +67,8 @@ describe('install', () => {
     );
     const win = await page(container(CAL_A, 'id="a"') + container(CAL_B, 'id="b"'));
     const api = install(win, { fetch: fetchMock, autoScan: false });
-    const [a, b] = api.scan();
-    await a?.api?.getServices();
-    await b?.api?.getServices();
+    // Jede Instanz lädt beim Start die Angebote ihres eigenen Kalenders.
+    expect(api.scan()).toHaveLength(2);
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
       `${API}/api/public/calendars/${CAL_A}/services`,
       `${API}/api/public/calendars/${CAL_B}/services`,
@@ -75,14 +77,14 @@ describe('install', () => {
 
   it('erkennt Container beim Laden automatisch', async () => {
     const win = await page(container(CAL_A) + '<p>Text</p>' + container(CAL_B));
-    install(win);
+    install(win, { fetch: pendingFetch });
     expect(roots(win)).toHaveLength(2);
   });
 
   it('wartet auf DOMContentLoaded, solange die Seite noch lädt', async () => {
     const win = await page(container(CAL_A));
     Object.defineProperty(win.document, 'readyState', { value: 'loading', configurable: true });
-    install(win);
+    install(win, { fetch: pendingFetch });
     expect(roots(win)).toHaveLength(0);
 
     win.document.dispatchEvent(new win.Event('DOMContentLoaded'));
@@ -94,8 +96,8 @@ describe('install', () => {
 
   it('installiert sich bei mehrfacher Ausführung nur einmal', async () => {
     const win = await page(container(CAL_A) + container(CAL_B));
-    const first = install(win);
-    const second = install(win);
+    const first = install(win, { fetch: pendingFetch });
+    const second = install(win, { fetch: pendingFetch });
     expect(second).toBe(first);
     expect(win.FwBooking).toBe(first);
     expect(first.version).toBe(WIDGET_VERSION);
@@ -104,7 +106,7 @@ describe('install', () => {
 
   it('initialisiert bei erneutem Scan oder Mount keinen Container doppelt', async () => {
     const win = await page(container(CAL_A, 'id="a"'));
-    const api = install(win);
+    const api = install(win, { fetch: pendingFetch });
     const a = win.document.getElementById('a');
     if (!a) throw new Error('Container fehlt');
     const instance = api.mount(a);
@@ -116,13 +118,13 @@ describe('install', () => {
 
   it('übernimmt keine Container, die ein anderes Widget-Bundle bereits initialisiert hat', async () => {
     const win = await page(container(CAL_A, `${STATE_ATTRIBUTE}="ready"`));
-    install(win);
+    install(win, { fetch: pendingFetch });
     expect(roots(win)).toHaveLength(0);
   });
 
   it('initialisiert nachträglich eingefügte Container über scan()', async () => {
     const win = await page('<section id="tab"></section>');
-    const api = install(win);
+    const api = install(win, { fetch: pendingFetch });
     const tab = win.document.getElementById('tab');
     if (!tab) throw new Error('Bereich fehlt');
     tab.innerHTML = container(CAL_A) + container(CAL_B);
@@ -134,7 +136,7 @@ describe('install', () => {
 
   it('scan() berücksichtigt auch das übergebene Element selbst', async () => {
     const win = await page(container(CAL_A, 'id="a"'));
-    const api = install(win, { autoScan: false });
+    const api = install(win, { fetch: pendingFetch, autoScan: false });
     const a = win.document.getElementById('a');
     if (!a) throw new Error('Container fehlt');
     expect(api.scan(a)).toHaveLength(1);
@@ -142,7 +144,7 @@ describe('install', () => {
 
   it('erlaubt nach unmount() eine neue Initialisierung', async () => {
     const win = await page(container(CAL_A, 'id="a"'));
-    const api = install(win);
+    const api = install(win, { fetch: pendingFetch });
     const a = win.document.getElementById('a');
     if (!a) throw new Error('Container fehlt');
     expect(api.unmount(a)).toBe(true);
@@ -156,7 +158,7 @@ describe('install', () => {
     const win = await page(
       `<div id="x" data-fw-booking-calendar="&lt;img src=x onerror=alert(1)&gt;" data-fw-booking-api="${API}"></div>`,
     );
-    install(win);
+    install(win, { fetch: pendingFetch });
     const x = win.document.getElementById('x');
     if (!x) throw new Error('Container fehlt');
 
@@ -172,7 +174,7 @@ describe('install', () => {
     const win = await page(
       `<div data-fw-booking-calendar="${CAL_A}" data-fw-booking-api="${API}"><noscript>Bitte JavaScript aktivieren</noscript></div>`,
     );
-    install(win);
+    install(win, { fetch: pendingFetch });
     const [root] = roots(win);
     expect(root?.parentElement?.children).toHaveLength(1);
     expect(root?.querySelector('[role="status"]')?.textContent).toBe(
@@ -182,7 +184,7 @@ describe('install', () => {
 
   it('stellt window.FwBooking unveränderlich bereit', async () => {
     const win = await page('');
-    const api = install(win);
+    const api = install(win, { fetch: pendingFetch });
     expect(Object.isFrozen(api)).toBe(true);
     expect(Object.keys(win)).not.toContain('FwBooking');
   });

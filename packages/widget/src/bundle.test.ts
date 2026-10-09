@@ -5,7 +5,7 @@ import { JSDOM } from 'jsdom';
 import { build } from 'vite';
 import type { Rolldown } from 'vite';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { WIDGET_FILE_NAME, WIDGET_SIZE_LIMIT_BYTES } from '../vite.config.js';
+import { ALLOWED_SHARED_FILES, WIDGET_FILE_NAME, WIDGET_SIZE_LIMIT_BYTES } from '../vite.config.js';
 
 const CONFIG_FILE = fileURLToPath(new URL('../vite.config.ts', import.meta.url));
 const WIDGET_SRC = fileURLToPath(new URL('./', import.meta.url));
@@ -38,13 +38,15 @@ describe('Widget-Bundle', () => {
     expect(chunk.dynamicImports).toEqual([]);
   });
 
-  it('enthält nur Code aus packages/widget/src', () => {
+  it('enthält nur Code aus packages/widget/src und freigegebene shared-Dateien', () => {
     const modules = Object.keys(chunk.modules).filter((id) => !id.startsWith('\0'));
     expect(modules.length).toBeGreaterThan(0);
-    for (const id of modules) expect(id.startsWith(WIDGET_SRC)).toBe(true);
-    expect(modules.some((id) => /node_modules|apps[\\/]portal|packages[\\/]shared/.test(id))).toBe(
-      false,
-    );
+    for (const id of modules) {
+      expect(id.startsWith(WIDGET_SRC) || ALLOWED_SHARED_FILES.includes(id)).toBe(true);
+    }
+    expect(modules.some((id) => /node_modules|apps[\\/]portal|zod|temporal/i.test(id))).toBe(false);
+    // Von shared nur die Intl-Formatierung, keine Schemas oder Temporal-Umrechnung.
+    expect(modules.filter((id) => !id.startsWith(WIDGET_SRC))).toEqual(ALLOWED_SHARED_FILES);
   });
 
   it('bleibt unter dem Größenlimit', () => {

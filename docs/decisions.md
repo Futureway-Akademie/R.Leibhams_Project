@@ -433,3 +433,18 @@ Eine einzelne IIFE-Datei aus einem eigenen Vite-Library-Build (Ziel ES2020). Kon
 ### Begründung
 
 Ein klassisches Script funktioniert ohne `type="module"` mit `wp_enqueue_script` und auf jeder Seite. Datenattribute machen jeden Container selbstbeschreibend, passend zu Shortcode und Block, und erlauben unterschiedliche Kalender auf einer Seite. Ein dauerhafter Beobachter auf der ganzen Seite wäre für die seltenen nachträglich eingefügten Container unverhältnismäßig; `scan()` genügt dafür. Nur Typ-Importe halten das Bundle bei rund 4 KB statt Zod und Temporal mitzuliefern; die API prüft ihre Antworten ohnehin selbst gegen die strikten Schemas.
+
+## 2026-10-09 – Kursansicht im Widget
+
+### Kontext
+
+Besucher sollen Kurstermine mit freien Plätzen sehen und einen Termin wählen können; das Buchungsformular folgt erst in task-4-4. Die öffentliche API liefert Kurstermine je Angebot für höchstens 62 Tage pro Abfrage. Ein Widget-Container kann alle Angebote oder ein bestimmtes zeigen sollen.
+
+### Entscheidung
+
+Ohne weiteres Attribut zeigt der Container eine Angebotsliste, mit `data-fw-booking-service` direkt ein festes Angebot. Die Kursansicht lädt die nächsten 62 Tage und auf „Weitere Termine“ jeweils die folgenden 62 Tage; ein leerer Zeitraum beendet die Liste. Ausgebuchte Termine bleiben sichtbar, sind aber nicht wählbar. Eine Auswahl wird in der Instanz gehalten und als Ereignis `fw-booking:select` am Container gemeldet. Zeiten werden mit der Intl-Formatierung aus `@fw-booking/shared/format` dargestellt, die als einzige shared-Datei im Bundle freigegeben ist.
+
+### Begründung
+
+Die Angebotsliste genügt für die meisten Seiten mit einem Shortcode, das feste Angebot erlaubt Kursseiten je Angebot. Nachladen in API-großen Zeiträumen hält Anfragen klein und macht spätere Termine erreichbar, ohne Monatsnavigation. Sichtbare ausgebuchte Termine zeigen, dass der Kurs stattfindet. Das Ereignis entkoppelt die Ansicht vom späteren Formular und lässt einbindende Seiten reagieren. Ein leerer Zeitraum als Ende ist eine bewusste Vereinfachung: Lücken von mehr als 62 Tagen innerhalb des Buchungshorizonts beenden die Liste vorzeitig.
+

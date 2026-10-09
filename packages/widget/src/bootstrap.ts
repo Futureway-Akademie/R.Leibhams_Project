@@ -37,7 +37,10 @@ export function install(
 
   const doc = win.document;
   const instances = new WeakMap<HTMLElement, WidgetInstance>();
-  const instanceOptions: InstanceOptions = options.fetch ? { fetch: options.fetch } : {};
+  const instanceOptions: InstanceOptions = {
+    ...(options.fetch ? { fetch: options.fetch } : {}),
+    ...(options.now ? { now: options.now } : {}),
+  };
 
   function mount(container: HTMLElement): WidgetInstance {
     const current = instances.get(container);

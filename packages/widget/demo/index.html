@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Widget-Demo</title>
     <!-- Lokale Prüfseite für das gebaute Bundle (pnpm --filter @fw-booking/widget demo).
-         Optional: ?calendar=cal_…&api=http://127.0.0.1:3000 verwendet echte Werte. -->
+         Optional: ?calendar=cal_…&api=http://127.0.0.1:3000 verwendet echte Werte,
+         &service=<Angebots-ID> legt Kalender B auf ein Angebot fest. -->
     <script>
       const params = new URLSearchParams(location.search);
       window.demoConfig = {
         calendar: params.get('calendar') ?? 'cal_DemoDemoDemoDemo',
         api: params.get('api') ?? 'http://127.0.0.1:3000',
+        service: params.get('service'),
       };
     </script>
     <!-- Absichtlich doppelt eingebunden, wie bei mehreren Shortcodes auf einer Seite. -->
@@ -23,7 +25,7 @@
     <h2>Kalender A</h2>
     <div id="a" class="demo-calendar"></div>
 
-    <h2>Kalender B</h2>
+    <h2>Kalender B (optional festes Angebot)</h2>
     <div id="b" class="demo-calendar"></div>
 
     <h2>Fehlerhafte Einbindung</h2>
@@ -47,6 +49,14 @@
         el.setAttribute('data-fw-booking-calendar', window.demoConfig.calendar);
         el.setAttribute('data-fw-booking-api', window.demoConfig.api);
       }
+      if (window.demoConfig.service) {
+        document
+          .getElementById('b')
+          .setAttribute('data-fw-booking-service', window.demoConfig.service);
+      }
+      document.addEventListener('fw-booking:select', (event) => {
+        console.info('fw-booking:select', event.target.id, event.detail);
+      });
       document.getElementById('add').addEventListener('click', () => {
         const el = document.createElement('div');
         el.setAttribute('data-fw-booking-calendar', window.demoConfig.calendar);

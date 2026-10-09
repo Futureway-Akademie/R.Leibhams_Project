@@ -1,15 +1,19 @@
 // Konfiguration eines Widget-Containers aus seinen Datenattributen:
 // <div data-fw-booking-calendar="cal_…" data-fw-booking-api="https://buchung.example.de"></div>
+// Optional legt data-fw-booking-service="<Angebots-ID>" den Container auf ein Angebot fest.
 
 /** Selektor, an dem das Widget seine Container erkennt. */
 export const CONTAINER_SELECTOR = '[data-fw-booking-calendar]';
 
 const CALENDAR_ID_PATTERN = /^cal_[A-Za-z0-9_-]{16,}$/;
+const SERVICE_ID_PATTERN = /^[0-9a-f]{24}$/;
 
 export interface WidgetConfig {
   calendarId: string;
   /** Basisadresse der Buchungs-API ohne abschließenden Schrägstrich. */
   apiUrl: string;
+  /** Festes Angebot; ohne Angabe zeigt das Widget alle Angebote zur Auswahl. */
+  serviceId: string | null;
 }
 
 export type ConfigResult = { ok: true; config: WidgetConfig } | { ok: false; reason: string };
@@ -23,7 +27,15 @@ export function readConfig(container: HTMLElement): ConfigResult {
   if (apiUrl === null) {
     return { ok: false, reason: 'data-fw-booking-api fehlt oder ist keine http(s)-Adresse' };
   }
-  return { ok: true, config: { calendarId, apiUrl } };
+  const rawService = container.dataset['fwBookingService']?.trim();
+  let serviceId: string | null = null;
+  if (rawService !== undefined && rawService !== '') {
+    if (!SERVICE_ID_PATTERN.test(rawService)) {
+      return { ok: false, reason: 'data-fw-booking-service ist keine gültige Angebots-ID' };
+    }
+    serviceId = rawService;
+  }
+  return { ok: true, config: { calendarId, apiUrl, serviceId } };
 }
 
 function parseApiUrl(value: string | undefined): string | null {

@@ -943,7 +943,7 @@
           "description": "Anzeige von Kursterminen mit freien Plätzen inklusive Lade-, Leer- und Fehlerzustand.",
           "order": 2,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-4-1",
             "task-2-8"
@@ -953,13 +953,21 @@
             "Lade-, Leer- und Fehlerzustände sind sichtbar",
             "API-Daten werden mit sicherer DOM-Erzeugung ausgegeben, nicht als HTML"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T09:50:44Z",
+          "completedAt": "2026-10-09T11:01:36Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "37 neue Widget-Tests (78 im Widget, 7 Dateien); API 315, Worker 98, DB 36, shared 147 unverändert grün. Ablauf: Ladezustand, Angebotsliste, Leerzustand ohne Angebote, Ladefehler mit erneutem Versuch, verständliche Meldungen für Netzwerk, 404, 429 mit Retry-After und sonstige Fehler, einzelnes Angebot direkt ohne Zurück, festes Angebot per data-fw-booking-service (auch unbekannt), Hinweis bei Einzelterminen. Kursansicht: Zeitraum ab heute in der Zeitzone der Installation (22:30 UTC = nächster Tag in Berlin), 62 Tage je Abfrage (entspricht MAX_AVAILABLE_DATES_RANGE_DAYS), Gruppierung nach lokalem Tag, Zeiten über Sommer-/Winterzeit korrekt, Ort, Pluralformen, ausgebuchte Termine deaktiviert mit Ausgebucht, Leer- und Ladezustand, Nachladen mit lückenlosen Zeiträumen und Ende bei leerem Zeitraum, Fehler mit erneutem Versuch, Zeitzonenhinweis nur bei abweichender Gerätezeitzone, Texte aus API-Daten (Titel, Beschreibung, Ort) nie als HTML. Auswahl mit aria-pressed, instance.selection und bubbelndem Ereignis fw-booking:select, Zurücksetzen beim Wechsel zur Liste; Abbruch laufender Anfragen beim Verlassen und Entfernen, späte Antworten verworfen. Bundle 11,9 KB (gzip 4,8 KB), nur Widget-Module und shared/time/format.ts. Manuell im Browser-Pane gegen lokale API (temporärer Owner, drei Angebote, fünf Yoga-Kurstermine, einer per bookedCount ausgebucht): Angebotsliste in zwei Containern, Kursansicht mit drei Tagen und korrekten Zeiten (auch nach Zeitumstellung), HTML in der Beschreibung als Text, ausgebuchter Termin deaktiviert, Weitere Termine lud den Dezember-Termin, danach Ende der Liste, Auswahl mit Ereignis nur am eigenen Container, Zurück setzt die Auswahl zurück, Pilates leer, Haarschnitt mit Hinweis, festes Angebot nachträglich über scan() ohne Zurück, bei gestoppter API Fehler mit erneutem Versuch. Danach Testdaten, Owner und Sitzung entfernt (Collection-Zählung wie vorher), Server beendet, .env unverändert. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/widget test",
+              "Browser-Pane: Demo-Seite gegen lokale API mit temporären Testdaten (CORS_ALLOWED_ORIGINS per Umgebungsvariable)",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T11:01:36Z"
           }
         },
         {

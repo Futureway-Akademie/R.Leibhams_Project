@@ -19,7 +19,7 @@ describe('readConfig', () => {
     );
     expect(result).toEqual({
       ok: true,
-      config: { calendarId: CALENDAR_ID, apiUrl: 'https://buchung.example.de' },
+      config: { calendarId: CALENDAR_ID, apiUrl: 'https://buchung.example.de', serviceId: null },
     });
   });
 
@@ -32,7 +32,7 @@ describe('readConfig', () => {
     );
     expect(result).toEqual({
       ok: true,
-      config: { calendarId: CALENDAR_ID, apiUrl: 'https://example.de/buchung' },
+      config: { calendarId: CALENDAR_ID, apiUrl: 'https://example.de/buchung', serviceId: null },
     });
   });
 
@@ -68,4 +68,50 @@ describe('readConfig', () => {
     const result = readConfig(container(attributes));
     expect(result).toEqual({ ok: false, reason: expect.stringContaining('api') as string });
   });
+
+  it('liest ein optional festgelegtes Angebot', () => {
+    const result = readConfig(
+      container({
+        'data-fw-booking-calendar': CALENDAR_ID,
+        'data-fw-booking-api': 'https://x.de',
+        'data-fw-booking-service': '66f1a2b3c4d5e6f708192a3b',
+      }),
+    );
+    expect(result).toEqual({
+      ok: true,
+      config: {
+        calendarId: CALENDAR_ID,
+        apiUrl: 'https://x.de',
+        serviceId: '66f1a2b3c4d5e6f708192a3b',
+      },
+    });
+  });
+
+  it('behandelt ein leeres Angebotsattribut wie ein fehlendes', () => {
+    const result = readConfig(
+      container({
+        'data-fw-booking-calendar': CALENDAR_ID,
+        'data-fw-booking-api': 'https://x.de',
+        'data-fw-booking-service': ' ',
+      }),
+    );
+    expect(result).toMatchObject({ ok: true, config: { serviceId: null } });
+  });
+
+  it.each(['yoga', '66F1A2B3C4D5E6F708192A3B', '66f1a2b3c4d5e6f708192a3', '<b>x</b>'])(
+    'lehnt die Angebots-ID %s ab',
+    (serviceId) => {
+      const result = readConfig(
+        container({
+          'data-fw-booking-calendar': CALENDAR_ID,
+          'data-fw-booking-api': 'https://x.de',
+          'data-fw-booking-service': serviceId,
+        }),
+      );
+      expect(result).toEqual({
+        ok: false,
+        reason: 'data-fw-booking-service ist keine gültige Angebots-ID',
+      });
+    },
+  );
 });
