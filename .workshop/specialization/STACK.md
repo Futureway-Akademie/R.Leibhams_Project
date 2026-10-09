@@ -5,7 +5,7 @@
 | Monorepo | pnpm 12 (Corepack) mit `pnpm -r`, TypeScript 6.0, ESLint 9 (typescript-eslint, typbasiert), Prettier 3 |
 | API | NestJS 12 mit Express, offizieller MongoDB-Treiber 7, nestjs-pino, argon2 (Argon2id), cookie-parser; Build und Tests mit SWC (`apps/api`) |
 | Hintergrund-Worker | Node.js, TypeScript, MongoDB-Outbox mit Job-Leases (`apps/worker`) |
-| Verwaltungsportal/PWA | React, Vite, TypeScript (`apps/portal`) |
+| Verwaltungsportal/PWA | React 19, Vite, TypeScript, React Router, TanStack Query, eigenes CSS; Tests mit Testing Library (`apps/portal`) |
 | Öffentliches Widget | TypeScript, eigener schlanker Vite-Library-Build, Light DOM (`packages/widget`) |
 | Gemeinsame Typen | TypeScript, Validierungsschemas (`packages/shared`) |
 | WordPress-Anbindung | PHP-Plugin mit Shortcode und Block (`plugins/wordpress`) |

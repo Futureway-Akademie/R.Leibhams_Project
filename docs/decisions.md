@@ -518,3 +518,17 @@ Plugin `fw-booking` mit Shortcode und dynamischem Block (`block.json`, Editor-Sc
 
 Ohne Build-Schritt bleibt das Plugin klein und ohne zusätzliche Toolchain wartbar. Eigene Assets funktionieren mit strikter Content-Security-Policy und ohne Zugriff auf weitere Server; Updates des Widgets kommen mit dem Plugin. Die Ausgabe in `wp_head` mit Priorität 1 ist der früheste Zeitpunkt, den ein Plugin zuverlässig erreicht. Docker entspricht echten Installationen (Apache, PHP, MariaDB) und braucht kein lokales PHP. Im Test fiel auf, dass `esc_url_raw` unzulässige Adressen stillschweigend leert; das gilt jetzt als Fehler statt als geleertes Feld.
 
+
+## 2026-10-09 – Portal-Gerüst und Anmeldung
+
+### Kontext
+
+Owner sollen Angebote, Öffnungszeiten, Kurstermine, Buchungen und Benachrichtigungsfehler in einem eigenen Portal pflegen, das später als PWA installiert wird. Die Owner-API arbeitet mit einem HttpOnly-Sitzungs-Cookie (`SameSite=Lax`) und einem CSRF-Token je Sitzung; Owner-Routen haben bewusst keine CORS-Freigabe. Zugangstoken dürfen nicht im JavaScript-Speicher liegen.
+
+### Entscheidung
+
+React-Portal mit Vite und TypeScript in `apps/portal`, Routing mit React Router (Datenrouter, `createBrowserRouter`), Serverdaten mit TanStack Query, eigenes CSS mit Custom Properties (mobil zuerst, heller und dunkler Modus nach Systemeinstellung). Portal und API laufen unter derselben Origin: lokal leitet der Vite-Dev-Server `/api` an die API weiter (`PORTAL_API_TARGET`, Standard `http://127.0.0.1:3000`), in Produktion liefert derselbe Host Portal und `/api` aus (Festlegung der Auslieferung in task-7-4). Der API-Client sendet nur relative `/api/…`-Pfade mit `credentials: 'same-origin'`, `cache: 'no-store'` und ohne Referrer; ändernde Anfragen immer als JSON mit `X-CSRF-Token`. Owner und CSRF-Token stehen nur im Query-Cache im Arbeitsspeicher und werden nach dem Neuladen über `GET /api/auth/session` geholt. Jede Owner-Anfrage mit 401 beendet die Sitzung im Portal und leert alle Owner-Daten aus dem Cache; geschützte Seiten leiten dann zum Login und kehren nach der Anmeldung zur ursprünglichen Seite zurück (nur Pfade innerhalb des Portals). Logout wiederholt einen 403 (veraltetes CSRF-Token) einmal mit neu gelesener Sitzung. ESLint prüft das Portal zusätzlich mit `eslint-plugin-react-hooks`.
+
+### Begründung
+
+Gleiche Origin vermeidet CORS mit Credentials und Cookie-Ausnahmen; das `SameSite=Lax`-Cookie und der CSRF-Schutz der API funktionieren unverändert. Ein Token, das JavaScript nie sieht, kann auch kein eingeschleustes Script auslesen; das CSRF-Token allein erlaubt ohne Cookie keine Anfrage. React Router und TanStack Query sind verbreitet und decken geschützte Routen, Neuladen und Mutationen der folgenden Verwaltungsseiten ab, ohne eigene Infrastruktur. Eigenes CSS hält das Bundle klein und passt zur späteren PWA. Das Leeren des Caches bei Sitzungsende verhindert, dass Teilnehmerdaten eines Owners nach dem Abmelden im Speicher bleiben.

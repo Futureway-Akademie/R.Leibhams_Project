@@ -1147,7 +1147,7 @@
       "description": "React-Portal für Angebote, Öffnungszeiten, Kurstermine, Buchungen und Benachrichtigungsfehler.",
       "order": 5,
       "weight": 12,
-      "status": "ready",
+      "status": "in_progress",
       "tasks": [
         {
           "id": "task-5-1",
@@ -1155,7 +1155,7 @@
           "description": "React/Vite-Portal mit Routing, API-Client sowie Login und Logout.",
           "order": 1,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-2-3"
           ],
@@ -1164,13 +1164,24 @@
             "Geschützte Seiten leiten ohne Session zum Login",
             "Keine Zugangstoken im JavaScript-Speicher"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T15:48:40Z",
+          "completedAt": "2026-10-09T15:59:33Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "35 Portal-Tests (Vitest, jsdom, Testing Library): API-Client (same-origin, no-store, kein Referrer, JSON und X-CSRF-Token nur bei ändernden Anfragen, ApiError mit Status/Code/Retry-After, Netzwerkfehler, Zeitlimit, Abbruch, nur /api/-Pfade), Weiterleitungsziel nur innerhalb des Portals, Weiterleitung geschützter Seiten zum Login mit Rückkehr, Login mit Prüfung vor dem Absenden, Meldungen bei 401/429/500/Netzwerk, Doppelklick-Schutz, bestehende Sitzung überspringt Login, Logout mit CSRF-Token und Leeren aller Owner-Daten, 403-Wiederholung, Fehler beim Logout, 401 einer Owner-Anfrage führt zum Login, Server nicht erreichbar mit erneutem Versuch, unbekannte Pfade; keine Werte in localStorage, sessionStorage oder document.cookie. Manuell im Browser-Pane gegen API und Docker-MongoDB über den Vite-Proxy: temporärer Owner, Aufruf /angebote?x=1 leitet zum Login, falsches Passwort mit Meldung, Anmeldung führt zurück zu /angebote?x=1, document.cookie leer und Browser-Speicher leer, Cookie fw_session HttpOnly und SameSite=Lax mit Cache-Control no-store, Neuladen behält die Sitzung, mobile Ansicht 375 px (aktiver Menüpunkt wird sichtbar gescrollt), Logout 204 mit Löschen der Sitzung in authSessions, geschützte Seite danach wieder beim Login; keine Passwörter oder Tokens in API- und Portal-Log. Owner, Sitzungen, Login-Versuche und Audit-Einträge danach entfernt, Server per PID beendet. Build 139 KB gzip. Quality Gate grün (lint inkl. eslint-plugin-react-hooks, typecheck, 815 Tests, format:check).",
+            "commands": [
+              "pnpm --filter @fw-booking/portal test",
+              "pnpm --filter @fw-booking/portal build",
+              "pnpm --filter @fw-booking/api dev",
+              "pnpm --filter @fw-booking/portal dev",
+              "pnpm --filter @fw-booking/api owner:create -- --email …",
+              "Browser-Pane: http://127.0.0.1:5173 (Login, Weiterleitung, Logout, mobile Ansicht)",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T15:59:33Z"
           }
         },
         {
@@ -1179,7 +1190,7 @@
           "description": "Oberfläche für Angebote inklusive Wahl der Terminart.",
           "order": 2,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-5-1",
             "task-2-4"
@@ -1277,7 +1288,7 @@
           "description": "Anzeige endgültig fehlgeschlagener Benachrichtigungen im Portal.",
           "order": 6,
           "weight": 1,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-5-1",
             "task-3-5"
@@ -1302,7 +1313,7 @@
       "description": "Installierbare mobile Terminübersicht mit sicherer, länger gültiger Sitzung und klarem Offline-Zustand.",
       "order": 6,
       "weight": 7,
-      "status": "planned",
+      "status": "ready",
       "tasks": [
         {
           "id": "task-6-1",
@@ -1310,7 +1321,7 @@
           "description": "Web-App-Manifest und Service Worker, der ausschließlich statische App-Dateien cacht.",
           "order": 1,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-5-1"
           ],
