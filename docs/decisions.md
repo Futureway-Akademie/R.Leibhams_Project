@@ -588,3 +588,17 @@ Owner brauchen eine Übersicht aller Buchungen beider Terminarten, die Teilnehme
 ### Begründung
 
 Ein frei wählbarer Zeitraum deckt Tagesplanung und Rückblick ab, die Schnellauswahl die häufigsten Fälle. Nur Namen in der Übersicht halten die Liste übersichtlich und zeigen Kontaktdaten erst dort, wo sie gebraucht werden (Datenminimierung, auch bei geteiltem Bildschirm). Fenstertitel landen im Verlauf und in Tab-Leisten; deshalb ohne Namen. Die kurze Aufbewahrung im Speicher begrenzt, wie lange personenbezogene Daten nach dem Verlassen einer Seite im Browser verbleiben.
+
+## 2026-10-10 – Fehlgeschlagene Benachrichtigungen im Portal
+
+### Kontext
+
+Mails an Teilnehmer können endgültig scheitern (z. B. Mailserver dauerhaft nicht erreichbar, Adresse abgelehnt). Der Owner muss davon erfahren, um den Versand erneut anzustoßen oder Teilnehmer auf anderem Weg zu informieren. Die API liefert Kategorie, Zeitpunkt, Versuche und eine Kurzübersicht der Buchung; Kategorien tragen einen Hinweis, ob ein erneuter Versuch sinnvoll ist.
+
+### Entscheidung
+
+Seite `/benachrichtigungen` mit Filter nach Art. Die Zahl offener Fehlschläge steht in der Hauptnavigation und als Hinweis auf der Übersicht; sie wird beim Zurückkehren zum Tab und alle 5 Minuten aktualisiert. „Erneut senden“ erscheint nur bei Ursachen, bei denen ein neuer Versuch Aussicht hat; sonst nennt der Eintrag einen anderen Weg mit Telefon-Link. Ausblenden erfordert eine kurze Rückfrage, weil die Mail danach nicht mehr versendet wird.
+
+### Begründung
+
+Fehlschläge sind selten, aber wichtig; die Zahl in der Navigation macht sie sichtbar, ohne eine eigene Benachrichtigungsfunktion zu bauen. Aussichtslose Wiederholungen würden nur erneut scheitern und Vertrauen in die Schaltfläche kosten. Die Rückfrage verhindert versehentliches Ausblenden. Die Abfrage enthält Kontaktdaten; sie liegt nur im Arbeitsspeicher, wird beim Abmelden verworfen und nach dem Verlassen nicht lange gehalten.

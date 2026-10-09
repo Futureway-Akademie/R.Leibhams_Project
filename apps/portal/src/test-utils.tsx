@@ -14,6 +14,15 @@ export const SESSION: Session = {
   csrfToken: 'csrf-token-aus-der-sitzung',
 };
 
+/**
+ * Anfragen, die das Layout auf jeder Seite stellt (Zahl fehlgeschlagener Benachrichtigungen);
+ * einzelne Tests können sie überschreiben.
+ */
+const DEFAULT_HANDLERS: Record<string, Handler> = {
+  'GET /api/owner/notifications/failed': () =>
+    json({ notifications: [], total: 0, retryingCount: 0 }),
+};
+
 export interface Call {
   method: string;
   path: string;
@@ -38,7 +47,7 @@ export function fakeFetch(handlers: Record<string, Handler | Handler[]>): {
 } {
   const calls: Call[] = [];
   const queues = new Map(
-    Object.entries(handlers).map(([key, value]) => [
+    Object.entries({ ...DEFAULT_HANDLERS, ...handlers }).map(([key, value]) => [
       key,
       Array.isArray(value) ? [...value] : value,
     ]),

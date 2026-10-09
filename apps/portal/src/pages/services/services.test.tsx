@@ -369,6 +369,6 @@ describe('Angebot bearbeiten', () => {
     expect(
       await screen.findByRole('heading', { name: 'Angebot nicht gefunden' }),
     ).toBeInTheDocument();
-    expect(calls.some((c) => c.path.startsWith('/api/owner/'))).toBe(false);
+    expect(calls.some((c) => c.path.startsWith('/api/owner/services'))).toBe(false);
   });
 });

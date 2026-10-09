@@ -4,6 +4,9 @@ export interface NavItem {
   label: string;
 }
 
+/** Bereich mit Zahl fehlgeschlagener Benachrichtigungen in der Navigation. */
+export const NOTIFICATIONS_PATH = '/benachrichtigungen';
+
 export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/', label: 'Übersicht' },
   { path: '/angebote', label: 'Angebote' },

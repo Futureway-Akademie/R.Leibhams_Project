@@ -2,13 +2,15 @@ import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 import { useLogout, useSession } from '../auth/hooks.js';
-import { NAV_ITEMS } from './navigation.js';
+import { useFailedNotifications } from '../notifications/queries.js';
+import { NAV_ITEMS, NOTIFICATIONS_PATH } from './navigation.js';
 
 export function AppLayout(): ReactNode {
   const session = useSession();
   const logout = useLogout();
   const { pathname } = useLocation();
   const navRef = useRef<HTMLElement>(null);
+  const failedCount = useFailedNotifications().data?.total ?? 0;
 
   // Auf schmalen Bildschirmen scrollt die Navigation waagerecht: aktiven Bereich sichtbar halten.
   useEffect(() => {
@@ -45,6 +47,15 @@ export function AppLayout(): ReactNode {
             <li key={item.path}>
               <NavLink to={item.path} end={item.path === '/'}>
                 {item.label}
+                {item.path === NOTIFICATIONS_PATH && failedCount > 0 && (
+                  <>
+                    {' '}
+                    <span className="nav-badge" aria-hidden="true">
+                      {failedCount}
+                    </span>
+                    <span className="visually-hidden">{`(${String(failedCount)} fehlgeschlagen)`}</span>
+                  </>
+                )}
               </NavLink>
             </li>
           ))}

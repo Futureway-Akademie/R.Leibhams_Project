@@ -1147,7 +1147,7 @@
       "description": "React-Portal für Angebote, Öffnungszeiten, Kurstermine, Buchungen und Benachrichtigungsfehler.",
       "order": 5,
       "weight": 12,
-      "status": "in_progress",
+      "status": "completed",
       "tasks": [
         {
           "id": "task-5-1",
@@ -1334,7 +1334,7 @@
           "description": "Anzeige endgültig fehlgeschlagener Benachrichtigungen im Portal.",
           "order": 6,
           "weight": 1,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-5-1",
             "task-3-5"
@@ -1342,13 +1342,26 @@
           "definitionOfDone": [
             "Fehlgeschlagene Benachrichtigungen werden mit Typ und Zeitpunkt angezeigt"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T22:00:04Z",
+          "completedAt": "2026-10-09T22:07:55Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "10 neue Portal-Tests (169 im Portal): Anzeige mit Typ, Zeitpunkt, Ursache, Versuchen und Buchung (inkl. gelöschter Buchung), Hinweis auf automatische Wiederholungen, Erneut senden nur bei sinnvollen Ursachen mit Telefon-Hinweis sonst, Erneut senden mit CSRF-Token und Neuladen, Ausblenden erst nach Rückfrage, Fehler am Eintrag, Filter nach Art in der Adresse, Leerzustand, gekürzte Liste, Zahl in der Navigation und Hinweis auf der Übersicht bzw. ohne Fehlschläge keine Zahl. Manuell im Browser-Pane gegen API, Worker, Docker-MongoDB und Mailpit: zwei echte Buchungen, deren Bestätigungsaufträge in MongoDB auf failed gesetzt wurden (smtp_unavailable nach 6 Versuchen, recipient_rejected nach 1 Versuch; endgültige Fehlschläge entstehen im Betrieb erst nach Stunden Backoff); Zahl 2 in Navigation und Hinweis auf der Übersicht; Liste zeigt beide Ursachen, beim abgelehnten Empfänger nur Ausblenden mit Telefon-Hinweis; Erneut senden reiht ein, Zahl sinkt auf 1, Worker versendet die Bestätigung (Mail in Mailpit, Auftrag sent); Ausblenden nach Rückfrage setzt dismissedAt, Zahl verschwindet. Dabei korrigiert: fehlendes Leerzeichen in der Screenreader-Beschriftung der Zahl (jetzt eigener versteckter Text, Zahl aria-hidden) und Leerzustandstext („Keine offenen fehlgeschlagenen Benachrichtigungen.“). Keine Passwörter oder Teilnehmerdaten in API- und Worker-Log. Testmail aus Mailpit und alle Testdaten (außer settings und _migrations) entfernt; übrig gebliebene Watcher-Prozesse früherer Tests per PID beendet. Quality Gate grün (lint, typecheck, 949 Tests, format:check).",
+            "commands": [
+              "pnpm --filter @fw-booking/portal test",
+              "pnpm --filter @fw-booking/api dev",
+              "pnpm --filter @fw-booking/portal dev",
+              "pnpm --filter @fw-booking/worker dev (mit MAIL_FROM_ADDRESS, BUSINESS_NAME, MANAGE_PAGE_URL)",
+              "pnpm --filter @fw-booking/api owner:create -- --email …",
+              "mongosh: Bestätigungsaufträge auf failed gesetzt (Simulation)",
+              "Browser-Pane: http://127.0.0.1:5173/benachrichtigungen (Erneut senden, Ausblenden, Navigation)",
+              "Mailpit-API: Suche und Löschen der Testmail",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T22:07:55Z"
           }
         }
       ]
