@@ -20,6 +20,8 @@ export class ApiError extends Error {
   readonly code: string | null;
   /** Sekunden aus `Retry-After` bei 429. */
   readonly retryAfterSeconds: number | null;
+  /** Feldpfade ungültiger Eingaben bei 400 (z. B. `bookingRules.horizonDays`), ohne Werte. */
+  readonly fieldPaths: readonly string[];
 
   constructor(
     kind: ApiErrorKind,
@@ -27,6 +29,7 @@ export class ApiError extends Error {
     message: string,
     code: string | null = null,
     retryAfterSeconds: number | null = null,
+    fieldPaths: readonly string[] = [],
   ) {
     super(message);
     this.name = 'ApiError';
@@ -34,6 +37,7 @@ export class ApiError extends Error {
     this.status = status;
     this.code = code;
     this.retryAfterSeconds = retryAfterSeconds;
+    this.fieldPaths = fieldPaths;
   }
 }
 
@@ -133,10 +137,18 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 async function toApiError(response: Response): Promise<ApiError> {
   let message = `HTTP ${String(response.status)}`;
   let code: string | null = null;
+  let fieldPaths: string[] = [];
   try {
-    const data = (await response.json()) as { message?: unknown; code?: unknown };
+    const data = (await response.json()) as { message?: unknown; code?: unknown; issues?: unknown };
     if (typeof data.message === 'string') message = data.message;
     if (typeof data.code === 'string') code = data.code;
+    if (Array.isArray(data.issues)) {
+      fieldPaths = data.issues
+        .map((issue: unknown) =>
+          typeof issue === 'object' && issue !== null && 'path' in issue ? issue.path : null,
+        )
+        .filter((path): path is string => typeof path === 'string');
+    }
   } catch {
     // Antwort ohne JSON-Body: Status genügt.
   }
@@ -147,5 +159,6 @@ async function toApiError(response: Response): Promise<ApiError> {
     message,
     code,
     Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : null,
+    fieldPaths,
   );
 }

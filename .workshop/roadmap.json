@@ -1190,7 +1190,7 @@
           "description": "Oberfläche für Angebote inklusive Wahl der Terminart.",
           "order": 2,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-5-1",
             "task-2-4"
@@ -1199,13 +1199,24 @@
             "Angebote beider Terminarten können angelegt und bearbeitet werden",
             "Felder passen sich der gewählten Terminart an"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T19:02:58Z",
+          "completedAt": "2026-10-09T19:13:18Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "35 neue Portal-Tests (70 im Portal): Formularlogik (Einzeltermin ohne Kapazität, Gruppenkurs mit Kapazität, Stunden→Minuten mit Dezimalkomma, deutsche Feldmeldungen, Grenzen der Dauer, Darstellung gespeicherter Werte, Teiländerung nur mit geänderten Feldern und Terminart, Feldpfade aus der API), Verschieben auch bei Filter, Dauerformat; Seiten: Liste mit Reihenfolge, Terminart, Dauer, Plätzen und Status, Filter in der Adresse, Leer- und Fehlerzustand, Verschieben mit vollständiger Reihenfolge und CSRF-Token, Wiederherstellen bei Fehler, Aktivieren/Deaktivieren ohne Löschen, Anlegen beider Terminarten mit angepassten Feldern, Prüfung vor dem Absenden mit Fokus, Fristen im Bereich „Erweitert“, API-Fehler am Feld, Bearbeiten mit nur angezeigter Terminart und Teiländerung, ohne Änderung keine Anfrage, unbekannte und ungültige IDs. Manuell im Browser-Pane gegen API und Docker-MongoDB: Leerzustand, Einzeltermin (ungültige Dauer abgelehnt, dann angelegt), Gruppenkurs mit 12 Plätzen und Horizont 120 Tage, Verschieben (Fokus bleibt am Angebot), Deaktivieren und Filter „Inaktiv“, Bearbeiten (Plätze 15, Horizont zurück auf Standard; in MongoDB und Audit-Log nur diese Felder), mobile Ansicht 375 px; dabei Checkbox-Ausrichtung, Aussehen deaktivierter Knöpfe und eine Feldbeschriftung korrigiert. Keine Passwörter oder Angebotsdaten im API-Log. Testdaten, Owner, Sitzungen und Audit-Einträge entfernt, Server per PID beendet. Quality Gate grün (lint, typecheck, 850 Tests, format:check).",
+            "commands": [
+              "pnpm --filter @fw-booking/portal test",
+              "pnpm --filter @fw-booking/portal build",
+              "pnpm --filter @fw-booking/api dev",
+              "pnpm --filter @fw-booking/portal dev",
+              "pnpm --filter @fw-booking/api owner:create -- --email …",
+              "Browser-Pane: http://127.0.0.1:5173/angebote (Anlegen, Bearbeiten, Verschieben, Deaktivieren, mobil)",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T19:13:18Z"
           }
         },
         {
@@ -1214,7 +1225,7 @@
           "description": "Oberfläche zur Pflege von Öffnungszeiten und Ausnahmen.",
           "order": 3,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-5-2",
             "task-2-5"
@@ -1238,7 +1249,7 @@
           "description": "Oberfläche für Kurstermine und wiederkehrende Regeln inklusive Sperren und Absagen.",
           "order": 4,
           "weight": 3,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-5-2",
             "task-2-7",

@@ -532,3 +532,17 @@ React-Portal mit Vite und TypeScript in `apps/portal`, Routing mit React Router 
 ### Begründung
 
 Gleiche Origin vermeidet CORS mit Credentials und Cookie-Ausnahmen; das `SameSite=Lax`-Cookie und der CSRF-Schutz der API funktionieren unverändert. Ein Token, das JavaScript nie sieht, kann auch kein eingeschleustes Script auslesen; das CSRF-Token allein erlaubt ohne Cookie keine Anfrage. React Router und TanStack Query sind verbreitet und decken geschützte Routen, Neuladen und Mutationen der folgenden Verwaltungsseiten ab, ohne eigene Infrastruktur. Eigenes CSS hält das Bundle klein und passt zur späteren PWA. Das Leeren des Caches bei Sitzungsende verhindert, dass Teilnehmerdaten eines Owners nach dem Abmelden im Speicher bleiben.
+
+## 2026-10-09 – Angebote im Portal verwalten
+
+### Kontext
+
+Owner legen Einzeltermine und Gruppenkurse im Portal an und bearbeiten sie; die Felder hängen von der Terminart ab, die nach dem Anlegen unveränderlich ist. Die Reihenfolge-Aktion der API erwartet alle Angebote; Fristen sind je Angebot optional und in Minuten gespeichert.
+
+### Entscheidung
+
+Eigene Seiten für Liste (`/angebote`), Anlegen (`/angebote/neu`) und Bearbeiten (`/angebote/:id`) statt Dialogen. Reihenfolge über Pfeil-Knöpfe „nach oben/unten“, die immer die vollständige Liste senden; bei aktivem Filter wird am sichtbaren Nachbarn vorbei verschoben, die Anzeige ändert sich sofort und wird bei Fehlern zurückgesetzt. Deaktivieren statt Löschen direkt in der Liste. Fristen im eingeklappten Bereich „Erweitert“ mit „Standard der Installation“ je Frist; Vorlauf und Storno-/Umbuchungsfrist werden in Stunden eingegeben, der Horizont in Tagen. Formulare mit eigenem Zustand, geprüft mit den Schemas aus `@fw-booking/shared` und eigenen deutschen Meldungen je Feld; Bearbeiten sendet nur geänderte Felder.
+
+### Begründung
+
+Eigene Adressen funktionieren auf dem Handy, mit Zurück-Taste und Neuladen erwartbar. Pfeil-Knöpfe sind ohne zusätzliche Bibliothek per Tastatur und Touch bedienbar. Stunden und Tage entsprechen der Sprache der Owner; die Umrechnung bleibt im Portal, die API speichert unverändert Minuten. Gemeinsame Schemas halten Portal und API bei denselben Regeln; Teiländerungen halten das Audit-Log aussagekräftig (nur tatsächlich geänderte Felder).

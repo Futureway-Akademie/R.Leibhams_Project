@@ -72,6 +72,24 @@ describe('createApiClient', () => {
     expect(error).toMatchObject({ status: 502, message: 'HTTP 502', retryAfterSeconds: null });
   });
 
+  it('übernimmt Feldpfade ungültiger Eingaben aus 400-Antworten', async () => {
+    const { fetch } = fakeFetch({
+      'POST /api/owner/x': () =>
+        json(
+          {
+            message: 'Ungültige Eingabe',
+            issues: [{ path: 'title', message: 'x' }, { path: 'bookingRules.horizonDays' }, {}],
+          },
+          400,
+        ),
+    });
+    const api = createApiClient({ getCsrfToken: () => 'csrf', fetch });
+    await expect(api.post('/api/owner/x', {})).rejects.toMatchObject({
+      status: 400,
+      fieldPaths: ['title', 'bookingRules.horizonDays'],
+    });
+  });
+
   it('meldet Netzwerkfehler und Zeitüberschreitung', async () => {
     const api = createApiClient({
       getCsrfToken: () => null,

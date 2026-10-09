@@ -7,6 +7,11 @@ import { HomePage } from './pages/HomePage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PlaceholderPage } from './pages/PlaceholderPage.js';
+import { EditServicePage, NewServicePage } from './pages/services/ServiceFormPage.js';
+import { ServiceListPage } from './pages/services/ServiceListPage.js';
+
+/** Bereiche mit eigenen Seiten; die übrigen Einträge der Navigation sind noch Platzhalter. */
+const IMPLEMENTED = new Set(['/', '/angebote']);
 
 export const routes: RouteObject[] = [
   { path: LOGIN_PATH, element: <LoginPage /> },
@@ -18,7 +23,15 @@ export const routes: RouteObject[] = [
         element: <AppLayout />,
         children: [
           { index: true, element: <HomePage /> },
-          ...NAV_ITEMS.filter((item) => item.path !== '/').map((item) => ({
+          {
+            path: '/angebote',
+            children: [
+              { index: true, element: <ServiceListPage /> },
+              { path: 'neu', element: <NewServicePage /> },
+              { path: ':serviceId', element: <EditServicePage /> },
+            ],
+          },
+          ...NAV_ITEMS.filter((item) => !IMPLEMENTED.has(item.path)).map((item) => ({
             path: item.path,
             element: <PlaceholderPage title={item.label} />,
           })),
