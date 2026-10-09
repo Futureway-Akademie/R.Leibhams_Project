@@ -5,7 +5,15 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/coverage/**', '.workshop/**'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/coverage/**',
+      '.workshop/**',
+      // Ins WordPress-Plugin kopiertes, gebautes Widget (pnpm wp:assets).
+      'plugins/wordpress/fw-booking/assets/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   {
@@ -20,7 +28,7 @@ export default tseslint.config(
     rules: { '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }] },
   },
   {
-    files: ['packages/widget/**', 'apps/portal/**'],
+    files: ['packages/widget/**', 'apps/portal/**', 'plugins/wordpress/fw-booking/**/*.js'],
     languageOptions: { globals: { ...globals.browser } },
   },
   { files: ['**/*.js', '**/*.mjs'], extends: [tseslint.configs.disableTypeChecked] },

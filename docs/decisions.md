@@ -504,3 +504,17 @@ Das Script liest das Token beim Ausführen, entfernt das Fragment sofort per `hi
 
 Fragmente werden nie an Server oder im Referrer übertragen; nach dem Entfernen können auch später ausgeführte Scripts die Adresse nicht mehr mit Token lesen. Ohne Speicherung im Browser bleibt kein Token zurück, das andere Scripts der Seite später finden könnten. Der markierte Container erlaubt Seiten mit mehreren Kalendern, der erste Container als Rückfall hält die Einbindung einfach. Der eigene Endpunkt liefert dieselben Tage, die manage/slots anbietet; der öffentliche Endpunkt hätte Tage ausgelassen, an denen nur die eigene Zeit frei wäre. Damit das Token auch vor Analytics-Scripts entfernt wird, soll das Script auf der Verwaltungsseite früh im `<head>` geladen werden (WordPress-Plugin, task-4-7).
 
+## 2026-10-09 – WordPress-Plugin
+
+### Kontext
+
+Kunden binden das Widget auf ihrer WordPress-Seite ein. Das Plugin soll nur ein Integrationsadapter sein: keine Buchungslogik, keine Zugangsdaten, Assets nur einmal laden, und auf der Verwaltungsseite muss das Widget-Script vor Analytics laufen, damit das Token aus dem Link entfernt ist. PHP war lokal nicht installiert.
+
+### Entscheidung
+
+Plugin `fw-booking` mit Shortcode und dynamischem Block (`block.json`, Editor-Script in reinem JavaScript ohne Build, gemeinsame serverseitige Ausgabe). Einstellungen speichern nur API-Adresse, Kalenderkennung und Seiten-IDs; ungültige Eingaben werden mit Meldung abgelehnt, der alte Wert bleibt. Die Widget-Dateien werden ins Plugin kopiert und von der eigenen Domain ausgeliefert; geladen werden sie nur auf Seiten mit Widget, im `<head>`, auf der Verwaltungsseite mit Priorität 1 vor allen anderen Scripts. Die Verwaltungsseite wird als Einstellung gewählt. Lokal läuft WordPress per Docker (`infra/docker-compose.wordpress.yml`, WP-CLI für Einrichtung und Tests).
+
+### Begründung
+
+Ohne Build-Schritt bleibt das Plugin klein und ohne zusätzliche Toolchain wartbar. Eigene Assets funktionieren mit strikter Content-Security-Policy und ohne Zugriff auf weitere Server; Updates des Widgets kommen mit dem Plugin. Die Ausgabe in `wp_head` mit Priorität 1 ist der früheste Zeitpunkt, den ein Plugin zuverlässig erreicht. Docker entspricht echten Installationen (Apache, PHP, MariaDB) und braucht kein lokales PHP. Im Test fiel auf, dass `esc_url_raw` unzulässige Adressen stillschweigend leert; das gilt jetzt als Fehler statt als geleertes Feld.
+

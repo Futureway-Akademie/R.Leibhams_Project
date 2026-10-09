@@ -24,8 +24,8 @@ apps/portal       Owner-Portal und PWA
 packages/db       Datenmodell, Collections, Migrationen (API und Worker)
 packages/shared   Domänentypen, Validierung, Zeitzonen
 packages/widget   Öffentliches Widget
-plugins/wordpress PHP-Plugin
-infra/            docker-compose (MongoDB, Mailpit)
+plugins/wordpress PHP-Plugin (Shortcode und Block)
+infra/            docker-compose (MongoDB, Mailpit; WordPress für Plugin-Tests)
 ```
 
 ## Terminarten
@@ -184,6 +184,10 @@ Einbindung je Kalender:
 - **Tastatur:** Monatskalender nach dem WAI-ARIA-Muster Datumsauswahl (ein Tab-Stopp, Pfeiltasten, Pos1/Ende, Bild↑/↓ über Monatsgrenzen), nicht verfügbare Tage fokussierbar mit `aria-disabled`; Uhrzeiten ebenfalls mit einem Tab-Stopp und Pfeiltasten. Sichtbarer Fokus über `:focus-visible`.
 - **Selbstverwaltung** (`src/manage/`): Das Script liest `#t=TOKEN` sofort beim Ausführen (`token.ts`), entfernt das Fragment per `history.replaceState` und behält das Token nur im Arbeitsspeicher. Die Verwaltungsansicht erscheint im Container mit `data-fw-booking-manage`, sonst im ersten Container (Token wird genau einmal vergeben). `manage-client.ts` sendet das Token nur im Header `X-Booking-Token` (gemeinsame Anfragelogik `createRequester`). Ansicht mit Angebot, Termin, Name, Ort, Status und Frist; Umbuchung über die bestehenden Auswahlansichten mit Verwaltungs-Reader (Einzeltermine starten am bisherigen Tag), Storno und Umbuchung nur über einen eigenen Bestätigungsschritt („Abbrechen“ zuerst, Storno-Schaltfläche als `confirm--danger`). Ereignisse `fw-booking:cancelled` und `fw-booking:rebooked` ohne Token und Teilnehmerdaten; nach Storno „Neuen Termin buchen“ im selben Container.
 - **Bundle-Wächter** im Vite-Build: Nur Module aus `packages/widget/src` und einzeln freigegebene shared-Dateien (`ALLOWED_SHARED_FILES`, derzeit nur `time/format.ts` über den Export `@fw-booking/shared/format`, reines Intl) sind erlaubt; aus dem shared-Index nur Typ-Importe, damit weder Zod noch Temporal-Polyfill ins Bundle gelangen. Der Build löst Workspace-Pakete über die Bedingung `development` aus dem Quellcode auf. Größenlimit 50 000 Bytes für das Script (derzeit rund 37 KB) und 20 000 Bytes für das Stylesheet (derzeit rund 13 KB). `src/bundle.test.ts` baut das Bundle und prüft Inhalt, Größe und dreifaches Einbinden in jsdom.
+
+## WordPress-Plugin
+
+`plugins/wordpress/fw-booking` (Details: `plugins/wordpress/README.md`) bindet das Widget per Shortcode `[fw_booking service="…"]` oder dynamischem Block `fw-booking/calendar` (`block.json`, Editor-Script ohne Build, serverseitiges Rendern über dieselbe Funktion) ein. Einstellungen unter „Einstellungen → Buchungskalender“ in der Option `fw_booking_settings`: API-Adresse, öffentliche Kalenderkennung, Datenschutzseite (Standard: WordPress-Datenschutzseite) und Verwaltungsseite – keine Zugangsdaten. Script und Stylesheet liegen im Plugin (`pnpm wp:assets` kopiert `packages/widget/dist`), werden einmal registriert und nur auf Seiten mit Widget geladen, dort im `<head>`; auf der Verwaltungsseite gibt `wp_head` (Priorität 1) das Script vor allen anderen Scripts aus und der erste Container erhält `data-fw-booking-manage`. Die Einstellungsseite nennt die Werte für `MANAGE_PAGE_URL` und `CORS_ALLOWED_ORIGINS` der Installation. Lokale Testinstanz: `infra/docker-compose.wordpress.yml` (`pnpm wp:up`, WordPress 7.1/PHP 8.4, MariaDB 11.8, WP-CLI).
 
 ## Öffentliche API (Widget)
 

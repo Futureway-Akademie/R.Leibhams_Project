@@ -1,0 +1,73 @@
+# Lokale WordPress-Instanz zum Testen des Plugins (task-4-7). Nicht für Produktion: Die
+# Datenbank-Zugangsdaten sind feste lokale Testwerte, die Datenbank ist nicht nach außen
+# veröffentlicht und WordPress nur an 127.0.0.1 gebunden.
+name: fw-booking-wp
+
+x-wordpress-env: &wordpress-env
+  WORDPRESS_DB_HOST: db
+  WORDPRESS_DB_NAME: wordpress
+  WORDPRESS_DB_USER: wordpress
+  WORDPRESS_DB_PASSWORD: wordpress-local-only
+  WORDPRESS_CONFIG_EXTRA: |
+    define('WP_ENVIRONMENT_TYPE', 'local');
+
+x-wordpress-volumes: &wordpress-volumes
+  - wp-html:/var/www/html
+  # Plugin direkt aus dem Repository (nur lesend): Änderungen wirken ohne Kopie.
+  - ../plugins/wordpress/fw-booking:/var/www/html/wp-content/plugins/fw-booking:ro
+
+services:
+  db:
+    image: mariadb:11.8.8
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: wordpress-local-only
+      MARIADB_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - wp-db:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      interval: 5s
+      timeout: 5s
+      start_period: 20s
+      retries: 20
+
+  wordpress:
+    image: wordpress:7.1-php8.4-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:8080:80'
+    environment: *wordpress-env
+    volumes: *wordpress-volumes
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'php',
+          '-r',
+          "exit(@file_get_contents('http://localhost/wp-login.php') === false ? 1 : 0);",
+        ]
+      interval: 5s
+      timeout: 5s
+      start_period: 20s
+      retries: 20
+
+  # Einmalige Befehle: docker compose -f infra/docker-compose.wordpress.yml run --rm cli wp …
+  cli:
+    image: wordpress:cli-2.12-php8.4
+    profiles: ['cli']
+    user: '33:33'
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    environment:
+      <<: *wordpress-env
+      HOME: /tmp
+    volumes: *wordpress-volumes
+
+volumes:
+  wp-db:
+  wp-html:

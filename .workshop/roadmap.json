@@ -903,7 +903,7 @@
       "description": "Schlankes TypeScript-Widget im Light DOM ohne iframe für Kurse und Einzeltermine, Self-Service-Seite und WordPress-Plugin.",
       "order": 4,
       "weight": 14,
-      "status": "in_progress",
+      "status": "completed",
       "tasks": [
         {
           "id": "task-4-1",
@@ -1110,7 +1110,7 @@
           "description": "Schlankes PHP-Plugin mit Shortcode und Block, Asset-Laden und Einstellungen für API-Adresse und Kalenderkennung.",
           "order": 7,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-4-5"
           ],
@@ -1120,13 +1120,23 @@
             "Plugin speichert keine Datenbank-Zugangsdaten",
             "Plugin ist in einer lokalen WordPress-Instanz getestet"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T14:39:49Z",
+          "completedAt": "2026-10-09T14:53:36Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "Plugin in lokaler WordPress-Instanz getestet (Docker: WordPress 7.1.3, PHP 8.4, MariaDB 11.8.8, WP-CLI 2.12; Standard-Theme). php -l für alle 7 PHP-Dateien fehlerfrei (pnpm wp:lint), ESLint für Editor-Script und Kopier-Script; Widget 181, API 318, Worker 98, DB 36, shared 147 Tests unverändert grün. Shortcode und Block auf derselben Seite erzeugen je einen Container mit escaped Datenattributen, Script und Stylesheet je genau einmal im head; feste Angebots-ID per Block-Attribut; Verwaltungsseite: Script als erstes Script im head (wp_head Priorität 1), erster Container mit data-fw-booking-manage. Ohne Einstellungen oder ohne veröffentlichte Datenschutzseite weder Container noch Assets für Besucher; ungültige Angebots-ID: Besucher nichts, Admin Hinweis mit Link zu den Einstellungen. Einstellungsseite: Werte, Anzeige von MANAGE_PAGE_URL und CORS_ALLOWED_ORIGINS, abschließender Schrägstrich entfernt; ungültige Kalenderkennung und javascript:-Adresse abgelehnt, alte Werte erhalten (behoben: doppelte Meldung, stilles Leeren der Adresse). Block im Editor registriert, gespeicherter Block gültig, Platzhalter und Seitenleiste mit Angebots-ID samt Hinweis bei ungültiger ID, keine Konsolenfehler. In der Datenbank nur Option fw_booking_settings mit API-Adresse, Kalenderkennung und Seiten-IDs; Deinstallation entfernt sie. Ende-zu-Ende mit API und Worker: Kursbuchung auf der WordPress-Seite per Klick und Tastatur, Bestätigungsmail mit Link auf /buchung-verwalten/, dort Token sofort aus der Adresse entfernt, Verwaltungsansicht und Storno mit Bestätigung. Danach Testdaten und Mails entfernt (Collection-Zählung wie vorher, Mailpit leer), API und Worker beendet, WordPress per wp:down gestoppt (Volume mit Testseiten bleibt), .env unverändert. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm wp:up",
+              "pnpm wp:lint",
+              "WP-CLI und Browser-Pane: Seiten mit Shortcode und Block, Einstellungen, Block-Editor, Deinstallation",
+              "Ende-zu-Ende: Buchung und Verwaltungslink über WordPress mit API, Worker und Mailpit",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T14:53:36Z"
           }
         }
       ]

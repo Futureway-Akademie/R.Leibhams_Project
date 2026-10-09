@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "fw-booking/calendar",
+  "version": "0.1.0",
+  "title": "Buchungskalender",
+  "category": "widgets",
+  "icon": "calendar-alt",
+  "description": "Kurse und Einzeltermine online buchen lassen.",
+  "keywords": ["Termin", "Buchung", "Kurs", "Kalender"],
+  "textdomain": "fw-booking",
+  "attributes": {
+    "service": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "multiple": true
+  },
+  "editorScript": "file:./editor.js",
+  "render": "file:./render.php"
+}

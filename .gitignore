@@ -31,3 +31,8 @@ coverage/
 
 # Testprotokolle (Lastlauf)
 logs/
+
+# WordPress-Plugin: Widget-Dateien werden per pnpm wp:assets aus packages/widget/dist kopiert
+plugins/wordpress/fw-booking/assets/fw-booking-widget.*
+# Lokale WordPress-Testinstanz: zufälliges Admin-Passwort
+infra/.wordpress-admin

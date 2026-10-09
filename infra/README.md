@@ -19,3 +19,17 @@ Voraussetzung: Docker Desktop (bzw. Docker Engine mit Compose v2).
 | Mailpit-Oberfläche | http://127.0.0.1:8025 |
 
 Die Verbindungswerte stehen auch in `.env.example`.
+
+## WordPress (Plugin-Tests)
+
+`docker-compose.wordpress.yml` startet eine lokale WordPress-Instanz (WordPress 7.1 mit PHP 8.4, MariaDB 11.8, WP-CLI) zum Testen des Plugins aus `plugins/wordpress/fw-booking`, das schreibgeschützt eingebunden ist. WordPress ist nur an `127.0.0.1:8080` gebunden; die Datenbank wird nicht veröffentlicht und nutzt feste lokale Testzugangsdaten.
+
+| Befehl | Wirkung |
+|---|---|
+| `pnpm wp:up` | Widget bauen und ins Plugin kopieren, Container starten, WordPress einrichten (Deutsch, Permalinks, Plugin aktiv) |
+| `pnpm wp:cli <befehl>` | WP-CLI im Container, z. B. `pnpm wp:cli plugin list` |
+| `pnpm wp:lint` | `php -l` für alle Plugin-Dateien |
+| `pnpm wp:down` | Container stoppen, Daten bleiben erhalten |
+| `pnpm wp:reset` | Container stoppen und **WordPress-Daten löschen** |
+
+Beim ersten Einrichten erzeugt `infra/wordpress-setup.sh` ein zufälliges Admin-Passwort und legt es nur in `infra/.wordpress-admin` ab (git-ignoriert). Admin-Oberfläche: http://localhost:8080/wp-admin/

@@ -17,7 +17,13 @@
     "infra:down": "docker compose -f infra/docker-compose.yml down",
     "infra:reset": "docker compose -f infra/docker-compose.yml down -v",
     "infra:logs": "docker compose -f infra/docker-compose.yml logs -f",
-    "infra:verify": "infra/verify.sh"
+    "infra:verify": "infra/verify.sh",
+    "wp:assets": "pnpm --filter @fw-booking/widget build && node plugins/wordpress/copy-widget-assets.mjs",
+    "wp:up": "pnpm wp:assets && docker compose -f infra/docker-compose.wordpress.yml up -d --wait && infra/wordpress-setup.sh",
+    "wp:down": "docker compose -f infra/docker-compose.wordpress.yml down",
+    "wp:reset": "docker compose -f infra/docker-compose.wordpress.yml down -v",
+    "wp:cli": "docker compose -f infra/docker-compose.wordpress.yml run --rm cli wp",
+    "wp:lint": "docker run --rm -v \"$PWD/plugins/wordpress/fw-booking:/plugin:ro\" wordpress:7.1-php8.4-apache sh -c 'find /plugin -name \"*.php\" -print0 | xargs -0 -n1 php -l'"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
