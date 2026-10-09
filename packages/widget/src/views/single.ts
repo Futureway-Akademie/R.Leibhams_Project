@@ -3,7 +3,7 @@
 // Jeder Tageswechsel lädt die Slots neu und bricht die vorherige Abfrage ab.
 import type { PublicService, PublicSlot } from '@fw-booking/shared';
 import { DEFAULT_LOCALE, differsFromDeviceTimeZone, formatTime } from '@fw-booking/shared/format';
-import type { ApiClient } from '../api/client.js';
+import type { AvailabilityReader } from '../api/client.js';
 import { button, el } from '../dom.js';
 import { loadErrorMessage, messages } from '../messages.js';
 import {
@@ -40,7 +40,7 @@ const DAY_PARTS = [
 
 export interface SingleViewOptions {
   doc: Document;
-  api: ApiClient;
+  api: AvailabilityReader;
   /** Wird abgebrochen, sobald die Ansicht verlassen oder das Widget entfernt wird. */
   signal: AbortSignal;
   service: PublicService;

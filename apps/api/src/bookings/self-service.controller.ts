@@ -2,6 +2,7 @@ import { Body, Controller, Get, Headers, HttpCode, Post, Query, Res } from '@nes
 import {
   BOOKING_TOKEN_HEADER,
   availableDatesQuerySchema,
+  availableDatesResponseSchema,
   publicSessionsResponseSchema,
   publicSlotsResponseSchema,
   selfServiceBookingSchema,
@@ -11,6 +12,7 @@ import {
 } from '@fw-booking/shared';
 import type {
   AvailableDatesQuery,
+  AvailableDatesResponse,
   PublicSessionsResponse,
   PublicSlotsResponse,
   SelfServiceBooking,
@@ -86,6 +88,21 @@ export class SelfServiceController {
       timeZone: result.timeZone,
       slots: result.slots.map((s) => ({ startsAt: iso(s.startsAt), endsAt: iso(s.endsAt) })),
     });
+  }
+
+  /** Tage mit möglichen neuen Startzeiten eines Einzeltermins (eigene Zeit gilt als frei). */
+  @Get('available-dates')
+  @RateLimit('manageRead')
+  async availableDates(
+    @Headers(BOOKING_TOKEN_HEADER) token: string | undefined,
+    @Query(new ZodValidationPipe(availableDatesQuerySchema)) query: AvailableDatesQuery,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AvailableDatesResponse> {
+    this.noStore(res);
+    return assertPublic(
+      availableDatesResponseSchema,
+      await this.rebooking.dateOptions(token, query),
+    );
   }
 
   /** Andere Kurstermine desselben Kurses. */

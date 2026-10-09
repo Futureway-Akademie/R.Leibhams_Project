@@ -1,4 +1,5 @@
 import {
+  availableDatesResponseSchema,
   publicSessionsResponseSchema,
   publicSlotsResponseSchema,
   selfServiceBookingSchema,
@@ -118,6 +119,48 @@ describe('Umbuchung eines Einzeltermins', () => {
     expect(options).not.toContain(slots[0]);
     expect(options).toContain(slots[3]); // 09:15 überschneidet die eigene Zeit
     expect(options).toHaveLength(slots.length - 1);
+  });
+
+  it('nennt Tage mit möglichen neuen Startzeiten, ohne Cache und mit der eigenen Zeit als frei', async () => {
+    const { service, slots, bookAt } = await singleSetup();
+    // slots[i] = 09:00 + 5·i Minuten (Berlin). Eigene Buchung 09:10–09:40.
+    const { token } = await bookAt(slots[2] ?? '');
+    const dates = (to: string) =>
+      withToken(http().get(`/api/public/manage/available-dates?from=${DATE}&to=${to}`), token);
+    const response = await dates(DATE).expect(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.headers['referrer-policy']).toBe('no-referrer');
+    expect(availableDatesResponseSchema.parse(response.body)).toMatchObject({ dates: [DATE] });
+
+    // Rest des Vormittags belegen (09:40–11:40); übrig bleiben 20 Minuten am Ende.
+    for (const i of [8, 14, 20, 26]) await bookAt(slots[i] ?? '');
+    const publicDates = await http().get(
+      `${base}/services/${service._id.toHexString()}/available-dates?from=${DATE}&to=${DATE}`,
+    );
+    expect(publicDates.body).toMatchObject({ dates: [] });
+    // Für die Umbuchung bleiben 09:00 und 09:05 möglich (überschneiden nur die eigene Zeit).
+    expect((await dates(DATE).expect(200)).body).toMatchObject({ dates: [DATE] });
+    const options = await withToken(
+      http().get(`/api/public/manage/slots?date=${DATE}`),
+      token,
+    ).expect(200);
+    expect(publicSlotsResponseSchema.parse(options.body).slots.map((s) => s.startsAt)).toEqual([
+      slots[0],
+      slots[1],
+    ]);
+  });
+
+  it('lehnt available-dates ohne gültiges Token, für Kurse und mit zu großem Zeitraum ab', async () => {
+    await withToken(
+      http().get(`/api/public/manage/available-dates?from=${DATE}&to=${DATE}`),
+      'x'.repeat(43),
+    ).expect(404);
+    const { slots, bookAt } = await singleSetup();
+    const { token } = await bookAt(slots[0] ?? '');
+    await withToken(
+      http().get(`/api/public/manage/available-dates?from=${DATE}&to=2099-12-31`),
+      token,
+    ).expect(400);
   });
 
   it('bucht um: neue Buchung, alte als umgebucht, Belegung, Auftrag, Links übertragen', async () => {
@@ -303,6 +346,17 @@ async function groupSetup(capacities: number[], overrides: Partial<GroupServiceD
 }
 
 describe('Umbuchung eines Kursplatzes', () => {
+  it('bietet available-dates nur für Einzeltermine an', async () => {
+    const { sessions, bookIn } = await groupSetup([3]);
+    const [session] = sessions;
+    if (!session) throw new Error();
+    const { token } = await bookIn(session);
+    await withToken(
+      http().get(`/api/public/manage/available-dates?from=${DATE}&to=${DATE}`),
+      token,
+    ).expect(400);
+  });
+
   it('bietet andere Termine desselben Kurses an, auch ausgebuchte', async () => {
     const { sessions, bookIn } = await groupSetup([3, 2, 2]);
     const [a, b, c] = sessions;

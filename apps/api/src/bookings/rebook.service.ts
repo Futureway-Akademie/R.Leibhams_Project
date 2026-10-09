@@ -1,6 +1,6 @@
 // Umbuchung über den Verwaltungslink (docs/domain-rules.md 6).
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { addLocalDays, localBoundaryToUtc, utcToLocal } from '@fw-booking/shared';
+import { addLocalDays, eachLocalDate, localBoundaryToUtc, utcToLocal } from '@fw-booking/shared';
 import type {
   AvailableDatesQuery,
   SelfServiceBooking,
@@ -68,6 +68,28 @@ export class RebookService {
       timeZone: settings.timeZone,
       slots: slots.filter((s) => s.startsAt.getTime() !== booking.startsAt.getTime()),
     };
+  }
+
+  /**
+   * Tage mit möglichen neuen Startzeiten eines Einzeltermins (für den Kalender der
+   * Self-Service-Seite); wie bei slotOptions gilt die eigene Zeit als frei, der eigene Beginn
+   * selbst zählt nicht.
+   */
+  async dateOptions(
+    token: string | undefined,
+    range: AvailableDatesQuery,
+    now = new Date(),
+  ): Promise<{ serviceId: string; timeZone: string; dates: string[] }> {
+    const { booking, service, settings } = await this.context(token, now);
+    if (booking.type !== 'single') throw new BadRequestException('Nur für Einzeltermine');
+    const dates: string[] = [];
+    for (const date of eachLocalDate(range.from, range.to)) {
+      const slots = await this.slots.slotsForDate(service, date, now, {
+        ignoreBookingId: booking._id,
+      });
+      if (slots.some((s) => s.startsAt.getTime() !== booking.startsAt.getTime())) dates.push(date);
+    }
+    return { serviceId: service._id.toHexString(), timeZone: settings.timeZone, dates };
   }
 
   /** Mögliche andere Kurstermine desselben Kurses mit freien Plätzen (auch ausgebuchte). */

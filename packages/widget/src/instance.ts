@@ -5,6 +5,8 @@ import type { ApiClient } from './api/client.js';
 import { startApp } from './app.js';
 import type { App, Selection } from './app.js';
 import { readConfig } from './config.js';
+import { startManageApp } from './manage/manage-app.js';
+import type { ManageToken } from './manage/token.js';
 import type { WidgetConfig } from './config.js';
 import { el } from './dom.js';
 import { messages } from './messages.js';
@@ -27,6 +29,8 @@ export interface InstanceOptions {
   fetch?: typeof fetch;
   /** Aktuelle Zeit (für Tests); Standard: Systemzeit. */
   now?: () => Date;
+  /** Verwaltungslink dieser Seite: Container zeigt die Selbstverwaltung statt der Buchung. */
+  manage?: ManageToken;
 }
 
 export function createInstance(
@@ -50,7 +54,29 @@ export function createInstance(
       ...(options.fetch ? { fetch: options.fetch } : {}),
     });
     container.setAttribute(STATE_ATTRIBUTE, 'ready');
-    app = startApp({ container, root, config, api, now: options.now ?? (() => new Date()) });
+    const now = options.now ?? (() => new Date());
+    const booking = (cfg: WidgetConfig, client: ApiClient) =>
+      startApp({ container, root, config: cfg, api: client, now });
+    const manage = options.manage ?? null;
+    if (manage === null) {
+      app = booking(config, api);
+    } else {
+      const cfg = config;
+      const client = api;
+      app = startManageApp({
+        container,
+        root,
+        config: cfg,
+        token: manage.kind === 'token' ? manage.token : null,
+        ...(options.fetch ? { fetch: options.fetch } : {}),
+        now,
+        onBookNew: () => {
+          // Nach Storno: derselbe Container wechselt zur normalen Buchung.
+          app?.destroy();
+          app = booking(cfg, client);
+        },
+      });
+    }
   } else {
     root.classList.add('fw-booking-root--error');
     root.append(

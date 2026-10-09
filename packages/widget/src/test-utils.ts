@@ -47,6 +47,7 @@ export function sessionsResponse(sessions: PublicSession[], serviceId = YOGA) {
 /** Fetch-Attrappe, die Anfragen nach Pfad beantwortet und alle Aufrufe festhält. */
 export function router(routes: Record<string, Handler | Handler[]>) {
   const calls: {
+    headers: Record<string, string>;
     url: URL;
     method: string;
     body: string | null;
@@ -58,12 +59,17 @@ export function router(routes: Record<string, Handler | Handler[]>) {
     const url = new URL(input as string);
     calls.push({
       url,
+      headers: { ...(init?.headers as Record<string, string> | undefined) },
       method: init?.method ?? 'GET',
       body: typeof init?.body === 'string' ? init.body : null,
       cache: init?.cache ?? null,
       signal: init?.signal ?? null,
     });
-    const path = url.pathname.slice(new URL(BASE).pathname.length);
+    // Pfade des Kalenders relativ zu BASE, andere (z. B. /api/public/manage) vollständig.
+    const basePath = new URL(BASE).pathname;
+    const path = url.pathname.startsWith(basePath)
+      ? url.pathname.slice(basePath.length)
+      : url.pathname;
     const route = routes[path];
     if (!route) return Promise.resolve(json({ statusCode: 404, message: 'Nicht gefunden' }, 404));
     const n = counters.get(path) ?? 0;

@@ -48,6 +48,41 @@ export const messages = {
     `Du erhältst gleich eine Bestätigung per E-Mail an ${email}. Darin findest du auch den Link, mit dem du den Termin verwalten kannst.`,
   bookAnother: 'Weiteren Termin buchen',
   serviceNotFound: 'Dieses Angebot ist derzeit nicht buchbar.',
+  manageTitle: 'Deine Buchung',
+  manageLoading: 'Deine Buchung wird geladen …',
+  bookedFor: 'Gebucht für',
+  location: 'Ort',
+  status: 'Status',
+  statusConfirmed: 'Bestätigt',
+  statusCancelled: 'Storniert',
+  statusRebooked: 'Umgebucht',
+  statusCancelledByOwner: 'Vom Anbieter abgesagt',
+  changeUntil: (deadline: string) => `Änderungen über diesen Link sind bis ${deadline} möglich.`,
+  changeClosed:
+    'Änderungen über diesen Link sind nicht mehr möglich. Bitte wende dich bei Fragen direkt an uns.',
+  rebookUsed:
+    'Dieser Termin wurde bereits einmal umgebucht; eine Stornierung ist weiterhin möglich.',
+  reloadHint:
+    'Aus Sicherheitsgründen ist diese Ansicht nur bis zum Neuladen der Seite verfügbar. Öffne danach den Link aus deiner E-Mail erneut.',
+  rebookAction: 'Termin umbuchen',
+  cancelAction: 'Termin stornieren',
+  backToBooking: 'Zurück zu deiner Buchung',
+  chooseNewAppointment: 'Neuen Termin wählen',
+  cancelQuestion: 'Möchtest du diesen Termin wirklich stornieren?',
+  cancelConfirm: 'Ja, stornieren',
+  rebookQuestion: 'Möchtest du deinen Termin wirklich umbuchen?',
+  rebookConfirm: 'Ja, umbuchen',
+  abort: 'Abbrechen',
+  previousAppointment: 'Bisher:',
+  newAppointment: 'Neu:',
+  processing: 'Wird ausgeführt …',
+  cancelledTitle: 'Dein Termin ist storniert',
+  rebookedTitle: 'Dein Termin ist umgebucht',
+  changeMail: 'Du erhältst gleich eine Bestätigung per E-Mail.',
+  bookNew: 'Neuen Termin buchen',
+  linkInvalid:
+    'Dieser Verwaltungslink ist ungültig oder nicht mehr aktuell. Bitte nutze den Link aus deiner neuesten E-Mail.',
+  linkExpired: 'Dieser Verwaltungslink ist abgelaufen, weil der Termin vorbei ist.',
   misconfigured: 'Der Buchungskalender ist nicht richtig eingebunden.',
   timeZoneHint: (timeZone: string) => `Alle Zeiten in der Zeitzone ${timeZone}.`,
   minutes: (minutes: number) => `${String(minutes)} Min.`,
@@ -138,4 +173,35 @@ export function bookingErrorMessage(error: unknown): BookingFailure {
     conflict: false,
     message: 'Die Buchung ist fehlgeschlagen. Bitte versuche es erneut.',
   };
+}
+
+/** Meldung zu einem fehlgeschlagenen Storno oder einer Umbuchung über den Verwaltungslink. */
+export function manageErrorMessage(error: unknown): BookingFailure {
+  if (error instanceof ApiError) {
+    switch (error.code) {
+      case 'change_deadline_passed':
+        return { conflict: false, message: messages.changeClosed };
+      case 'not_cancellable':
+        return { conflict: false, message: 'Diese Buchung kann nicht mehr storniert werden.' };
+      case 'rebook_not_allowed':
+        return { conflict: false, message: messages.rebookUsed };
+      case 'link_expired':
+        return { conflict: false, message: messages.linkExpired };
+      default:
+        break;
+    }
+    if (error.status === 404 && error.code === null) {
+      return { conflict: false, message: messages.linkInvalid };
+    }
+  }
+  return bookingErrorMessage(error);
+}
+
+/** Meldung, wenn die Buchung über den Link nicht geladen werden kann. */
+export function manageLoadMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.code === 'link_expired') return messages.linkExpired;
+    if (error.status === 404) return messages.linkInvalid;
+  }
+  return loadErrorMessage(error);
 }

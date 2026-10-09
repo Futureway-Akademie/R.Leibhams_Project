@@ -3,9 +3,14 @@
 // jede weitere verwendet sie. Jeder Container wird höchstens einmal initialisiert.
 import { CONTAINER_SELECTOR } from './config.js';
 import { STATE_ATTRIBUTE, createInstance } from './instance.js';
+import { takeManageToken } from './manage/token.js';
+import type { ManageToken } from './manage/token.js';
 import type { InstanceOptions, WidgetInstance } from './instance.js';
 
 export const WIDGET_VERSION = '0.1.0';
+
+/** Markiert den Container, der auf der Verwaltungsseite die Selbstverwaltung zeigt. */
+export const MANAGE_ATTRIBUTE = 'data-fw-booking-manage';
 
 export interface FwBookingApi {
   readonly version: string;
@@ -36,16 +41,37 @@ export function install(
   if (existing) return existing;
 
   const doc = win.document;
+  // Verwaltungslink sofort beim Ausführen des Scripts lesen und aus der Adresse entfernen,
+  // noch bevor die Seite fertig geladen ist.
+  let manage: ManageToken = takeManageToken(win);
   const instances = new WeakMap<HTMLElement, WidgetInstance>();
   const instanceOptions: InstanceOptions = {
     ...(options.fetch ? { fetch: options.fetch } : {}),
     ...(options.now ? { now: options.now } : {}),
   };
 
+  /**
+   * Container für die Selbstverwaltung: der erste mit data-fw-booking-manage, sonst der erste
+   * Container der Seite. Das Token wird genau einmal vergeben.
+   */
+  function claimManage(container: HTMLElement): ManageToken {
+    if (manage === null) return null;
+    const marked = doc.querySelector(`${CONTAINER_SELECTOR}[${MANAGE_ATTRIBUTE}]`);
+    const target = marked ?? doc.querySelector(CONTAINER_SELECTOR);
+    if (target !== container) return null;
+    const claimed = manage;
+    manage = null;
+    return claimed;
+  }
+
   function mount(container: HTMLElement): WidgetInstance {
     const current = instances.get(container);
     if (current) return current;
-    const instance = createInstance(container, instanceOptions);
+    const claimed = claimManage(container);
+    const instance = createInstance(
+      container,
+      claimed === null ? instanceOptions : { ...instanceOptions, manage: claimed },
+    );
     instances.set(container, instance);
     return instance;
   }

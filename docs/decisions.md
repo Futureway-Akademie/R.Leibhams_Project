@@ -490,3 +490,17 @@ Eigene Datei `fw-booking-widget.css` neben dem Script, ausgeliefert über `<link
 
 Eine separate Datei ist cachebar und funktioniert mit strikter Content-Security-Policy, die Inline-Styles blockieren würde. `:where()` hält die Spezifität des Resets niedrig, sodass eigene Regeln mit einer Klasse gewinnen, während Element-Selektoren der Themes verlieren (im Browser gegen ein simuliertes Theme geprüft). Ein automatischer Dunkelmodus hätte auf hellen Themes mit dunklem Systemmodus falsch gewirkt. Die Pfeiltasten für Uhrzeiten waren ursprünglich nicht geplant (Tab-Reihenfolge); die Browser-Prüfung zeigte rund 100 Tab-Stopps bis „Weiter“, daher dasselbe Muster wie im Kalender.
 
+## 2026-10-09 – Self-Service-Seite im Widget
+
+### Kontext
+
+Mails verlinken `MANAGE_PAGE_URL#t=TOKEN`, eine Seite mit dem Widget. Teilnehmer sollen dort ihre Buchung ansehen, stornieren und umbuchen. Das Token ist ein Zugangsschlüssel zur Buchung und darf weder in Referrer, Analytics, Server-Logs noch im Verlauf auftauchen. Für Einzeltermine gab es keine Übersicht der möglichen Tage beim Umbuchen.
+
+### Entscheidung
+
+Das Script liest das Token beim Ausführen, entfernt das Fragment sofort per `history.replaceState` und hält das Token nur im Arbeitsspeicher; nach dem Neuladen muss der Link erneut geöffnet werden. Die Verwaltung erscheint im Container mit `data-fw-booking-manage`, sonst im ersten Container. Storno und Umbuchung erfordern einen eigenen Bestätigungsschritt. Neuer Endpunkt `GET /api/public/manage/available-dates` (eigene Zeit gilt als frei, eigener Beginn zählt nicht) für den Monatskalender bei der Umbuchung; die Auswahlansichten aus task-4-2/4-3 werden mit einem Verwaltungs-Reader wiederverwendet.
+
+### Begründung
+
+Fragmente werden nie an Server oder im Referrer übertragen; nach dem Entfernen können auch später ausgeführte Scripts die Adresse nicht mehr mit Token lesen. Ohne Speicherung im Browser bleibt kein Token zurück, das andere Scripts der Seite später finden könnten. Der markierte Container erlaubt Seiten mit mehreren Kalendern, der erste Container als Rückfall hält die Einbindung einfach. Der eigene Endpunkt liefert dieselben Tage, die manage/slots anbietet; der öffentliche Endpunkt hätte Tage ausgelassen, an denen nur die eigene Zeit frei wäre. Damit das Token auch vor Analytics-Scripts entfernt wird, soll das Script auf der Verwaltungsseite früh im `<head>` geladen werden (WordPress-Plugin, task-4-7).
+

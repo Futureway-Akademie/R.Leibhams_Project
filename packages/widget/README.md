@@ -31,12 +31,13 @@ Lokale Prüfseite: `pnpm --filter @fw-booking/widget demo` (http://localhost:518
 <script src="https://…/fw-booking-widget.js" defer></script>
 ```
 
-| Attribut                      | Pflicht | Bedeutung                                                              |
-| ----------------------------- | ------- | ---------------------------------------------------------------------- |
-| `data-fw-booking-calendar`    | ja      | Öffentliche Kalenderkennung der Installation (`cal_…`)                 |
-| `data-fw-booking-api`         | ja      | Basisadresse der Buchungs-API (http(s), ohne Query und Fragment)       |
-| `data-fw-booking-privacy-url` | ja      | Datenschutzhinweise der Website (http(s), auch relativ, Query erlaubt) |
-| `data-fw-booking-service`     | nein    | Angebots-ID; ohne Angabe zeigt das Widget alle Angebote zur Auswahl    |
+| Attribut                      | Pflicht | Bedeutung                                                                 |
+| ----------------------------- | ------- | ------------------------------------------------------------------------- |
+| `data-fw-booking-calendar`    | ja      | Öffentliche Kalenderkennung der Installation (`cal_…`)                    |
+| `data-fw-booking-api`         | ja      | Basisadresse der Buchungs-API (http(s), ohne Query und Fragment)          |
+| `data-fw-booking-privacy-url` | ja      | Datenschutzhinweise der Website (http(s), auch relativ, Query erlaubt)    |
+| `data-fw-booking-service`     | nein    | Angebots-ID; ohne Angabe zeigt das Widget alle Angebote zur Auswahl       |
+| `data-fw-booking-manage`      | nein    | Container für die Selbstverwaltung über den Verwaltungslink (siehe unten) |
 
 Mehrere Container pro Seite sind möglich, das Script darf mehrfach eingebunden sein. Der Origin der Seite muss in der API unter `CORS_ALLOWED_ORIGINS` freigegeben sein.
 
@@ -55,10 +56,20 @@ Mehrere Container pro Seite sind möglich, das Script darf mehrfach eingebunden 
 
 Beide Ereignisse werden am Container ausgelöst und bubbeln; sie enthalten keine personenbezogenen Daten.
 
-| Ereignis            | `detail`                                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------------------ |
-| `fw-booking:select` | Gewählter Termin `{ type, calendarId, serviceId, sessionId?, startsAt, endsAt, timeZone }` oder `null` |
-| `fw-booking:booked` | `{ calendarId, bookingId, type, serviceId, serviceTitle, startsAt, endsAt, timeZone }`                 |
+| Ereignis               | `detail`                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `fw-booking:select`    | Gewählter Termin `{ type, calendarId, serviceId, sessionId?, startsAt, endsAt, timeZone }` oder `null` |
+| `fw-booking:booked`    | `{ calendarId, bookingId, type, serviceId, serviceTitle, startsAt, endsAt, timeZone }`                 |
+| `fw-booking:cancelled` | Storno über den Verwaltungslink: `{ calendarId, type, serviceTitle, startsAt, endsAt, timeZone }`      |
+| `fw-booking:rebooked`  | Umbuchung über den Verwaltungslink: gleiche Felder mit dem neuen Termin                                |
+
+## Selbstverwaltung über den Verwaltungslink
+
+Bestätigungs- und Erinnerungsmails verlinken `MANAGE_PAGE_URL#t=TOKEN`, eine Seite mit dem Widget. Dort zeigt das Widget die eigene Buchung mit Status und Frist; Umbuchung und Storno sind nur mit eigenem Bestätigungsschritt möglich.
+
+- **Container:** der erste Container mit `data-fw-booking-manage`, sonst der erste Container der Seite. Weitere Container buchen normal.
+- **Token:** Das Script liest `#t=…` sofort beim Ausführen und entfernt das Fragment per `history.replaceState` aus Adresszeile und Verlauf. Das Token bleibt nur im Arbeitsspeicher und geht ausschließlich im Header `X-Booking-Token` an die API (`credentials: 'omit'`, `referrerPolicy: 'no-referrer'`); Ereignisse enthalten es nicht. Nach dem Neuladen der Seite muss der Link aus der Mail erneut geöffnet werden.
+- **Einbindung auf der Verwaltungsseite:** Das Script möglichst früh laden (im `<head>`, ohne `defer`/`async` und vor Analytics- oder Tracking-Scripts), damit kein anderes Script die Adresse mit Token liest. Fragmente werden von Browsern nie im Referrer oder in Anfragen an Server übertragen.
 
 ## Styling-Schnittstelle
 
@@ -93,6 +104,8 @@ Gesetzt werden sie auf `.fw-booking-root` oder einem umgebenden Element mit höh
 | `--fw-booking-color-warning-surface` | `rgb(217 119 6 / 0.12)`   | Hintergrund von Hinweisen                        |
 | `--fw-booking-color-success`         | `#15803d`                 | Bestätigung                                      |
 | `--fw-booking-color-success-surface` | `rgb(21 128 61 / 0.08)`   | Hintergrund der Bestätigung                      |
+| `--fw-booking-color-danger`          | `#b91c1c`                 | Storno-Schaltflächen                             |
+| `--fw-booking-color-danger-text`     | `#ffffff`                 | Text auf der Storno-Bestätigung                  |
 | `--fw-booking-space-xs`              | `0.25em`                  | Kleinster Abstand                                |
 | `--fw-booking-space-sm`              | `0.5em`                   | Kleiner Abstand                                  |
 | `--fw-booking-space-md`              | `1em`                     | Standardabstand                                  |
@@ -136,16 +149,17 @@ Gesetzt werden sie auf `.fw-booking-root` oder einem umgebenden Element mit höh
 
 Alle Klassen beginnen mit `fw-booking-`. Wichtige Bausteine:
 
-| Bereich       | Klassen                                                                                                                                                                                                                                                        |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rahmen        | `root` (`root--error` bei fehlerhafter Einbindung), `view`, `step`                                                                                                                                                                                             |
-| Angebote      | `services`, `service-list`, `service` (`service--single`, `service--group`), `service-name`, `service-meta`, `service-header`, `service-title`, `service-duration`, `service-description`, `back`                                                              |
-| Kurse         | `course`, `sessions`, `session-day`, `session-day-title`, `session` (`session--full`), `session-time`, `session-location`, `session-seats`, `more`                                                                                                             |
-| Einzeltermine | `single`, `calendar`, `calendar-nav`, `month-prev`, `month-title`, `month-next`, `calendar-grid`, `weekday`, `week`, `day` (`day--free`, `day--unavailable`), `slots`, `slots-title`, `slot-group` (`slot-group--morning`, `--afternoon`, `--evening`), `slot` |
-| Weiter        | `continue-bar`, `chosen`, `continue`                                                                                                                                                                                                                           |
-| Formular      | `booking`, `change`, `form-title`, `summary`, `form`, `field` (`field--checkbox`), `label`, `input`, `checkbox`, `privacy-link`, `field-hint`, `field-error`, `form-status`, `submit`                                                                          |
-| Bestätigung   | `confirmation`, `confirmation-title`, `confirmation-mail`, `book-another`                                                                                                                                                                                      |
-| Meldungen     | `status`, `hint`, `message` (`message--info`, `--warning`, `--error`), `retry`, `separator`                                                                                                                                                                    |
+| Bereich          | Klassen                                                                                                                                                                                                                                                        |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rahmen           | `root` (`root--error` bei fehlerhafter Einbindung), `view`, `step`                                                                                                                                                                                             |
+| Angebote         | `services`, `service-list`, `service` (`service--single`, `service--group`), `service-name`, `service-meta`, `service-header`, `service-title`, `service-duration`, `service-description`, `back`                                                              |
+| Kurse            | `course`, `sessions`, `session-day`, `session-day-title`, `session` (`session--full`), `session-time`, `session-location`, `session-seats`, `more`                                                                                                             |
+| Einzeltermine    | `single`, `calendar`, `calendar-nav`, `month-prev`, `month-title`, `month-next`, `calendar-grid`, `weekday`, `week`, `day` (`day--free`, `day--unavailable`), `slots`, `slots-title`, `slot-group` (`slot-group--morning`, `--afternoon`, `--evening`), `slot` |
+| Weiter           | `continue-bar`, `chosen`, `continue`                                                                                                                                                                                                                           |
+| Formular         | `booking`, `change`, `form-title`, `summary`, `form`, `field` (`field--checkbox`), `label`, `input`, `checkbox`, `privacy-link`, `field-hint`, `field-error`, `form-status`, `submit`                                                                          |
+| Bestätigung      | `confirmation`, `confirmation-title`, `confirmation-mail`, `book-another`                                                                                                                                                                                      |
+| Selbstverwaltung | `manage`, `manage-title`, `details`, `detail`, `detail-label`, `detail-value`, `manage-actions`, `rebook`, `cancel`, `reload-hint`, `manage-rebook`, `manage-confirm`, `confirm-title`, `abort`, `confirm` (`confirm--danger`), `back-to-booking`              |
+| Meldungen        | `status`, `hint`, `message` (`message--info`, `--warning`, `--error`), `retry`, `separator`                                                                                                                                                                    |
 
 Zustände werden über Attribute abgebildet und lassen sich direkt ansprechen:
 

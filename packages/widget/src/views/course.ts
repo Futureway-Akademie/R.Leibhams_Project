@@ -2,7 +2,7 @@
 // Zeiträume sowie Lade-, Leer- und Fehlerzustand. Ausgebuchte Termine bleiben sichtbar.
 import type { PublicService, PublicSession } from '@fw-booking/shared';
 import { differsFromDeviceTimeZone, formatDate, formatTimeRange } from '@fw-booking/shared/format';
-import type { ApiClient } from '../api/client.js';
+import type { AvailabilityReader } from '../api/client.js';
 import { button, el, withSeparators } from '../dom.js';
 import { loadErrorMessage, messages } from '../messages.js';
 import { addDays, localDate } from '../time.js';
@@ -17,7 +17,7 @@ export const SESSION_WINDOW_DAYS = 62;
 
 export interface CourseViewOptions {
   doc: Document;
-  api: ApiClient;
+  api: AvailabilityReader;
   /** Wird abgebrochen, sobald die Ansicht verlassen oder das Widget entfernt wird. */
   signal: AbortSignal;
   service: PublicService;

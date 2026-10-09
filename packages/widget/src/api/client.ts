@@ -77,7 +77,24 @@ export interface ApiClientOptions {
   bypassCache?: boolean;
 }
 
-export interface ApiClient {
+/** Verfügbarkeit für die Auswahlansichten; erfüllt vom öffentlichen und vom Verwaltungs-Client. */
+export interface AvailabilityReader {
+  getSlots(serviceId: string, date: string, signal?: AbortSignal): Promise<PublicSlotsResponse>;
+  getAvailableDates(
+    serviceId: string,
+    from: string,
+    to: string,
+    signal?: AbortSignal,
+  ): Promise<AvailableDatesResponse>;
+  getSessions(
+    serviceId: string,
+    from: string,
+    to: string,
+    signal?: AbortSignal,
+  ): Promise<PublicSessionsResponse>;
+}
+
+export interface ApiClient extends AvailabilityReader {
   getServices(signal?: AbortSignal): Promise<PublicServicesResponse>;
   getSlots(serviceId: string, date: string, signal?: AbortSignal): Promise<PublicSlotsResponse>;
   getAvailableDates(
@@ -100,13 +117,31 @@ export interface ApiClient {
   fresh(): ApiClient;
 }
 
-export function createApiClient(options: ApiClientOptions): ApiClient {
+export interface RequesterOptions {
+  apiUrl: string;
+  timeoutMs?: number;
+  fetch?: typeof fetch;
+  bypassCache?: boolean;
+  /** Zusätzliche Header jeder Anfrage (z. B. das Verwaltungs-Token). */
+  headers?: Record<string, string>;
+}
+
+export type Requester = <T>(
+  path: string,
+  init: { method: 'GET' | 'POST'; body?: unknown },
+  signal: AbortSignal | undefined,
+) => Promise<T>;
+
+/**
+ * Gemeinsame Anfragelogik für öffentliche API und Verwaltungslink: Zeitlimit, Abbruch, keine
+ * Cookies, kein Referrer, Fehler als ApiError. `path` beginnt unterhalb von `apiUrl`.
+ */
+export function createRequester(options: RequesterOptions): Requester {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   // Erst beim Aufruf auflösen, damit später gesetzte oder ersetzte fetch-Funktionen greifen.
   const doFetch: typeof fetch = options.fetch ?? ((input, init) => globalThis.fetch(input, init));
-  const base = `${options.apiUrl}/api/public/calendars/${encodeURIComponent(options.calendarId)}`;
 
-  async function request<T>(
+  return async function request<T>(
     path: string,
     init: { method: 'GET' | 'POST'; body?: unknown },
     signal: AbortSignal | undefined,
@@ -124,12 +159,13 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     try {
       let response: Response;
       try {
-        response = await doFetch(`${base}${path}`, {
+        response = await doFetch(`${options.apiUrl}${path}`, {
           method: init.method,
-          headers:
-            init.body === undefined
-              ? { Accept: 'application/json' }
-              : { Accept: 'application/json', 'Content-Type': 'application/json' },
+          headers: {
+            Accept: 'application/json',
+            ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+            ...options.headers,
+          },
           ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
           signal: controller.signal,
           // Keine Cookies der einbindenden Seite mitsenden, keinen Referrer preisgeben.
@@ -151,7 +187,17 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       clearTimeout(timer);
       signal?.removeEventListener('abort', forwardAbort);
     }
-  }
+  };
+}
+
+export function createApiClient(options: ApiClientOptions): ApiClient {
+  const base = `/api/public/calendars/${encodeURIComponent(options.calendarId)}`;
+  const send = createRequester(options);
+  const request = <T>(
+    path: string,
+    init: { method: 'GET' | 'POST'; body?: unknown },
+    signal: AbortSignal | undefined,
+  ) => send<T>(`${base}${path}`, init, signal);
 
   const service = (id: string) => `/services/${encodeURIComponent(id)}`;
 
@@ -172,7 +218,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
   };
 }
 
-function query(params: Record<string, string>): string {
+export function query(params: Record<string, string>): string {
   return new URLSearchParams(params).toString();
 }
 

@@ -1076,7 +1076,7 @@
           "description": "Seite für Interessenten zum Ansehen, Stornieren und Umbuchen der eigenen Buchung über den Verwaltungslink.",
           "order": 6,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-4-4",
             "task-2-13"
@@ -1086,13 +1086,22 @@
             "Storno und Umbuchung erfordern eine bewusste Bestätigung",
             "Token gelangt nicht in Referrer oder Analytics"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T12:09:56Z",
+          "completedAt": "2026-10-09T12:24:22Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "API: neuer Endpunkt GET /api/public/manage/available-dates mit 3 E2E-Tests (318 API-Tests; no-store/no-referrer, eigene Zeit gilt als frei, Tag bleibt wählbar wenn öffentlich voll, 404 ohne gültiges Token, 400 bei zu großem Zeitraum und für Kurse). Widget: 25 neue Tests (181 im Widget): Token aus #t= gelesen und per replaceState entfernt (kein Verlaufseintrag), ungültiges Token ohne Anfrage, Token nur im Header X-Booking-Token, nie in URLs; markierter bzw. erster Container, Token nur einmal vergeben; Übersicht mit Angebot, Termin, Name, Ort, Status, Frist und Aktionen je canCancel/canRebook, Hinweise nach Umbuchung und Fristablauf, alle Status; Ladefehler 404/410/500; keine HTML-Ausgabe; Storno nur nach Bestätigung (Abbrechen zuerst, Fokus auf Frage), genau eine Anfrage, Fehler im Bestätigungsschritt, Abbruch beim Entfernen, Ereignis ohne Name/Token, danach normale Buchung; Umbuchung für Kurs und Einzeltermin über manage/sessions, manage/available-dates und manage/slots, Bestätigung mit Bisher/Neu, Konflikt mit frischer Auswahl. Bundle 37,1 KB (gzip 12,7 KB), CSS 13,3 KB. Ende-zu-Ende im Browser-Pane mit API, Worker und Mailpit: Kursbuchung im Widget, Link aus der Mail geöffnet, Token sofort aus location.href entfernt, Übersicht korrekt; Umbuchung auf 14.10. per Doppelklick bestätigt (eine POST-Anfrage), danach Storno mit Bestätigung; Datenbank rebooked/cancelled, beide Kurstermine wieder frei, drei Mails (Bestätigung, Umbuchung, Storno); Einzeltermin per Link von 10:00 auf überlappende 10:15 umgebucht (Kalender am bisherigen Tag, eigener Beginn nicht angeboten), Belegung genau 6 Einheiten, Umbuchungsmail; ungültiger Link mit Hinweis; Tokens weder in API- noch Worker-Log. Danach Testdaten und Mails entfernt (Collection-Zählung wie vorher, Mailpit leer), Server beendet, .env unverändert. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/api exec vitest run src/bookings/rebook.e2e.test.ts",
+              "pnpm --filter @fw-booking/widget test",
+              "Ende-zu-Ende: Browser-Pane mit API, Worker und Mailpit, Verwaltungslink aus der Mail (CORS_ALLOWED_ORIGINS, MANAGE_PAGE_URL per Umgebungsvariable)",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T12:24:22Z"
           }
         },
         {
