@@ -119,6 +119,8 @@ export function singleView(options: SingleViewOptions): HTMLElement {
   const freeDays = new Map<string, Set<string>>();
   let month = firstMonth;
   let selectedDay: string | null = null;
+  /** Tag mit dem einzigen Tab-Stopp im Raster (roving tabindex). */
+  let focusDay: string | null = null;
   let selectedSlot: string | null = null;
   let slotController: AbortController | null = null;
 
@@ -142,21 +144,29 @@ export function singleView(options: SingleViewOptions): HTMLElement {
     for (let i = 0; i < weekdayIndex(first); i++) {
       cells.push(el(doc, 'td', { className: 'day-empty' }));
     }
+    const tabbable = tabbableDay(first, last, days);
     for (let day = first; day <= last; day = addDays(day, 1)) {
       const free = days.has(day);
       const date = day;
+      // Nicht verfügbare Tage bleiben fokussierbar (aria-disabled statt disabled), damit die
+      // Pfeiltasten durch den ganzen Monat führen.
       const node = button(
         doc,
         {
-          className: free ? ['day', 'day--free'] : 'day',
+          className: free ? ['day', 'day--free'] : ['day', 'day--unavailable'],
           text: String(Number(day.slice(8))),
-          attrs: { 'aria-label': dayFormat.format(plainDate(day)), 'data-date': day },
+          attrs: {
+            'aria-label': dayFormat.format(plainDate(day)),
+            'data-date': day,
+            tabindex: day === tabbable ? '0' : '-1',
+          },
         },
         () => {
-          selectDay(date);
+          focusDay = date;
+          if (free) selectDay(date);
         },
       );
-      if (!free) node.disabled = true;
+      if (!free) node.setAttribute('aria-disabled', 'true');
       node.setAttribute('aria-pressed', String(day === selectedDay));
       if (day === selectedDay) node.classList.add('fw-booking-day--selected');
       if (day === today) node.setAttribute('aria-current', 'date');
@@ -169,6 +179,79 @@ export function singleView(options: SingleViewOptions): HTMLElement {
     }
     grid.replaceChildren(...rows);
   }
+
+  /** Tab-Stopp im Monat: zuletzt fokussierter, gewählter, erster freier Tag, heute oder der 1. */
+  function tabbableDay(first: string, last: string, days: Set<string>): string {
+    const inMonth = (day: string | null): day is string =>
+      day !== null && day >= first && day <= last;
+    if (inMonth(focusDay)) return focusDay;
+    if (inMonth(selectedDay)) return selectedDay;
+    const [firstFree] = [...days].sort();
+    if (firstFree !== undefined) return firstFree;
+    return inMonth(today) ? today : first;
+  }
+
+  function dayButton(day: string): HTMLButtonElement | null {
+    return grid.querySelector<HTMLButtonElement>(`[data-date="${day}"]`);
+  }
+
+  /** Bewegt den Fokus auf einen Tag, wechselt bei Bedarf den Monat (innerhalb der Grenzen). */
+  async function moveFocus(target: string): Promise<void> {
+    const first = monthRange(firstMonth).first;
+    const last = monthRange(lastMonth).last;
+    const day = target < first ? first : target > last ? last : target;
+    focusDay = day;
+    if (monthOf(day) !== month) await showMonth(monthOf(day));
+    if (monthOf(day) !== month) return;
+    for (const node of grid.querySelectorAll<HTMLButtonElement>('.fw-booking-day')) {
+      node.tabIndex = node.dataset['date'] === day ? 0 : -1;
+    }
+    dayButton(day)?.focus();
+  }
+
+  /** Gleicher Tag im Nachbarmonat, begrenzt auf dessen Länge (31.1. → 28.2.). */
+  function sameDayInMonth(day: string, months: number): string {
+    const target = addMonths(monthOf(day), months);
+    const { last } = monthRange(target);
+    const candidate = `${target}-${day.slice(8)}`;
+    return candidate > last ? last : candidate;
+  }
+
+  grid.addEventListener('keydown', (event) => {
+    const day = (event.target as HTMLElement).dataset['date'];
+    if (day === undefined) return;
+    let target: string | null = null;
+    switch (event.key) {
+      case 'ArrowLeft':
+        target = addDays(day, -1);
+        break;
+      case 'ArrowRight':
+        target = addDays(day, 1);
+        break;
+      case 'ArrowUp':
+        target = addDays(day, -7);
+        break;
+      case 'ArrowDown':
+        target = addDays(day, 7);
+        break;
+      case 'Home':
+        target = addDays(day, -weekdayIndex(day));
+        break;
+      case 'End':
+        target = addDays(day, 6 - weekdayIndex(day));
+        break;
+      case 'PageUp':
+        target = sameDayInMonth(day, -1);
+        break;
+      case 'PageDown':
+        target = sameDayInMonth(day, 1);
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    void moveFocus(target);
+  });
 
   function renderMonth(target: string, days: Set<string>) {
     renderGrid(target, days);
@@ -211,12 +294,14 @@ export function singleView(options: SingleViewOptions): HTMLElement {
       const isSelected = node.dataset['date'] === selectedDay;
       node.setAttribute('aria-pressed', String(isSelected));
       node.classList.toggle('fw-booking-day--selected', isSelected);
+      node.tabIndex = node.dataset['date'] === (focusDay ?? selectedDay) ? 0 : -1;
     }
   }
 
   function selectDay(day: string) {
     if (day === selectedDay) return;
     selectedDay = day;
+    focusDay = day;
     updateDayButtons();
     if (selectedSlot !== null) {
       selectedSlot = null;
@@ -284,6 +369,8 @@ export function singleView(options: SingleViewOptions): HTMLElement {
                 attrs: {
                   'aria-label': `${start}–${formatTime(slot.endsAt, timeZone)}`,
                   'aria-pressed': 'false',
+                  // Ein Tab-Stopp für alle Uhrzeiten (roving tabindex), Pfeiltasten wechseln.
+                  tabindex: buttons.length === 0 ? '0' : '-1',
                 },
               },
               () => {
@@ -292,6 +379,7 @@ export function singleView(options: SingleViewOptions): HTMLElement {
                   const isSelected = other === node;
                   other.setAttribute('aria-pressed', String(isSelected));
                   other.classList.toggle('fw-booking-slot--selected', isSelected);
+                  other.tabIndex = isSelected ? 0 : -1;
                 }
                 options.onSelect(slot);
               },
@@ -303,7 +391,38 @@ export function singleView(options: SingleViewOptions): HTMLElement {
       ]);
     });
     slotsArea.replaceChildren(heading, ...groups.filter((g) => g !== null));
+    slotButtons = buttons;
   }
+
+  /** Uhrzeiten der aktuellen Anzeige in Reihenfolge (für die Pfeiltasten). */
+  let slotButtons: HTMLButtonElement[] = [];
+
+  slotsArea.addEventListener('keydown', (event) => {
+    const index = slotButtons.indexOf(event.target as HTMLButtonElement);
+    if (index < 0) return;
+    let target: number;
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        target = Math.min(index + 1, slotButtons.length - 1);
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        target = Math.max(index - 1, 0);
+        break;
+      case 'Home':
+        target = 0;
+        break;
+      case 'End':
+        target = slotButtons.length - 1;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    for (const [i, node] of slotButtons.entries()) node.tabIndex = i === target ? 0 : -1;
+    slotButtons[target]?.focus();
+  });
 
   /**
    * Sucht ab dem aktuellen (bzw. bevorzugten) Monat den ersten Monat mit freien Tagen und wählt

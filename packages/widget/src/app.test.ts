@@ -157,14 +157,14 @@ describe('Kursansicht', () => {
       expect(w.$$('.fw-booking-session')).toHaveLength(4);
     });
 
-    expect(w.text('.fw-booking-day-title')).toEqual([
+    expect(w.text('.fw-booking-session-day-title')).toEqual([
       'Mo., 12. Okt. 2026',
       'Di., 13. Okt. 2026',
       'Mo., 26. Okt. 2026',
     ]);
-    expect(w.$$('.fw-booking-day').map((day) => day.querySelectorAll('li').length)).toEqual([
-      2, 1, 1,
-    ]);
+    expect(w.$$('.fw-booking-session-day').map((day) => day.querySelectorAll('li').length)).toEqual(
+      [2, 1, 1],
+    );
     expect(w.text('.fw-booking-session-time')).toEqual([
       '18:00–19:00',
       '20:00–21:00',

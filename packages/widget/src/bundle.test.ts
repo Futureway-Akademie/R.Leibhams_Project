@@ -5,12 +5,19 @@ import { JSDOM } from 'jsdom';
 import { build } from 'vite';
 import type { Rolldown } from 'vite';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { ALLOWED_SHARED_FILES, WIDGET_FILE_NAME, WIDGET_SIZE_LIMIT_BYTES } from '../vite.config.js';
+import {
+  ALLOWED_SHARED_FILES,
+  WIDGET_CSS_FILE_NAME,
+  WIDGET_CSS_SIZE_LIMIT_BYTES,
+  WIDGET_FILE_NAME,
+  WIDGET_SIZE_LIMIT_BYTES,
+} from '../vite.config.js';
 
 const CONFIG_FILE = fileURLToPath(new URL('../vite.config.ts', import.meta.url));
 const WIDGET_SRC = fileURLToPath(new URL('./', import.meta.url));
 
 let chunk: Rolldown.OutputChunk;
+let assets: Rolldown.OutputAsset[];
 
 beforeAll(async () => {
   const result = await build({
@@ -24,6 +31,7 @@ beforeAll(async () => {
   const [only] = chunks;
   if (!only) throw new Error('Kein Bundle erzeugt');
   chunk = only;
+  assets = outputs.flatMap((o) => o.output).filter((o) => o.type === 'asset');
 }, 60_000);
 
 function container(calendarId: string): string {
@@ -47,6 +55,19 @@ describe('Widget-Bundle', () => {
     expect(modules.some((id) => /node_modules|apps[\\/]portal|zod|temporal/i.test(id))).toBe(false);
     // Von shared nur die Intl-Formatierung, keine Schemas oder Temporal-Umrechnung.
     expect(modules.filter((id) => !id.startsWith(WIDGET_SRC))).toEqual(ALLOWED_SHARED_FILES);
+  });
+
+  it('liefert das Stylesheet als eigene Datei und nicht im Script', () => {
+    const css = assets.find((a) => a.fileName === WIDGET_CSS_FILE_NAME);
+    expect(assets.map((a) => a.fileName).filter((n) => n.endsWith('.css'))).toEqual([
+      WIDGET_CSS_FILE_NAME,
+    ]);
+    const source = typeof css?.source === 'string' ? css.source : '';
+    expect(source.startsWith('.fw-booking-root{')).toBe(true);
+    expect(Buffer.byteLength(source)).toBeLessThan(WIDGET_CSS_SIZE_LIMIT_BYTES);
+    // Kein Inline-<style> per Script (Content-Security-Policy).
+    expect(chunk.code).not.toContain('fw-booking-color-accent');
+    expect(chunk.code).not.toMatch(/createElement\([`'"]style[`'"]\)/);
   });
 
   it('bleibt unter dem Größenlimit', () => {

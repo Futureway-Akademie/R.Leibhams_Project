@@ -69,8 +69,11 @@ export function courseView(options: CourseViewOptions): HTMLElement {
     if (!ul) {
       ul = el(doc, 'ul', { className: 'session-list' });
       list.append(
-        el(doc, 'section', { className: 'day' }, [
-          el(doc, 'h4', { className: 'day-title', text: formatDate(session.startsAt, timeZone) }),
+        el(doc, 'section', { className: 'session-day' }, [
+          el(doc, 'h4', {
+            className: 'session-day-title',
+            text: formatDate(session.startsAt, timeZone),
+          }),
           ul,
         ]),
       );

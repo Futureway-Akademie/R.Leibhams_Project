@@ -1043,7 +1043,7 @@
           "description": "Klassen mit Präfix fw-booking-, CSS Custom Properties, gekapselte Basisstyles, Tastaturbedienung und sichtbarer Fokus.",
           "order": 5,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-4-4"
           ],
@@ -1053,13 +1053,21 @@
             "Widget ist vollständig per Tastatur bedienbar",
             "Styling-Schnittstelle ist dokumentiert"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T11:50:53Z",
+          "completedAt": "2026-10-09T12:01:30Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "15 neue Widget-Tests (156 im Widget); API 315, Worker 98, DB 36, shared 147 unverändert grün. Getestet: jede CSS-Regel unter .fw-booking-root (auch in @media), !important nur für [hidden], jede verwendete Custom Property mit Standardwert im Root (außer Schriftfamilie, -größe und Zeilenhöhe, die bewusst vom Theme erben), Farben/Abstände/Fokus vorhanden, alle Properties im README dokumentiert, keine verwaisten Klassen; gebautes Bundle mit eigener Datei fw-booking-widget.css (11,6 KB, gzip 2,1 KB), kein Inline-Style im Script; Monatskalender mit einem Tab-Stopp, Pfeiltasten, Pos1/Ende, Bild auf/ab über Monatsgrenzen (31.10. → 30.11.), Grenze am ersten Monat, nicht verfügbare Tage fokussierbar (aria-disabled) aber nicht wählbar; Uhrzeiten mit einem Tab-Stopp und Pfeiltasten über Tageszeiten hinweg; keine positiven tabindex-Werte. Script 28,0 KB (gzip 10,0 KB). Manuell im Browser-Pane gegen lokale API mit simuliertem Theme (globale Styles für button, ul, h3/h4, td, Serifenschrift): Reset hält, Theme-Schrift wird übernommen, Buttons außerhalb des Widgets unverändert; Kalenderzeilen nach Korrektur gleich hoch; Durchlauf nur per Tastatur von Monat über Tag (Pfeil, Enter), Uhrzeit (Pfeil, Leertaste), Weiter, Formular (Tippen, Leertaste auf Checkbox) bis zur Bestätigung mit sichtbarem Fokus; dunkles Theme über Custom Properties und Mobilbreite 375 px ohne horizontales Scrollen (Kursansicht mit ausgebuchtem Termin, Kalender, Uhrzeiten, Formularfehler). Danach Testdaten, Owner und Sitzung entfernt (Collection-Zählung wie vorher, Mailpit leer), Server beendet, .env unverändert. Build und Quality Gate grün.",
+            "commands": [
+              "pnpm --filter @fw-booking/widget test",
+              "Browser-Pane: Demo-Seite mit simuliertem Theme, dunklem Theme (&theme=dark), Mobilbreite und Tastatur-Durchlauf gegen lokale API mit temporären Testdaten",
+              "pnpm build",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T12:01:30Z"
           }
         },
         {
@@ -1093,7 +1101,7 @@
           "description": "Schlankes PHP-Plugin mit Shortcode und Block, Asset-Laden und Einstellungen für API-Adresse und Kalenderkennung.",
           "order": 7,
           "weight": 2,
-          "status": "planned",
+          "status": "ready",
           "dependsOn": [
             "task-4-5"
           ],

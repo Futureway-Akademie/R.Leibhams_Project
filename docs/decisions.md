@@ -476,3 +476,17 @@ Nach der Terminwahl führt „Weiter zu deinen Angaben“ in einen eigenen Schri
 
 Ein eigener Schritt bleibt bei rund 100 Uhrzeiten und auf dem Handy übersichtlich. Das Pflicht-Attribut verhindert Einbindungen ohne erreichbare Datenschutzhinweise; das WordPress-Plugin kann die Datenschutzseite von WordPress vorbelegen. Gesperrtes Absenden plus stabiler Schlüssel schützt sowohl vor Doppelklicks als auch vor doppelten Buchungen bei verlorenen Antworten. Ohne Umgehung des Caches zeigte die Auswahl nach einem Konflikt bis zu 30 Sekunden lang die alte Verfügbarkeit (im Browser beobachtet). Die erneute Bestätigung der Checkbox hält die Einwilligung an die einzelne Buchung gebunden.
 
+## 2026-10-09 – CSS-Schnittstelle und Tastaturbedienung des Widgets
+
+### Kontext
+
+Das Widget läuft im Light DOM beliebiger WordPress-Themes. Es muss ohne Anpassung ordentlich aussehen, sich gegen typische globale Theme-Regeln (Buttons, Listen, Tabellen, Überschriften) behaupten, aber leicht an die Marke der Website anpassbar sein. Außerdem muss es vollständig per Tastatur bedienbar sein.
+
+### Entscheidung
+
+Eigene Datei `fw-booking-widget.css` neben dem Script, ausgeliefert über `<link>` bzw. `wp_enqueue_style`. Alle Regeln unter `.fw-booking-root`; ein gezielter Reset mit `:where()` neutralisiert Theme-Styles für Buttons, Felder, Listen, Tabellen und Überschriften innerhalb des Widgets. Schrift und Textfarbe erben vom Theme, eine Akzentfarbe und neutrale halbtransparente Flächen funktionieren auf hellen wie dunklen Seiten; Anpassungen und Dunkelmodus laufen ausschließlich über Custom Properties `--fw-booking-*`. Monatskalender und Uhrzeiten haben jeweils einen Tab-Stopp mit Pfeiltasten (roving tabindex).
+
+### Begründung
+
+Eine separate Datei ist cachebar und funktioniert mit strikter Content-Security-Policy, die Inline-Styles blockieren würde. `:where()` hält die Spezifität des Resets niedrig, sodass eigene Regeln mit einer Klasse gewinnen, während Element-Selektoren der Themes verlieren (im Browser gegen ein simuliertes Theme geprüft). Ein automatischer Dunkelmodus hätte auf hellen Themes mit dunklem Systemmodus falsch gewirkt. Die Pfeiltasten für Uhrzeiten waren ursprünglich nicht geplant (Tab-Reihenfolge); die Browser-Prüfung zeigte rund 100 Tab-Stopps bis „Weiter“, daher dasselbe Muster wie im Kalender.
+

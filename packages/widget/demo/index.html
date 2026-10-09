@@ -6,7 +6,48 @@
     <title>Widget-Demo</title>
     <!-- Lokale Prüfseite für das gebaute Bundle (pnpm --filter @fw-booking/widget demo).
          Optional: ?calendar=cal_…&api=http://127.0.0.1:3000 verwendet echte Werte,
-         &service=<Angebots-ID> legt Kalender B auf ein Angebot fest. -->
+         &service=<Angebots-ID> legt Kalender B auf ein Angebot fest,
+         &theme=dark zeigt das Widget auf dunklem Hintergrund mit überschriebenen Custom Properties. -->
+    <link rel="stylesheet" href="/dist/fw-booking-widget.css" />
+    <style>
+      /* Simuliertes Theme mit globalen Element-Styles, gegen die der Reset bestehen muss. */
+      body {
+        font-family: Georgia, serif;
+        max-width: 56rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      button {
+        background: #ff0;
+        border: 3px dashed #f0f;
+        text-transform: uppercase;
+      }
+      ul {
+        list-style: square;
+        padding-left: 3rem;
+      }
+      h3,
+      h4 {
+        color: #c00;
+        margin: 2rem 0;
+      }
+      table td {
+        border: 2px solid #0a0;
+        padding: 1rem;
+      }
+      body.dark {
+        background: #111827;
+        color: #e5e7eb;
+      }
+      body.dark .fw-booking-root {
+        --fw-booking-color-muted: #a1a1aa;
+        --fw-booking-color-accent: #60a5fa;
+        --fw-booking-color-accent-text: #0b1220;
+        --fw-booking-color-error: #fca5a5;
+        --fw-booking-color-warning: #fcd34d;
+        --fw-booking-color-success: #86efac;
+      }
+    </style>
     <script>
       const params = new URLSearchParams(location.search);
       window.demoConfig = {
@@ -20,6 +61,11 @@
     <script src="/dist/fw-booking-widget.js"></script>
   </head>
   <body>
+    <script>
+      if (new URLSearchParams(location.search).get('theme') === 'dark') {
+        document.body.classList.add('dark');
+      }
+    </script>
     <h1>Widget-Demo</h1>
 
     <h2>Kalender A</h2>

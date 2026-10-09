@@ -59,7 +59,7 @@ describe('Einzeltermin-Ansicht', () => {
     expect(weeks[0]?.querySelector('.fw-booking-day')?.textContent).toBe('1');
     expect(weeks[4]?.querySelectorAll('.fw-booking-day-empty')).toHaveLength(1);
     expect(w.$('th.fw-booking-weekday')?.getAttribute('abbr')).toBe('Montag');
-    const free = w.$$('.fw-booking-day').filter((n) => !(n as HTMLButtonElement).disabled);
+    const free = w.$$('.fw-booking-day').filter((n) => !n.hasAttribute('aria-disabled'));
     expect(free.map((n) => n.dataset['date'])).toEqual(['2026-10-14', '2026-10-20']);
     expect(dayButton(w, '2026-10-12').getAttribute('aria-current')).toBe('date');
     expect(dayButton(w, '2026-10-14').getAttribute('aria-label')).toBe(

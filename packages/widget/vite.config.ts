@@ -5,9 +5,12 @@ import { defaultClientConditions } from 'vite';
 import type { Plugin } from 'vite';
 
 export const WIDGET_FILE_NAME = 'fw-booking-widget.js';
+export const WIDGET_CSS_FILE_NAME = 'fw-booking-widget.css';
 
 /** Obergrenze für das minifizierte Bundle; schützt vor versehentlich eingebundenen Bibliotheken. */
 export const WIDGET_SIZE_LIMIT_BYTES = 50_000;
+/** Obergrenze für das minifizierte Stylesheet. */
+export const WIDGET_CSS_SIZE_LIMIT_BYTES = 20_000;
 
 /**
  * Einzeln freigegebene Dateien aus @fw-booking/shared. Sie dürfen nur Intl nutzen und nichts
@@ -30,7 +33,18 @@ function bundleGuard(): Plugin {
     name: 'fw-booking-bundle-guard',
     generateBundle(_options, bundle) {
       for (const output of Object.values(bundle)) {
-        if (output.type !== 'chunk') continue;
+        if (output.type === 'asset') {
+          const size =
+            typeof output.source === 'string'
+              ? Buffer.byteLength(output.source)
+              : output.source.byteLength;
+          if (output.fileName.endsWith('.css') && size > WIDGET_CSS_SIZE_LIMIT_BYTES) {
+            this.error(
+              `Widget-CSS ist ${String(size)} Bytes groß (Limit ${String(WIDGET_CSS_SIZE_LIMIT_BYTES)})`,
+            );
+          }
+          continue;
+        }
         const foreign = Object.keys(output.modules).filter(
           (id) => !id.startsWith('\0') && !id.startsWith(widgetSrc) && !allowed.has(id),
         );
@@ -61,6 +75,7 @@ export default defineConfig({
       formats: ['iife'],
       name: 'FwBookingWidget',
       fileName: () => WIDGET_FILE_NAME,
+      cssFileName: WIDGET_CSS_FILE_NAME.replace(/\.css$/, ''),
     },
   },
   test: {

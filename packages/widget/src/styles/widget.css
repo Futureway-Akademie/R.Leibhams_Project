@@ -1,0 +1,552 @@
+/*
+ * Basisstyles des Buchungs-Widgets (dist/fw-booking-widget.css).
+ * Jede Regel beginnt mit .fw-booking-root; nichts wirkt außerhalb des Widgets.
+ * Anpassung über die Custom Properties unten (Dokumentation: packages/widget/README.md).
+ * Schrift (Familie, Größe, Zeilenhöhe) und Textfarbe erben vom Theme, solange die zugehörigen
+ * Properties nicht gesetzt sind.
+ */
+
+.fw-booking-root {
+  /* Farben */
+  --fw-booking-color-text: currentColor;
+  --fw-booking-color-muted: rgb(110 110 110);
+  --fw-booking-color-accent: #1d4ed8;
+  --fw-booking-color-accent-text: #ffffff;
+  --fw-booking-color-surface: transparent;
+  --fw-booking-color-surface-hover: rgb(127 127 127 / 0.12);
+  --fw-booking-color-surface-muted: rgb(127 127 127 / 0.08);
+  --fw-booking-color-border: rgb(127 127 127 / 0.45);
+  --fw-booking-color-error: #b91c1c;
+  --fw-booking-color-error-surface: rgb(185 28 28 / 0.08);
+  --fw-booking-color-warning: #92400e;
+  --fw-booking-color-warning-surface: rgb(217 119 6 / 0.12);
+  --fw-booking-color-success: #15803d;
+  --fw-booking-color-success-surface: rgb(21 128 61 / 0.08);
+  /* Abstände und Formen */
+  --fw-booking-space-xs: 0.25em;
+  --fw-booking-space-sm: 0.5em;
+  --fw-booking-space-md: 1em;
+  --fw-booking-space-lg: 1.5em;
+  --fw-booking-radius: 0.5em;
+  --fw-booking-radius-sm: 0.3em;
+  --fw-booking-border-width: 1px;
+  --fw-booking-control-height: 2.75em;
+  --fw-booking-max-width: 42rem;
+  /* Fokus */
+  --fw-booking-focus-color: var(--fw-booking-color-accent);
+  --fw-booking-focus-width: 3px;
+  --fw-booking-focus-offset: 2px;
+
+  display: block;
+  box-sizing: border-box;
+  max-width: var(--fw-booking-max-width);
+  color: var(--fw-booking-color-text);
+  font-family: var(--fw-booking-font-family);
+  font-size: var(--fw-booking-font-size);
+  line-height: var(--fw-booking-line-height);
+  text-align: start;
+}
+
+/* ---------- Gezielter Reset gegen typische Theme-Styles ---------- */
+
+.fw-booking-root *,
+.fw-booking-root *::before,
+.fw-booking-root *::after {
+  box-sizing: border-box;
+}
+
+.fw-booking-root [hidden] {
+  display: none !important;
+}
+
+.fw-booking-root :where(h3, h4, h5, p, ul, li, table, th, td, form, label, section) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.fw-booking-root :where(ul) {
+  list-style: none;
+}
+
+.fw-booking-root :where(li)::before,
+.fw-booking-root :where(li)::marker {
+  content: none;
+}
+
+.fw-booking-root :where(table) {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.fw-booking-root :where(button, input) {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.fw-booking-root :where(button) {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fw-booking-space-xs);
+  min-height: var(--fw-booking-control-height);
+  padding: var(--fw-booking-space-xs) var(--fw-booking-space-md);
+  border: var(--fw-booking-border-width) solid var(--fw-booking-color-border);
+  border-radius: var(--fw-booking-radius-sm);
+  background: var(--fw-booking-color-surface);
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  white-space: normal;
+}
+
+.fw-booking-root :where(button):hover {
+  background: var(--fw-booking-color-surface-hover);
+}
+
+.fw-booking-root :where(button):disabled,
+.fw-booking-root :where(button)[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.fw-booking-root :where(button):disabled:hover,
+.fw-booking-root :where(button)[aria-disabled='true']:hover {
+  background: var(--fw-booking-color-surface);
+}
+
+.fw-booking-root :where(a) {
+  color: var(--fw-booking-color-accent);
+  text-decoration: underline;
+}
+
+/* Sichtbarer Fokus für alle Bedienelemente und fokussierte Überschriften */
+.fw-booking-root :focus-visible {
+  outline: var(--fw-booking-focus-width) solid var(--fw-booking-focus-color);
+  outline-offset: var(--fw-booking-focus-offset);
+}
+
+.fw-booking-root [tabindex='-1']:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---------- Grundlayout ---------- */
+
+.fw-booking-root .fw-booking-view,
+.fw-booking-root .fw-booking-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-booking-space-md);
+}
+
+.fw-booking-root .fw-booking-service-title,
+.fw-booking-root .fw-booking-services-title,
+.fw-booking-root .fw-booking-form-title,
+.fw-booking-root .fw-booking-confirmation-title {
+  font-size: 1.25em;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.fw-booking-root .fw-booking-month-title,
+.fw-booking-root .fw-booking-session-day-title,
+.fw-booking-root .fw-booking-slots-title {
+  font-size: 1.05em;
+  font-weight: 600;
+}
+
+.fw-booking-root .fw-booking-slot-group-title {
+  margin-block-end: var(--fw-booking-space-xs);
+  color: var(--fw-booking-color-muted);
+  font-size: 0.875em;
+  font-weight: 600;
+}
+
+.fw-booking-root .fw-booking-separator {
+  color: var(--fw-booking-color-muted);
+}
+
+/* ---------- Meldungen ---------- */
+
+.fw-booking-root .fw-booking-status,
+.fw-booking-root .fw-booking-hint,
+.fw-booking-root .fw-booking-service-duration,
+.fw-booking-root .fw-booking-field-hint {
+  color: var(--fw-booking-color-muted);
+}
+
+.fw-booking-root .fw-booking-message {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fw-booking-space-sm);
+  padding: var(--fw-booking-space-sm) var(--fw-booking-space-md);
+  border-inline-start: 4px solid var(--fw-booking-color-border);
+  border-radius: var(--fw-booking-radius-sm);
+  background: var(--fw-booking-color-surface-muted);
+}
+
+.fw-booking-root .fw-booking-message--error {
+  border-color: var(--fw-booking-color-error);
+  background: var(--fw-booking-color-error-surface);
+}
+
+.fw-booking-root .fw-booking-message--warning {
+  border-color: var(--fw-booking-color-warning);
+  background: var(--fw-booking-color-warning-surface);
+}
+
+.fw-booking-root .fw-booking-message--info {
+  border-color: var(--fw-booking-color-border);
+}
+
+/* ---------- Angebote ---------- */
+
+.fw-booking-root .fw-booking-service-list,
+.fw-booking-root .fw-booking-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-booking-space-sm);
+}
+
+.fw-booking-root .fw-booking-service-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--fw-booking-space-xs);
+}
+
+.fw-booking-root .fw-booking-service,
+.fw-booking-root .fw-booking-session {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: var(--fw-booking-space-sm) var(--fw-booking-space-md);
+  border-radius: var(--fw-booking-radius);
+  text-align: start;
+}
+
+.fw-booking-root .fw-booking-service-name,
+.fw-booking-root .fw-booking-session-time {
+  font-weight: 600;
+}
+
+.fw-booking-root .fw-booking-back,
+.fw-booking-root .fw-booking-change {
+  min-height: auto;
+  padding: var(--fw-booking-space-xs) 0;
+  border-color: transparent;
+  background: none;
+  color: var(--fw-booking-color-accent);
+  text-decoration: underline;
+}
+
+.fw-booking-root .fw-booking-back::before,
+.fw-booking-root .fw-booking-change::before {
+  content: '‹';
+  text-decoration: none;
+}
+
+.fw-booking-root .fw-booking-back:hover,
+.fw-booking-root .fw-booking-change:hover {
+  background: none;
+}
+
+/* ---------- Kursansicht ---------- */
+
+.fw-booking-root .fw-booking-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-booking-space-md);
+}
+
+.fw-booking-root .fw-booking-session-day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-booking-space-sm);
+}
+
+.fw-booking-root .fw-booking-session--full .fw-booking-session-seats {
+  font-weight: 600;
+}
+
+/* ---------- Gewählter Zustand (Kurstermin, Tag, Uhrzeit) ---------- */
+
+.fw-booking-root .fw-booking-session[aria-pressed='true'],
+.fw-booking-root .fw-booking-day[aria-pressed='true'],
+.fw-booking-root .fw-booking-slot[aria-pressed='true'] {
+  border-color: var(--fw-booking-color-accent);
+  background: var(--fw-booking-color-accent);
+  color: var(--fw-booking-color-accent-text);
+}
+
+.fw-booking-root .fw-booking-session[aria-pressed='true'] .fw-booking-separator {
+  color: inherit;
+}
+
+/* ---------- Monatskalender ---------- */
+
+.fw-booking-root .fw-booking-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-booking-space-sm);
+}
+
+.fw-booking-root .fw-booking-calendar-nav {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--fw-booking-space-sm);
+}
+
+.fw-booking-root .fw-booking-month-title {
+  text-align: center;
+}
+
+.fw-booking-root .fw-booking-month-prev,
+.fw-booking-root .fw-booking-month-next {
+  padding-inline: var(--fw-booking-space-sm);
+  font-size: 0.875em;
+}
+
+.fw-booking-root .fw-booking-weekday {
+  padding-block: var(--fw-booking-space-xs);
+  color: var(--fw-booking-color-muted);
+  font-size: 0.8125em;
+  font-weight: 600;
+  text-align: center;
+}
+
+.fw-booking-root .fw-booking-day-cell,
+.fw-booking-root .fw-booking-day-empty {
+  height: calc(var(--fw-booking-control-height) + 4px);
+  padding: 2px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.fw-booking-root .fw-booking-day {
+  width: 100%;
+  height: var(--fw-booking-control-height);
+  min-height: 0;
+  padding: 0;
+  border-color: transparent;
+  border-radius: var(--fw-booking-radius-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.fw-booking-root .fw-booking-day--free {
+  border-color: var(--fw-booking-color-border);
+  background: var(--fw-booking-color-surface-muted);
+  font-weight: 600;
+}
+
+.fw-booking-root .fw-booking-day--free:hover {
+  background: var(--fw-booking-color-surface-hover);
+}
+
+.fw-booking-root .fw-booking-day[aria-current='date'] {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.fw-booking-root .fw-booking-day--unavailable {
+  opacity: 0.4;
+}
+
+/* ---------- Uhrzeiten ---------- */
+
+.fw-booking-root .fw-booking-slots,
+.fw-booking-root .fw-booking-slot-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-booking-space-sm);
+}
+
+.fw-booking-root .fw-booking-slots {
+  gap: var(--fw-booking-space-md);
+}
+
+.fw-booking-root .fw-booking-slot-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5em, 1fr));
+  gap: var(--fw-booking-space-sm);
+}
+
+.fw-booking-root .fw-booking-slot {
+  width: 100%;
+  padding-inline: var(--fw-booking-space-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Weiter-Leiste ---------- */
+
+.fw-booking-root .fw-booking-continue-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fw-booking-space-sm);
+  padding: var(--fw-booking-space-sm) var(--fw-booking-space-md);
+  border: var(--fw-booking-border-width) solid var(--fw-booking-color-border);
+  border-radius: var(--fw-booking-radius);
+  background: var(--fw-booking-color-surface-muted);
+}
+
+/* ---------- Primäre Schaltflächen ---------- */
+
+.fw-booking-root .fw-booking-continue,
+.fw-booking-root .fw-booking-submit,
+.fw-booking-root .fw-booking-book-another {
+  border-color: var(--fw-booking-color-accent);
+  background: var(--fw-booking-color-accent);
+  color: var(--fw-booking-color-accent-text);
+  font-weight: 600;
+}
+
+.fw-booking-root .fw-booking-continue:hover,
+.fw-booking-root .fw-booking-submit:hover,
+.fw-booking-root .fw-booking-book-another:hover {
+  background: var(--fw-booking-color-accent);
+  filter: brightness(1.1);
+}
+
+.fw-booking-root .fw-booking-submit:disabled:hover {
+  filter: none;
+}
+
+.fw-booking-root .fw-booking-more,
+.fw-booking-root .fw-booking-retry {
+  align-self: flex-start;
+}
+
+/* ---------- Formular ---------- */
+
+.fw-booking-root .fw-booking-summary {
+  font-weight: 600;
+}
+
+.fw-booking-root .fw-booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-booking-space-md);
+}
+
+.fw-booking-root .fw-booking-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-booking-space-xs);
+}
+
+.fw-booking-root .fw-booking-label {
+  font-weight: 600;
+}
+
+.fw-booking-root .fw-booking-input {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: var(--fw-booking-control-height);
+  padding: var(--fw-booking-space-xs) var(--fw-booking-space-sm);
+  border: var(--fw-booking-border-width) solid var(--fw-booking-color-border);
+  border-radius: var(--fw-booking-radius-sm);
+  background: var(--fw-booking-color-surface);
+}
+
+.fw-booking-root .fw-booking-input[aria-invalid='true'] {
+  border-color: var(--fw-booking-color-error);
+  border-width: 2px;
+}
+
+.fw-booking-root .fw-booking-field--checkbox {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  column-gap: var(--fw-booking-space-sm);
+}
+
+.fw-booking-root .fw-booking-field--checkbox .fw-booking-label {
+  font-weight: 400;
+}
+
+.fw-booking-root .fw-booking-field--checkbox .fw-booking-field-error {
+  grid-column: 1 / -1;
+}
+
+.fw-booking-root .fw-booking-checkbox {
+  width: 1.25em;
+  height: 1.25em;
+  margin-block-start: 0.15em;
+  accent-color: var(--fw-booking-color-accent);
+}
+
+.fw-booking-root .fw-booking-field-hint {
+  font-size: 0.875em;
+}
+
+.fw-booking-root .fw-booking-field-error {
+  color: var(--fw-booking-color-error);
+  font-size: 0.875em;
+  font-weight: 600;
+}
+
+.fw-booking-root .fw-booking-form-status:empty {
+  display: none;
+}
+
+.fw-booking-root .fw-booking-submit {
+  align-self: flex-start;
+}
+
+/* ---------- Bestätigung ---------- */
+
+.fw-booking-root .fw-booking-confirmation {
+  padding: var(--fw-booking-space-md);
+  border: var(--fw-booking-border-width) solid var(--fw-booking-color-success);
+  border-radius: var(--fw-booking-radius);
+  background: var(--fw-booking-color-success-surface);
+}
+
+.fw-booking-root .fw-booking-confirmation-title {
+  color: var(--fw-booking-color-success);
+}
+
+.fw-booking-root .fw-booking-book-another {
+  align-self: flex-start;
+}
+
+/* ---------- Schmale Container und Bewegung ---------- */
+
+@media (max-width: 30em) {
+  .fw-booking-root .fw-booking-continue,
+  .fw-booking-root .fw-booking-submit {
+    width: 100%;
+  }
+
+  .fw-booking-root .fw-booking-month-prev,
+  .fw-booking-root .fw-booking-month-next {
+    font-size: 0.8125em;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fw-booking-root :where(button) {
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      filter 120ms ease;
+  }
+}
