@@ -1006,3 +1006,86 @@ select[aria-invalid='true'] {
   margin: 0 0 var(--space-2);
   padding-left: var(--space-6);
 }
+
+/* Buchungen und Teilnehmer */
+
+.range-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.range-form .field input {
+  width: 11rem;
+}
+
+.range-error {
+  flex-basis: 100%;
+}
+
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.button[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.toolbar-checkbox {
+  align-self: flex-end;
+  min-height: 2.75rem;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.day-heading {
+  display: flex;
+  align-items: center;
+  margin: 0 0 var(--space-2);
+  font-size: 1.05rem;
+}
+
+.participants {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-6);
+}
+
+.participants li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+
+.participant-name {
+  font-weight: 600;
+}
+
+.participant-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.history summary {
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.history[open] summary {
+  margin-bottom: var(--space-2);
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}

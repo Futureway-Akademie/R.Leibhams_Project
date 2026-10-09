@@ -47,6 +47,9 @@ function useSessionsChanged() {
   return (session?: Session): void => {
     if (session) queryClient.setQueryData(sessionKey(session.id), session);
     void queryClient.invalidateQueries({ queryKey: [...sessionsKey, 'list'] });
+    // Absagen ändern Status in Teilnehmerlisten und Buchungsübersicht.
+    void queryClient.invalidateQueries({ queryKey: [...sessionsKey, 'participants'] });
+    void queryClient.invalidateQueries({ queryKey: ['owner', 'bookings'] });
   };
 }
 

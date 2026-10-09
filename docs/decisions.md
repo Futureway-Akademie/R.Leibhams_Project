@@ -574,3 +574,17 @@ Reiter „Termine“ und „Regeln“ unter `/kurstermine`. Termine als Kalender
 ### Begründung
 
 Die Wochenansicht passt zum Rhythmus von Kursen und funktioniert auf dem Handy besser als ein Monatsraster. Eine Absage löst Mails aus und ist nicht umkehrbar; der Bestätigungsbereich zeigt die Folgen vor dem Klick. Die gemeinsame Umrechnung behandelt Zeitumstellungen wie die API; der Polyfill vergrößert das Portal-Bundle um etwa 27 KB gzip, was für eine Verwaltungsoberfläche vertretbar ist (Aufteilung bei Bedarf in Phase 6). Teilnehmerdaten erst in task-5-5 hält diesen Schritt frei von personenbezogenen Daten.
+
+## 2026-10-09 – Buchungen und Teilnehmerliste im Portal
+
+### Kontext
+
+Owner brauchen eine Übersicht aller Buchungen beider Terminarten, die Teilnehmer je Kurstermin und Kontaktdaten für Rückfragen. Die API liefert Teilnehmerdaten nur angemeldeten Owners, ohne Zwischenspeicherung, und begrenzt die Übersicht auf 92 Tage.
+
+### Entscheidung
+
+Übersicht `/buchungen` mit Zeitraum von–bis plus Schnellauswahl, Filter nach Angebot und standardmäßig nur bestätigten Buchungen (Schalter für stornierte und abgesagte). Kontaktdaten erscheinen nur auf der Buchungsdetailseite und in der Teilnehmerliste eines Kurstermins, als `mailto:`- und `tel:`-Links. Einzelne Buchungen lassen sich auf der Detailseite über einen Bestätigungsbereich mit optionaler Begründung absagen. Teilnehmernamen stehen nicht im Fenstertitel; Abfragen mit Teilnehmerdaten werden nach 60 Sekunden ohne Anzeige aus dem Speicher entfernt.
+
+### Begründung
+
+Ein frei wählbarer Zeitraum deckt Tagesplanung und Rückblick ab, die Schnellauswahl die häufigsten Fälle. Nur Namen in der Übersicht halten die Liste übersichtlich und zeigen Kontaktdaten erst dort, wo sie gebraucht werden (Datenminimierung, auch bei geteiltem Bildschirm). Fenstertitel landen im Verlauf und in Tab-Leisten; deshalb ohne Namen. Die kurze Aufbewahrung im Speicher begrenzt, wie lange personenbezogene Daten nach dem Verlassen einer Seite im Browser verbleiben.

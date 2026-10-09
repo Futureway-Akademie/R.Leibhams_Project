@@ -107,6 +107,13 @@ function setup(path: string, handlers: Record<string, Handler | Handler[]> = {})
     'GET /api/owner/calendar': ok({ calendarId: 'cal_AAAAAAAAAAAAAAAA', timeZone: TZ }),
     'GET /api/owner/services': ok([YOGA, PILATES, HAIRCUT]),
     [`GET ${WEEK_QUERY}`]: ok([MONDAY, FULL, CANCELLED]),
+    // Teilnehmerlisten der Detailseite (Inhalt prüft bookings.test.tsx).
+    ...Object.fromEntries(
+      [MONDAY, CANCELLED, EMPTY].map((session) => [
+        `GET /api/owner/sessions/${session.id}/participants`,
+        ok({ session, bookings: [] }),
+      ]),
+    ),
     ...handlers,
   });
   const rendered = renderPortal(path, fetch);

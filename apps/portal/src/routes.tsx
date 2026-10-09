@@ -8,6 +8,8 @@ import { LoginPage } from './pages/LoginPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PlaceholderPage } from './pages/PlaceholderPage.js';
 import { AvailabilityPage } from './pages/availability/AvailabilityPage.js';
+import { BookingDetailPage } from './pages/bookings/BookingDetailPage.js';
+import { BookingListPage } from './pages/bookings/BookingListPage.js';
 import { CoursesLayout } from './pages/courses/CoursesLayout.js';
 import { RuleEditPage, RuleNewPage } from './pages/courses/RuleFormPage.js';
 import { RuleListPage } from './pages/courses/RuleListPage.js';
@@ -18,7 +20,7 @@ import { EditServicePage, NewServicePage } from './pages/services/ServiceFormPag
 import { ServiceListPage } from './pages/services/ServiceListPage.js';
 
 /** Bereiche mit eigenen Seiten; die übrigen Einträge der Navigation sind noch Platzhalter. */
-const IMPLEMENTED = new Set(['/', '/angebote', '/oeffnungszeiten', '/kurstermine']);
+const IMPLEMENTED = new Set(['/', '/angebote', '/oeffnungszeiten', '/kurstermine', '/buchungen']);
 
 export const routes: RouteObject[] = [
   { path: LOGIN_PATH, element: <LoginPage /> },
@@ -39,6 +41,13 @@ export const routes: RouteObject[] = [
             ],
           },
           { path: '/oeffnungszeiten', element: <AvailabilityPage /> },
+          {
+            path: '/buchungen',
+            children: [
+              { index: true, element: <BookingListPage /> },
+              { path: ':bookingId', element: <BookingDetailPage /> },
+            ],
+          },
           {
             path: '/kurstermine',
             element: <CoursesLayout />,

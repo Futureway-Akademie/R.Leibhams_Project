@@ -20,6 +20,7 @@ import {
 import { sessionToInput, validateSessionChange } from '../../courses/session-form.js';
 import type { SessionErrors, SessionField, SessionInput } from '../../courses/session-form.js';
 import { Field, focusLater } from '../../layout/Field.js';
+import { ParticipantsSection } from './ParticipantsSection.js';
 import type { FlashState } from '../../layout/flash.js';
 import { usePageTitle } from '../../layout/usePageTitle.js';
 import { useServices } from '../../services/queries.js';
@@ -127,6 +128,7 @@ function SessionDetail({ session, title }: { session: Session; title: string }):
         )}
       </dl>
 
+      <ParticipantsSection sessionId={session.id} />
       {cancelled && <p className="muted">Abgesagte Kurstermine können nicht geändert werden.</p>}
       {ended && !cancelled && (
         <p className="muted">Der Termin ist vorbei und kann nicht mehr geändert werden.</p>

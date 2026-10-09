@@ -1299,7 +1299,7 @@
           "description": "Übersicht der Buchungen und Teilnehmer für beide Terminarten.",
           "order": 5,
           "weight": 2,
-          "status": "ready",
+          "status": "completed",
           "dependsOn": [
             "task-5-3",
             "task-5-4"
@@ -1308,13 +1308,24 @@
             "Buchungen sind nach Datum filterbar",
             "Teilnehmernamen sind in der Termin-Detailansicht sichtbar"
           ],
-          "startedAt": null,
-          "completedAt": null,
+          "startedAt": "2026-10-09T21:47:05Z",
+          "completedAt": "2026-10-09T21:53:16Z",
           "verification": {
-            "status": "not_run",
-            "summary": null,
-            "commands": [],
-            "checkedAt": null
+            "status": "passed",
+            "summary": "17 neue Portal-Tests (159 im Portal): Zeitraum (Schnellauswahlen, Tageszählung, Prüfung auf Datum, Reihenfolge und 92 Tage, Zeitraum aus der Adresse), Kontakt-Links (tel/mailto); Seiten: Übersicht nach Tagen beider Terminarten nur mit Namen und status=confirmed, Schalter für stornierte/abgesagte, Filter nach Angebot, eingegebener Zeitraum mit Prüfung, Standard ab heute 31 Tage und Schnellauswahl, Detail mit Kontakt-Links und Kurs-Link ohne Namen im Fenstertitel, Absage mit Bestätigung, Begründung und CSRF-Token, 409-Meldung, inaktive Buchung ohne Absage mit Umbuchungslink, unbekannte Buchung; Teilnehmerliste eines Kurstermins mit Kontakt und eingeklappter Historie. Manuell im Browser-Pane gegen API und Docker-MongoDB: Gruppenkurs, Einzeltermin-Angebot, Öffnungszeiten und Kurstermin per Owner-API, vier echte Buchungen per öffentlicher API; Übersicht 12.–18.10. zeigt beide Terminarten nach Tagen; Absage einer Kursbuchung mit Begründung (Status cancelled_by_owner, Grund gespeichert, ein owner_cancellation-Auftrag); Kurstermin-Detail zeigt 2 Teilnehmer mit Kontakt-Links, Belegung 2 / 10, Historie eingeklappt; Schalter für alle Buchungen und mobile Ansicht 375 px. Keine Passwörter oder Teilnehmerdaten im API-Log. Alle Testdaten (außer settings und _migrations) entfernt, Server per PID beendet. Quality Gate grün (lint, typecheck, 939 Tests, format:check).",
+            "commands": [
+              "pnpm --filter @fw-booking/portal test",
+              "pnpm --filter @fw-booking/api dev",
+              "pnpm --filter @fw-booking/portal dev",
+              "pnpm --filter @fw-booking/api owner:create -- --email …",
+              "python3 -I scratchpad/seed.py (Owner-API und öffentliche Buchungen, danach gelöscht)",
+              "Browser-Pane: http://127.0.0.1:5173/buchungen und /kurstermine/:id (Übersicht, Absage, Teilnehmerliste, mobil)",
+              "pnpm lint",
+              "pnpm typecheck",
+              "pnpm test",
+              "pnpm format:check"
+            ],
+            "checkedAt": "2026-10-09T21:53:16Z"
           }
         },
         {
